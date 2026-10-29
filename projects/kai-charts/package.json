@@ -1,0 +1,38 @@
+{
+  "name": "kai-charts",
+  "version": "0.1.0",
+  "description": "Dependency-free SVG chart components for Angular 20+: standalone, signals, OnPush, themed by CSS tokens.",
+  "license": "MIT",
+  "author": "Kaissar Mahfoud",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/K4BMB/kai-charts.git"
+  },
+  "homepage": "https://github.com/K4BMB/kai-charts#readme",
+  "bugs": {
+    "url": "https://github.com/K4BMB/kai-charts/issues"
+  },
+  "keywords": [
+    "angular",
+    "charts",
+    "svg",
+    "bar-chart",
+    "donut-chart",
+    "line-chart",
+    "kpi",
+    "dashboard",
+    "signals",
+    "standalone"
+  ],
+  "peerDependencies": {
+    "@angular/common": ">=20.0.0",
+    "@angular/core": ">=20.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
