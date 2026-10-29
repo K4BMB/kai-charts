@@ -1,144 +1,24 @@
 <header class="topbar">
   <div>
-    <h1>kai-charts <span class="tag">demo</span></h1>
+    <h1>kai-charts <span class="tag">Angular</span></h1>
     <p>Gráficos SVG para Angular 20+ · sin dependencias · colores por tokens CSS</p>
   </div>
-  <div class="controls" role="group" aria-label="Opciones de la demo">
-    <label>
-      Tema
-      <select [value]="theme()" (change)="setTheme($event)">
-        <option value="light">Claro</option>
-        <option value="dark">Oscuro</option>
-        <option value="brand">Marca</option>
-      </select>
-    </label>
-    <label
-      ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
-      Cargando</label
+  <nav class="nav" aria-label="Secciones">
+    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+      >Vitrina</a
     >
-    <label
-      ><input type="checkbox" [checked]="empty()" (change)="empty.set(!empty())" /> Sin datos</label
-    >
-    <label>
-      <input type="checkbox" [checked]="showTable()" (change)="showTable.set(!showTable())" />
-      Tabla espejo
-    </label>
-  </div>
+    <a routerLink="/playground" routerLinkActive="active">Playground</a>
+    <a href="../react/">Demo React</a>
+    <a href="https://github.com/K4BMB/kai-charts" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <label class="theme">
+    Tema
+    <select [value]="theme()" (change)="setTheme($event)">
+      <option value="light">Claro</option>
+      <option value="dark">Oscuro</option>
+      <option value="brand">Marca</option>
+    </select>
+  </label>
 </header>
 
-<main class="grid">
-  <section class="card">
-    <h2>Trámites por tipo</h2>
-    <p class="hint">
-      Horizontal, una serie, valores visibles. Las etiquetas largas caben mejor así.
-    </p>
-    <kc-bar-chart
-      orientation="horizontal"
-      [categories]="byType.categories"
-      [series]="empty() ? noData : byType.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      showValues
-      height="320"
-      label="Trámites por tipo"
-      categoryHeader="Tipo de trámite"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
-
-  <section class="card">
-    <h2>Trámites por día</h2>
-    <p class="hint">Vertical, dos series agrupadas. Clic en la leyenda para ocultar una serie.</p>
-    <kc-bar-chart
-      [categories]="byDay.categories"
-      [series]="empty() ? noData : byDay.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      label="Trámites por día de jornada"
-      categoryHeader="Día"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
-
-  <section class="card">
-    <h2>Estado de sincronización</h2>
-    <p class="hint">
-      Apilado horizontal con colores propios por serie y total al final de cada barra.
-    </p>
-    <kc-bar-chart
-      orientation="horizontal"
-      stacked
-      showValues
-      [categories]="syncState.categories"
-      [series]="empty() ? noData : syncState.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      height="220"
-      label="Estado de sincronización por entidad"
-      categoryHeader="Entidad"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
-
-  <section class="card">
-    <h2>Rango de edad</h2>
-    <p class="hint">
-      Vertical, una serie, sin leyenda (automático) y con valores sobre las barras.
-    </p>
-    <kc-bar-chart
-      showValues
-      [categories]="ageRange.categories"
-      [series]="empty() ? noData : ageRange.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      label="Ciudadanos por rango de edad"
-      categoryHeader="Rango"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
-
-  <section class="card">
-    <h2>Variación mensual</h2>
-    <p class="hint">Valores negativos (eje con cero intermedio) y formato Intl porcentual.</p>
-    <kc-bar-chart
-      showValues
-      [valueFormat]="percent"
-      [categories]="monthlyVariation.categories"
-      [series]="empty() ? noData : monthlyVariation.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      height="240"
-      label="Variación mensual de trámites"
-      categoryHeader="Mes"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
-
-  <section class="card">
-    <h2>Jornada sin trámites aún</h2>
-    <p class="hint">
-      Todo en cero no es “sin datos”: se dibuja el eje real con el catálogo. Pasa
-      <code>emptyText</code> para el estado vacío.
-    </p>
-    <kc-bar-chart
-      orientation="horizontal"
-      [categories]="byTypePhase1.categories"
-      [series]="empty() ? noData : byTypePhase1.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      height="320"
-      label="Trámites por tipo (jornada sin actas)"
-      categoryHeader="Tipo de trámite"
-      emptyText="Aún no hay trámites registrados"
-    />
-  </section>
-</main>
-
-<footer class="status" aria-live="polite">
-  @if (lastClick(); as click) {
-    Último clic: <strong>{{ click.category }}</strong> · {{ click.series }} = {{ click.value }}
-  } @else {
-    Haz clic (o Enter/Espacio con el teclado) sobre una barra para ver el evento
-    <code>barClick</code>.
-  }
-</footer>
+<router-outlet />

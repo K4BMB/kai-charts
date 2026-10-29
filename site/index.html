@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>kai-charts · gráficos SVG para Angular y React</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="kai-charts: componentes de gráficos SVG para dashboards de gestión. Angular y React sobre un mismo núcleo, sin dependencias, accesibles, con tema por tokens CSS. MIT."
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f1f5f9;
+        --fg: #0f172a;
+        --card: #ffffff;
+        --muted: #64748b;
+        --border: #e2e8f0;
+        --accent: #2563eb;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0b1220;
+          --fg: #e2e8f0;
+          --card: #111a2e;
+          --muted: #94a3b8;
+          --border: #1f2a44;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          sans-serif;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 48px 24px 64px;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: 32px;
+        align-items: center;
+      }
+      @media (max-width: 760px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2.6rem;
+        letter-spacing: -0.02em;
+      }
+      .lead {
+        margin: 0 0 20px;
+        color: var(--muted);
+        font-size: 1.1rem;
+      }
+      .buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .btn {
+        display: inline-block;
+        padding: 10px 18px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: var(--card);
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .btn.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .chart {
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: var(--card);
+      }
+      .chart svg {
+        display: block;
+        width: 100%;
+        height: auto;
+        font-size: 12px;
+      }
+      .chart text {
+        fill: var(--muted);
+      }
+      section {
+        margin-top: 48px;
+      }
+      h2 {
+        margin: 0 0 16px;
+        font-size: 1.4rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        padding: 16px 18px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--card);
+      }
+      .card h3 {
+        margin: 0 0 6px;
+        font-size: 1rem;
+      }
+      .card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      pre {
+        margin: 0;
+        padding: 12px 14px;
+        border-radius: 10px;
+        background: #0f172a;
+        color: #e2e8f0;
+        font-size: 0.85rem;
+        overflow-x: auto;
+      }
+      code {
+        font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+      }
+      th,
+      td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border);
+        text-align: left;
+      }
+      th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .ok {
+        color: #16a34a;
+        font-weight: 600;
+      }
+      footer {
+        margin-top: 48px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a {
+        color: inherit;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="hero">
+        <div>
+          <h1>kai-charts</h1>
+          <p class="lead">
+            Gráficos SVG para dashboards de gestión. Un núcleo sin dependencias y dos renderers —
+            <strong>Angular</strong> y <strong>React</strong> — con la misma API, el mismo CSS y los
+            mismos tokens de tema. Licencia MIT.
+          </p>
+          <div class="buttons">
+            <a class="btn primary" href="./angular/">Demo Angular</a>
+            <a class="btn primary" href="./react/">Demo React</a>
+            <a class="btn" href="https://github.com/K4BMB/kai-charts">GitHub</a>
+          </div>
+        </div>
+        <div class="chart" aria-hidden="true">
+          <svg viewBox="0 0 360 200">
+            <g stroke="currentColor" stroke-opacity="0.12">
+              <line x1="40" y1="20" x2="350" y2="20" />
+              <line x1="40" y1="60" x2="350" y2="60" />
+              <line x1="40" y1="100" x2="350" y2="100" />
+              <line x1="40" y1="140" x2="350" y2="140" />
+            </g>
+            <line x1="40" y1="180" x2="350" y2="180" stroke="currentColor" stroke-opacity="0.35" />
+            <g>
+              <rect x="58" y="70" width="26" height="110" rx="3" fill="#2563eb" />
+              <rect x="88" y="104" width="26" height="76" rx="3" fill="#16a34a" />
+              <rect x="138" y="40" width="26" height="140" rx="3" fill="#2563eb" />
+              <rect x="168" y="62" width="26" height="118" rx="3" fill="#16a34a" />
+              <rect x="218" y="92" width="26" height="88" rx="3" fill="#2563eb" />
+              <rect x="248" y="130" width="26" height="50" rx="3" fill="#16a34a" />
+              <rect x="298" y="118" width="26" height="62" rx="3" fill="#2563eb" />
+              <rect x="328" y="160" width="26" height="20" rx="3" fill="#16a34a" />
+            </g>
+            <g text-anchor="middle">
+              <text x="86" y="195">Lun</text>
+              <text x="166" y="195">Mar</text>
+              <text x="246" y="195">Mié</text>
+              <text x="326" y="195">Jue</text>
+            </g>
+            <g text-anchor="end">
+              <text x="34" y="24">80</text>
+              <text x="34" y="64">60</text>
+              <text x="34" y="104">40</text>
+              <text x="34" y="144">20</text>
+              <text x="34" y="184">0</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <section>
+        <h2>Instalación</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Angular 20+</h3>
+            <pre><code>pnpm add kai-charts
+
+import { KcBarChart } from 'kai-charts';
+&lt;kc-bar-chart [categories]="c" [series]="s" /&gt;</code></pre>
+          </div>
+          <div class="card">
+            <h3>React 18+</h3>
+            <pre><code>pnpm add kai-charts-react
+
+import { BarChart } from 'kai-charts-react';
+import 'kai-charts-react/styles.css';
+&lt;BarChart categories={c} series={s} /&gt;</code></pre>
+          </div>
+          <div class="card">
+            <h3>Núcleo (sin framework)</h3>
+            <pre><code>pnpm add kai-charts-core
+
+import { computeBarLayout } from 'kai-charts-core';
+// layouts, escalas, formato Intl, tokens</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Qué trae</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Tema por tokens CSS</h3>
+            <p>
+              <code>--kc-color-1..8</code> y colores derivados de <code>currentColor</code>: los
+              gráficos heredan el tema de la app (claro, oscuro, marca) sin configuración.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Accesible</h3>
+            <p>
+              SVG etiquetado, barras enfocables con <code>aria-label</code>, tooltip por teclado y
+              tabla espejo opcional para lectores de pantalla e impresión.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Responsive y ligero</h3>
+            <p>
+              Ancho fluido por <code>ResizeObserver</code>, alto fijo, SVG puro. Sin canvas, sin d3,
+              sin dependencias.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Formato Intl</h3>
+            <p>
+              <code>es-VE</code> por defecto; cualquier locale, opciones de
+              <code>Intl.NumberFormat</code> o un formateador propio.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Estados incluidos</h3>
+            <p>Cargando (skeleton), sin datos, y ceros tratados como datos reales.</p>
+          </div>
+          <div class="card">
+            <h3>Solo presentación</h3>
+            <p>
+              Los componentes reciben datos ya mapeados (<code>categories</code> +
+              <code>series</code>): encajan como adaptador UI en una arquitectura hexagonal.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Componentes</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Componente</th>
+              <th>Angular</th>
+              <th>React</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Barras (vertical/horizontal, agrupado/apilado)</td>
+              <td><code>kc-bar-chart</code></td>
+              <td><code>BarChart</code></td>
+              <td class="ok">v0.1</td>
+            </tr>
+            <tr>
+              <td>Donut con valor central</td>
+              <td><code>kc-donut-chart</code></td>
+              <td><code>DonutChart</code></td>
+              <td>planificado</td>
+            </tr>
+            <tr>
+              <td>Líneas (varias series, área opcional)</td>
+              <td><code>kc-line-chart</code></td>
+              <td><code>LineChart</code></td>
+              <td>planificado</td>
+            </tr>
+            <tr>
+              <td>Tarjeta KPI</td>
+              <td><code>kc-kpi-card</code></td>
+              <td><code>KpiCard</code></td>
+              <td>planificado</td>
+            </tr>
+            <tr>
+              <td>Lista de progreso con semáforo</td>
+              <td><code>kc-progress-list</code></td>
+              <td><code>ProgressList</code></td>
+              <td>planificado</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <footer>
+        MIT © Kaissar Mahfoud ·
+        <a href="https://github.com/K4BMB/kai-charts">github.com/K4BMB/kai-charts</a>
+      </footer>
+    </main>
+  </body>
+</html>

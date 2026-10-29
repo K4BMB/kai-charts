@@ -1,0 +1,56 @@
+# Publishes the landing page plus both demos (Angular and React) to GitHub Pages:
+#   https://k4bmb.github.io/kai-charts/           landing (site/)
+#   https://k4bmb.github.io/kai-charts/angular/   Angular demo + playground
+#   https://k4bmb.github.io/kai-charts/react/     React demo + playground
+name: Deploy demos to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:core
+      - name: Build Angular demo
+        run: pnpm --filter kai-charts-angular exec ng build demo --base-href /kai-charts/angular/
+      - name: Build React demo
+        run: pnpm --filter kai-charts-react-demo build --base=/kai-charts/react/
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r site/. _site/
+          cp -r packages/angular/dist/demo/browser _site/angular
+          cp -r packages/react-demo/dist _site/react
+          touch _site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

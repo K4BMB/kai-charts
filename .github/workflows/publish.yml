@@ -1,0 +1,39 @@
+# Manual release: builds everything and publishes the three packages to npm.
+# Requires the repository secret NPM_TOKEN (npm access token with publish rights).
+name: Publish to npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: npm dist-tag
+        default: latest
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+      - name: Publish kai-charts-core
+        run: pnpm --filter kai-charts-core publish --access public --no-git-checks --tag ${{ inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish kai-charts (Angular)
+        run: pnpm publish --access public --no-git-checks --tag ${{ inputs.tag }}
+        working-directory: packages/angular/dist/kai-charts
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish kai-charts-react
+        run: pnpm --filter kai-charts-react publish --access public --no-git-checks --tag ${{ inputs.tag }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
