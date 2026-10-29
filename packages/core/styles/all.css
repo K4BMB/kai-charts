@@ -1,0 +1,7 @@
+/* Convenience bundle: every kai-charts stylesheet in one import. */
+@import './tokens.css';
+@import './bar-chart.css';
+@import './legend.css';
+@import './tooltip.css';
+@import './chart-table.css';
+@import './chart-state.css';

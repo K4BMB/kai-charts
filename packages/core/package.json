@@ -1,0 +1,56 @@
+{
+  "name": "kai-charts-core",
+  "version": "0.1.0",
+  "description": "Framework-agnostic core of kai-charts: layouts, scales, Intl formatting, palette tokens and CSS. Used by kai-charts (Angular) and kai-charts-react.",
+  "license": "MIT",
+  "author": "Kaissar Mahfoud",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/K4BMB/kai-charts.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/K4BMB/kai-charts#readme",
+  "bugs": {
+    "url": "https://github.com/K4BMB/kai-charts/issues"
+  },
+  "keywords": [
+    "charts",
+    "svg",
+    "bar-chart",
+    "layout",
+    "headless",
+    "dashboard"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./styles/*": "./styles/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "styles",
+    "README.md"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2",
+    "vitest": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

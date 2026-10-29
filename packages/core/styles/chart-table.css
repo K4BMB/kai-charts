@@ -1,0 +1,38 @@
+/* kai-charts · mirror table */
+.kc-table-wrap {
+  display: block;
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.kc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--kc-font-family, inherit);
+  font-size: var(--kc-font-size, 12px);
+}
+
+.kc-table caption {
+  margin-bottom: 4px;
+  text-align: left;
+  font-weight: 600;
+  caption-side: top;
+}
+
+.kc-table th,
+.kc-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--kc-border, color-mix(in srgb, currentColor 15%, transparent));
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.kc-table th:first-child,
+.kc-table td:first-child {
+  text-align: left;
+}
+
+.kc-table thead th {
+  color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+  font-weight: 600;
+}

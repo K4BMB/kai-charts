@@ -1,0 +1,61 @@
+/* kai-charts · bar chart. The root element carries `.kc-bar-chart`; the rest is scoped by class. */
+.kc-bar-chart {
+  display: block;
+  position: relative;
+  font-family: var(--kc-font-family, inherit);
+  font-size: var(--kc-font-size, 12px);
+  color: var(--kc-text, inherit);
+}
+
+.kc-bar-chart .kc-plot {
+  position: relative;
+}
+
+.kc-bar-chart .kc-svg {
+  display: block;
+  overflow: visible;
+}
+
+.kc-bar-chart .kc-grid {
+  stroke: var(--kc-grid, color-mix(in srgb, currentColor 12%, transparent));
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.kc-bar-chart .kc-axis {
+  stroke: var(--kc-axis, color-mix(in srgb, currentColor 35%, transparent));
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.kc-bar-chart .kc-tick {
+  fill: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+  dominant-baseline: middle;
+}
+
+.kc-bar-chart .kc-value {
+  fill: currentColor;
+  font-weight: 600;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+.kc-bar-chart .kc-bar {
+  outline: none;
+  transition: opacity 120ms ease;
+}
+
+.kc-bar-chart .kc-bar:hover {
+  opacity: 0.85;
+}
+
+.kc-bar-chart .kc-bar:focus-visible {
+  stroke: var(--kc-focus, currentColor);
+  stroke-width: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kc-bar-chart .kc-bar {
+    transition: none;
+  }
+}
