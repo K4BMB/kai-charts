@@ -1,65 +1,47 @@
 # kai-charts
 
-Dependency-free SVG chart components for **Angular 20+** — standalone, signals, `OnPush`,
-`input()`/`output()`. Built for management dashboards: the charts you actually need, themed by
-CSS tokens, accessible by default, and small enough to copy into a project.
+Dependency-free SVG chart components for management dashboards, with one headless core and two
+renderers that share the same API, the same CSS and the same theme tokens:
 
-- **Zero dependencies** beyond Angular. Pure SVG, no canvas, no d3.
+| Package                              | For                 | Install                     |
+| ------------------------------------ | ------------------- | --------------------------- |
+| [`kai-charts`](packages/angular)     | Angular 20+         | `pnpm add kai-charts`       |
+| [`kai-charts-react`](packages/react) | React 18+           | `pnpm add kai-charts-react` |
+| [`kai-charts-core`](packages/core)   | Any (layouts, Intl) | `pnpm add kai-charts-core`  |
+
+**Live demos (GitHub Pages):** [landing](https://k4bmb.github.io/kai-charts/) ·
+[Angular demo + playground](https://k4bmb.github.io/kai-charts/angular/) ·
+[React demo + playground](https://k4bmb.github.io/kai-charts/react/). Each playground has an
+editable data panel (categories, series, every number) and generates the code to paste in your app.
+
+- **Zero dependencies** beyond the framework. Pure SVG, no canvas, no d3.
 - **Theme-aware**: colors come from `--kc-color-1..8` and `currentColor`, so charts inherit your
   app theme (light/dark/brand) without configuration.
 - **Responsive** through `ResizeObserver`; fixed height, fluid width.
 - **Accessible**: labelled SVG, keyboard-focusable data points with `aria-label`, visual tooltip,
   and an optional mirror `<table>` (`showTable`) for screen readers and print.
 - **Intl formatting** with `es-VE` by default; any locale, Intl options or custom formatter.
-- Loading and empty states built in.
+- Loading and empty states built in. Zeros are data; only `null`/`undefined` is "no data".
 
 ## Components
 
-| Component          | Status  | Notes                                                    |
-| ------------------ | ------- | -------------------------------------------------------- |
-| `kc-bar-chart`     | ✅ v0.1 | vertical / horizontal, grouped / stacked, values, legend |
-| `kc-donut-chart`   | planned | center value                                             |
-| `kc-line-chart`    | planned | one or more series, optional area                        |
-| `kc-kpi-card`      | planned | label, value, subtext, icon, trend                       |
-| `kc-progress-list` | planned | rows with bar and traffic-light status                   |
+| Component     | Angular            | React          | Status  |
+| ------------- | ------------------ | -------------- | ------- |
+| Bar chart     | `kc-bar-chart`     | `BarChart`     | ✅ v0.1 |
+| Donut chart   | `kc-donut-chart`   | `DonutChart`   | planned |
+| Line chart    | `kc-line-chart`    | `LineChart`    | planned |
+| KPI card      | `kc-kpi-card`      | `KpiCard`      | planned |
+| Progress list | `kc-progress-list` | `ProgressList` | planned |
 
 Out of scope for v1: zoom, complex animations, export.
 
-## Install
-
-```bash
-pnpm add kai-charts   # or npm i kai-charts
-```
-
-### As a local dependency (before it is published, or to iterate)
-
-```bash
-# in this repo
-pnpm build            # → dist/kai-charts
-# in your app
-pnpm add file:../kai-charts/dist/kai-charts
-# or: pnpm link ../kai-charts/dist/kai-charts
-```
-
-### By copying the folder
-
-Everything the components need lives in `projects/kai-charts/src/lib` (no path aliases, no
-external imports). Copy it into your app, e.g. `src/app/shared/ui/charts`, and import from its
-`index.ts`:
-
-```ts
-import { KcBarChart } from './shared/ui/charts';
-```
-
-The copied source uses only Angular 20+ APIs (`input()`, `output()`, `computed`, `@for`,
-`afterNextRender`). The prebuilt npm package is produced with the Angular 22 compiler in
-partial-Ivy mode.
-
 ## Usage
+
+### Angular
 
 ```ts
 import { Component } from '@angular/core';
-import { ChartSeries, KcBarChart } from 'kai-charts';
+import { ChartPointEvent, ChartSeries, KcBarChart } from 'kai-charts';
 
 @Component({
   selector: 'app-procedures',
@@ -83,13 +65,39 @@ export class Procedures {
 }
 ```
 
+Styles are embedded in the components (`ViewEncapsulation.None`, `.kc-` prefixed): nothing to
+import. Global defaults: `provideKaiCharts({ locale: 'en-US', emptyText: 'No data' })`.
+
+### React
+
+```tsx
+import { BarChart } from 'kai-charts-react';
+import 'kai-charts-react/styles.css';
+
+export function Procedures() {
+  return (
+    <BarChart
+      orientation="horizontal"
+      categories={['Nacimiento', 'Matrimonio', 'Defunción']}
+      series={[{ name: 'Trámites', data: [148, 22, 31] }]}
+      label="Trámites por tipo"
+      showValues
+      showTable
+      onBarClick={(e) => console.log(e)}
+    />
+  );
+}
+```
+
+Global defaults: wrap the app in `<KaiChartsProvider value={{ locale: 'en-US' }}>`.
+
 Charts are presentation-only: they receive data already shaped by your presenters/view models
 (`categories` + `series`) and never call services, so they fit a hexagonal architecture as a
 pure UI adapter.
 
-### `kc-bar-chart`
+### Bar chart options (same names in both frameworks)
 
-| Input            | Type                                        | Default    | Description                                           |
+| Option           | Type                                        | Default    | Description                                           |
 | ---------------- | ------------------------------------------- | ---------- | ----------------------------------------------------- |
 | `categories`     | `string[]`                                  | `[]`       | Category labels                                       |
 | `series`         | `ChartSeries[]`                             | `[]`       | `{ name, data: (number \| null)[], color? }`          |
@@ -108,21 +116,8 @@ pure UI adapter.
 | `locale`         | `string`                                    | config     | BCP 47 locale for `Intl`                              |
 | `valueFormat`    | `Intl.NumberFormatOptions \| (v) => string` | —          | e.g. `{ style: 'percent' }`                           |
 
-| Output     | Payload                                                                            |
-| ---------- | ---------------------------------------------------------------------------------- |
-| `barClick` | `{ seriesIndex, categoryIndex, series, category, value }` on click, Enter or Space |
-
-Zeros are data (the axis is drawn); only `null`/`undefined` values count as "no data".
-
-### Global configuration
-
-```ts
-import { provideKaiCharts } from 'kai-charts';
-
-bootstrapApplication(App, {
-  providers: [provideKaiCharts({ locale: 'es-VE', emptyText: 'Sin datos' })],
-});
-```
+Event: `barClick` (Angular output) / `onBarClick` (React prop) with
+`{ seriesIndex, categoryIndex, series, category, value }` on click, Enter or Space.
 
 ## Theming
 
@@ -142,25 +137,46 @@ Define the tokens on `:root` (or any ancestor) to inherit your theme:
 ```
 
 Text, grid, axis and skeleton colors derive from `currentColor`, so a chart inside a dark card
-is readable without extra work. The full token list with defaults is in
-[`styles/kai-charts.css`](projects/kai-charts/src/lib/styles/kai-charts.css) (also shipped in
-the package as `kai-charts/styles/kai-charts.css`). Tailwind 4 users can map tokens from
-`@theme` variables: `--kc-color-1: var(--color-primary)`.
+is readable without extra work. The full token list with defaults lives in
+[`packages/core/styles/tokens.css`](packages/core/styles/tokens.css) (shipped as
+`kai-charts-core/styles/tokens.css` and `kai-charts/styles/tokens.css`). Tailwind 4 users can
+map tokens from `@theme` variables: `--kc-color-1: var(--color-primary)`.
+
+## Using it without npm
+
+- **Angular**: copy `packages/angular/projects/kai-charts/src/lib` into your app (e.g.
+  `src/app/shared/ui/charts`) and install only `kai-charts-core`. The folder has no path aliases
+  and uses only Angular 20+ APIs.
+- **React**: copy `packages/react/src` the same way; import `styles.css` once.
+- **Local package**: `pnpm build` then `pnpm add file:../kai-charts/packages/angular/dist/kai-charts`
+  (or `file:../kai-charts/packages/react`).
+
+## Repository layout
+
+```
+packages/core        kai-charts-core  · layouts, scales, Intl, palette, shared CSS (+ Vitest)
+packages/angular     kai-charts       · Angular CLI workspace: library + demo/playground
+packages/react       kai-charts-react · Vite library: components + hooks (+ Vitest/RTL)
+packages/react-demo  React demo/playground (Vite)
+site/                landing page deployed with both demos to GitHub Pages
+```
 
 ## Development
 
 ```bash
 pnpm install
-pnpm start          # demo app on http://localhost:4200
-pnpm test           # Vitest, library specs
-pnpm test:all       # library + demo
-pnpm build          # ng-packagr → dist/kai-charts (+ README, LICENSE, CHANGELOG)
-pnpm pack           # tarball for local installs
+pnpm build          # core → angular lib → react lib → react demo
+pnpm test           # 65 specs across core, angular and react
+pnpm dev:angular    # http://localhost:4200  (showcase, #/playground)
+pnpm dev:react      # http://localhost:5173  (showcase, #/playground)
 pnpm format         # Prettier, 100 columns
 ```
 
-Commits follow [Conventional Commits](https://www.conventionalcommits.org/) in English.
-Changes are tracked in [CHANGELOG.md](CHANGELOG.md).
+CI runs format, build and tests on every push; `main` deploys the landing and both demos to GitHub
+Pages. Releases are published to npm with the manual **Publish to npm** workflow (needs the
+`NPM_TOKEN` repository secret). Commits follow
+[Conventional Commits](https://www.conventionalcommits.org/) in English; changes are tracked in
+[CHANGELOG.md](CHANGELOG.md).
 
 ## License
 
