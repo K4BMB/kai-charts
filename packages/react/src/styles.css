@@ -1,0 +1,13 @@
+/*
+ * kai-charts-react · component styles (published as `kai-charts-react/styles.css`).
+ *
+ * These are the shared, framework-agnostic stylesheets of kai-charts-core: plain CSS scoped by
+ * `.kc-` classes, no framework required. The design tokens (`--kc-color-1..8`, `--kc-radius`,
+ * ...) are NOT included on purpose: every rule falls back to `currentColor` and the default
+ * palette, so import `kai-charts-core/styles/tokens.css` only if you want to theme the charts.
+ */
+@import 'kai-charts-core/styles/bar-chart.css';
+@import 'kai-charts-core/styles/legend.css';
+@import 'kai-charts-core/styles/tooltip.css';
+@import 'kai-charts-core/styles/chart-table.css';
+@import 'kai-charts-core/styles/chart-state.css';
