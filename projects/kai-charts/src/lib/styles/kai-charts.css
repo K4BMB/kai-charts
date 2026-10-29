@@ -1,0 +1,38 @@
+/*
+ * kai-charts design tokens.
+ *
+ * Importing this file is OPTIONAL: every component falls back to these values when a token
+ * is missing. Define the tokens in `:root` (or on any ancestor) to make the charts inherit
+ * your app theme — dark mode, brand palette, fonts.
+ *
+ *   @import 'kai-charts/styles/kai-charts.css';   // or copy the block below into your styles
+ */
+:root {
+  /* Series palette, used in order and cycled when there are more than 8 series. */
+  --kc-color-1: #2563eb;
+  --kc-color-2: #16a34a;
+  --kc-color-3: #f59e0b;
+  --kc-color-4: #dc2626;
+  --kc-color-5: #7c3aed;
+  --kc-color-6: #0891b2;
+  --kc-color-7: #db2777;
+  --kc-color-8: #64748b;
+
+  /*
+   * Everything else is derived from `currentColor` by default, so charts follow the text
+   * color of their container. Uncomment to override.
+   *
+   * --kc-text: inherit;                                            axis and value labels
+   * --kc-muted: color-mix(in srgb, currentColor 70%, transparent); ticks, empty state
+   * --kc-grid: color-mix(in srgb, currentColor 12%, transparent);  grid lines
+   * --kc-axis: color-mix(in srgb, currentColor 35%, transparent);  baseline
+   * --kc-border: color-mix(in srgb, currentColor 15%, transparent); table borders, cards
+   * --kc-skeleton: color-mix(in srgb, currentColor 8%, transparent); loading placeholder
+   * --kc-focus: currentColor;                                      keyboard focus ring
+   * --kc-tooltip-bg: #1f2937;
+   * --kc-tooltip-text: #f9fafb;
+   * --kc-font-family: inherit;
+   * --kc-font-size: 12px;
+   * --kc-radius: 6px;
+   */
+}
