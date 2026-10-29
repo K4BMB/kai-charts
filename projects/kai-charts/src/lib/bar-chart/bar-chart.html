@@ -1,0 +1,88 @@
+@if (loading()) {
+  <kc-chart-state kind="loading" [height]="height()" [text]="loadingText" />
+} @else if (isEmpty()) {
+  <kc-chart-state kind="empty" [height]="height()" [text]="emptyLabel()" />
+} @else {
+  @let l = layout();
+  <div class="kc-plot">
+    <svg
+      class="kc-svg"
+      [attr.viewBox]="'0 0 ' + l.width + ' ' + l.height"
+      [attr.height]="l.height"
+      width="100%"
+      role="group"
+      [attr.aria-label]="label() || null"
+      (mouseleave)="hideTooltip()"
+    >
+      @if (showGrid()) {
+        @for (g of l.gridLines; track g.key) {
+          <line
+            class="kc-grid"
+            [attr.x1]="g.x1"
+            [attr.y1]="g.y1"
+            [attr.x2]="g.x2"
+            [attr.y2]="g.y2"
+          />
+        }
+      }
+      @for (t of l.valueTicks; track t.key) {
+        <text class="kc-tick" [attr.x]="t.x" [attr.y]="t.y" [attr.text-anchor]="t.anchor">
+          {{ t.label }}
+        </text>
+      }
+      @for (t of l.categoryTicks; track t.key) {
+        <text class="kc-tick" [attr.x]="t.x" [attr.y]="t.y" [attr.text-anchor]="t.anchor">
+          <title>{{ t.title }}</title>
+          {{ t.label }}
+        </text>
+      }
+      <line
+        class="kc-axis"
+        [attr.x1]="l.axisLine.x1"
+        [attr.y1]="l.axisLine.y1"
+        [attr.x2]="l.axisLine.x2"
+        [attr.y2]="l.axisLine.y2"
+      />
+      @for (bar of l.bars; track bar.key) {
+        <rect
+          class="kc-bar"
+          [attr.x]="bar.x"
+          [attr.y]="bar.y"
+          [attr.width]="bar.w"
+          [attr.height]="bar.h"
+          [attr.rx]="bar.rx"
+          [style.fill]="bar.color"
+          [attr.data-series]="bar.seriesIndex"
+          [attr.data-category]="bar.categoryIndex"
+          role="img"
+          tabindex="0"
+          [attr.aria-label]="bar.ariaLabel"
+          (mouseenter)="showTooltip(bar)"
+          (focus)="showTooltip(bar)"
+          (blur)="hideTooltip()"
+          (click)="activate(bar)"
+          (keydown.enter)="activate(bar, $event)"
+          (keydown.space)="activate(bar, $event)"
+        />
+      }
+      @for (v of l.valueLabels; track v.key) {
+        <text class="kc-value" [attr.x]="v.x" [attr.y]="v.y" [attr.text-anchor]="v.anchor">
+          {{ v.text }}
+        </text>
+      }
+    </svg>
+    <kc-tooltip [state]="tooltip()" />
+  </div>
+  @if (legendVisible()) {
+    <kc-legend [items]="legendItems()" (toggle)="toggleSeries($event)" />
+  }
+  @if (showTable()) {
+    <kc-chart-table
+      [categories]="categories()"
+      [series]="series()"
+      [format]="formatter()"
+      [caption]="label()"
+      [categoryHeader]="tableHeader()"
+    />
+  }
+}
