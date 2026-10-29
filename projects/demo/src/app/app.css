@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.tag {
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--kc-color-1, #2563eb);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.topbar p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.9rem;
+}
+
+.controls label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+.card h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.status {
+  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 10%, transparent);
+  font-size: 0.85em;
+}

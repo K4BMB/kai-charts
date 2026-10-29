@@ -1,0 +1,58 @@
+/*
+ * Demo theme. The charts only read `--kc-*` tokens and `currentColor`, so switching the
+ * theme on <html data-theme> re-colors every chart without touching the components.
+ */
+:root {
+  color-scheme: light;
+  --bg: #f1f5f9;
+  --fg: #0f172a;
+  --card: #ffffff;
+  --muted: #64748b;
+  --border: #e2e8f0;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --fg: #e2e8f0;
+  --card: #111a2e;
+  --muted: #94a3b8;
+  --border: #1f2a44;
+  --kc-tooltip-bg: #e2e8f0;
+  --kc-tooltip-text: #0b1220;
+}
+
+[data-theme='brand'] {
+  --bg: #fdf6ee;
+  --fg: #3b2a1a;
+  --card: #fffaf4;
+  --muted: #8a6d4f;
+  --border: #ead9c4;
+  --kc-color-1: #b45309;
+  --kc-color-2: #0f766e;
+  --kc-color-3: #9f1239;
+  --kc-color-4: #4338ca;
+  --kc-color-5: #ca8a04;
+  --kc-color-6: #0369a1;
+  --kc-color-7: #7c2d12;
+  --kc-color-8: #525252;
+  --kc-radius: 10px;
+  --kc-font-size: 13px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  line-height: 1.4;
+}
