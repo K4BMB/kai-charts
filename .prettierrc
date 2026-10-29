@@ -4,7 +4,7 @@
   "endOfLine": "lf",
   "overrides": [
     {
-      "files": "*.html",
+      "files": "packages/angular/**/*.html",
       "options": {
         "parser": "angular"
       }
