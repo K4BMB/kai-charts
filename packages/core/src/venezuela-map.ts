@@ -206,6 +206,16 @@ export function regionAnchor(
   return { x: round2(region.labelX * k), y: round2(region.labelY * k) };
 }
 
+/**
+ * Tooltip placement for an anchor inside the rendered map: sideways near the left/right edges
+ * (Zulia, Delta Amacuro) so the bubble stays inside the chart, `top` elsewhere.
+ */
+export function mapTooltipPlacement(x: number, renderedWidth: number): 'top' | 'right' | 'left' {
+  if (x < renderedWidth * 0.2) return 'right';
+  if (x > renderedWidth * 0.8) return 'left';
+  return 'top';
+}
+
 function isFinite(value: number | null | undefined): value is number {
   return typeof value === 'number' && Number.isFinite(value);
 }

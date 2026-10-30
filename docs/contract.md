@@ -442,7 +442,8 @@ DOM:
 ```
 
 Behaviour: hover/focus on a region or marker → tooltip anchored at `regionAnchor(region, width)`
-(marker: its x/y scaled the same way), placement `top`, rows `[{ name: valueHeader, value: valueText, color }]`;
+(marker: its x/y scaled the same way), placement `mapTooltipPlacement(anchor.x, width)` (`right`
+near the west edge, `left` near the east edge, `top` elsewhere), rows `[{ name: valueHeader, value: valueText, color }]`;
 leave/blur hides it. Click, Enter, Space → `regionClick` with `{ id, name, value }` (value `null`
 without data). `loading` → `kc-chart-state kind="loading"` with height `round(width × 614 / 800)`.
 There is **no empty state**: an empty `data` array still draws the grey map (that is the point).

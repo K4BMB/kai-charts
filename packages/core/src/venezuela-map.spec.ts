@@ -4,6 +4,7 @@ import {
   VENEZUELA_STATES,
   VENEZUELA_VIEWBOX,
   buildMapModel,
+  mapTooltipPlacement,
   normalizeRegionId,
   projectVenezuela,
   regionAnchor,
@@ -159,5 +160,16 @@ describe('buildMapModel', () => {
     const region = VENEZUELA_STATES[0];
     const anchor = regionAnchor(region, VENEZUELA_VIEWBOX.width / 2);
     expect(anchor.x).toBeCloseTo(region.labelX / 2, 1);
+  });
+
+  it('places the tooltip sideways near the edges and on top elsewhere', () => {
+    expect(mapTooltipPlacement(50, 600)).toBe('right'); // Zulia
+    expect(mapTooltipPlacement(560, 600)).toBe('left'); // Delta Amacuro
+    expect(mapTooltipPlacement(300, 600)).toBe('top');
+    const zulia = regionAnchor(
+      VENEZUELA_STATES.find((s) => s.id === 'VE-V')!,
+      600,
+    );
+    expect(mapTooltipPlacement(zulia.x, 600)).toBe('right');
   });
 });

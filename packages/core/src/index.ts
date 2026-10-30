@@ -59,6 +59,7 @@ export {
   VENEZUELA_STATES,
   VENEZUELA_VIEWBOX,
   buildMapModel,
+  mapTooltipPlacement,
   normalizeRegionId,
   projectVenezuela,
   regionAnchor,

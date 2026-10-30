@@ -57,6 +57,22 @@
   font-size: 0.9em;
 }
 
+/* Header button of a sortable column: looks like the plain header, behaves like a button. */
+.kc-ranking-table__sort-btn {
+  all: unset;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+}
+
+.kc-ranking-table__sort-btn:focus-visible {
+  outline: 2px solid var(--kc-focus, currentColor);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 .kc-ranking-table__row--clickable {
   cursor: pointer;
 }
