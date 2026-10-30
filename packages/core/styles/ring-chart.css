@@ -1,0 +1,105 @@
+/* kai-charts · concentric progress rings. Root element carries `.kc-ring`. */
+.kc-ring {
+  display: block;
+  font-family: var(--kc-font-family, inherit);
+  font-size: var(--kc-font-size, 12px);
+  color: var(--kc-text, inherit);
+}
+
+.kc-ring__figure {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.kc-ring__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.kc-ring__track {
+  fill: none;
+  stroke-opacity: 0.14;
+}
+
+.kc-ring__arc {
+  fill: none;
+  stroke-linecap: round;
+  outline: none;
+  transition: stroke-dasharray 400ms ease;
+}
+
+.kc-ring__arc--empty {
+  stroke-linecap: butt; /* a round cap would still paint a dot at 0 % */
+}
+
+.kc-ring__arc:hover {
+  stroke-opacity: 0.85;
+}
+
+.kc-ring__arc:focus-visible {
+  stroke: var(--kc-focus, currentColor);
+}
+
+/* Center text sits over the SVG, inside the hole. */
+.kc-ring__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.kc-ring__center-label {
+  color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+}
+
+.kc-ring__center-value {
+  font-size: var(--kc-ring-value-size, 1.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.kc-ring__legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kc-ring__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kc-ring__legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.kc-ring__legend-name {
+  color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+}
+
+.kc-ring__legend-value {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kc-ring__arc {
+    transition: none;
+  }
+}

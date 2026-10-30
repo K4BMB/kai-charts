@@ -21,6 +21,17 @@ export interface BarLayoutOptions {
   series: readonly ResolvedSeries[];
   format: ValueFormatter;
   fontSize?: number;
+  /** Share of each category band occupied by bars, 0.1–1 (default 0.7). Thin bars: 0.25. */
+  barWidth?: number;
+  /** Hide ticks of the value axis and shrink its margin (grid lines are still computed). */
+  showValueAxis?: boolean;
+  /** Hide category labels and shrink their margin. */
+  showCategoryAxis?: boolean;
+  /**
+   * Stacked only: round the outer corners of each stack with `barRadius`. The segment under the
+   * top one is extended behind it so no background shows through the rounded corners.
+   */
+  roundStackTop?: boolean;
 }
 
 export interface Rect {
@@ -99,6 +110,10 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
   const { horizontal, stacked, categories, series, format } = o;
   const categoryCount = categories.length;
   const seriesCount = series.length;
+  const showValueAxis = o.showValueAxis ?? true;
+  const showCategoryAxis = o.showCategoryAxis ?? true;
+  const bandFill = clamp(o.barWidth ?? BAND_FILL, 0.1, 1);
+  const roundStack = stacked && (o.roundStackTop ?? false) && o.barRadius > 0;
 
   // 1. Value domain (grouped: raw values; stacked: per-category positive and negative sums).
   let min = 0;
@@ -140,14 +155,15 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
   let left: number;
   let right: number;
   let top: number;
-  let bottom = fontSize + TICK_GAP + PAD;
+  let bottom = showCategoryAxis || horizontal ? fontSize + TICK_GAP + PAD : PAD;
   if (horizontal) {
-    left = Math.min(categoryLabelWidth, o.width * 0.35) + TICK_GAP + 2;
+    if (!showValueAxis) bottom = PAD;
+    left = showCategoryAxis ? Math.min(categoryLabelWidth, o.width * 0.35) + TICK_GAP + 2 : PAD;
     if (negativeLabelRoom) left += valueLabelWidth + 4;
     right = PAD + (o.showValues ? valueLabelWidth + 4 : 0);
     top = PAD;
   } else {
-    left = tickLabelWidth + TICK_GAP + 2;
+    left = showValueAxis ? tickLabelWidth + TICK_GAP + 2 : PAD;
     right = PAD;
     top = PAD + (o.showValues ? fontSize + 4 : 0);
     if (negativeLabelRoom) bottom += fontSize + 4;
@@ -166,7 +182,7 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
   const zero = toPx(0);
   const bandOrigin = horizontal ? plot.y : plot.x;
   const band = (horizontal ? plot.h : plot.w) / Math.max(1, categoryCount);
-  const groupSize = band * BAND_FILL;
+  const groupSize = band * bandFill;
   const slot = stacked ? groupSize : groupSize / Math.max(1, seriesCount);
   const gap = stacked || seriesCount === 1 ? 0 : Math.min(2, slot * 0.2);
   const thickness = Math.max(1, slot - gap);
@@ -181,6 +197,7 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
     let positive = 0;
     let negative = 0;
     let drawn = 0;
+    const firstBar = bars.length;
     for (let si = 0; si < seriesCount; si++) {
       const s = series[si];
       const value = s.data[ci];
@@ -262,6 +279,7 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
             },
       );
     }
+    if (roundStack && drawn > 0) roundStackEnds(bars.slice(firstBar), o.barRadius, horizontal);
   }
 
   // 5. Axes: value ticks with grid lines, category ticks and the zero baseline.
@@ -316,11 +334,37 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
     plot,
     bars,
     gridLines,
-    valueTicks,
-    categoryTicks,
+    valueTicks: showValueAxis ? valueTicks : [],
+    categoryTicks: showCategoryAxis ? categoryTicks : [],
     axisLine,
     valueLabels,
   };
+}
+
+/**
+ * Rounds the outer end of a stack: the last positive (and first negative) segment gets `rx`,
+ * and the neighbouring segment grows `rx` behind it so the rounded corners show its color
+ * instead of the background. Bars are mutated in place; they are drawn in array order.
+ */
+function roundStackEnds(stack: BarShape[], rx: number, horizontal: boolean): void {
+  const positives = stack.filter((b) => b.value >= 0);
+  const negatives = stack.filter((b) => b.value < 0);
+  const cap = (outer: BarShape | undefined, inner: BarShape | undefined, towardsEnd: boolean) => {
+    if (!outer) return;
+    outer.rx = rx;
+    if (!inner) return;
+    const grow = Math.min(rx, horizontal ? inner.w : inner.h);
+    if (horizontal) {
+      inner.w = round2(inner.w + grow);
+      if (!towardsEnd) inner.x = round2(inner.x - grow);
+    } else {
+      inner.h = round2(inner.h + grow);
+      if (towardsEnd) inner.y = round2(inner.y - grow);
+    }
+  };
+  // Vertical positives grow upwards (y decreases); horizontal positives grow to the right.
+  cap(positives.at(-1), positives.at(-2), true);
+  cap(negatives.at(-1), negatives.at(-2), false);
 }
 
 function isFiniteValue(value: ChartValue): value is number {

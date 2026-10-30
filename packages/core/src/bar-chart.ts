@@ -74,15 +74,7 @@ export function barTooltip(
   bar: BarShape,
   format: ValueFormatter,
 ): TooltipState {
-  const rows: TooltipRow[] = series.map((s) => {
-    const value = s.data[bar.categoryIndex];
-    return {
-      name: s.name,
-      value: value == null ? '—' : format(value),
-      color: s.color,
-      active: s.index === bar.seriesIndex,
-    };
-  });
+  const rows = categoryRows(series, bar.categoryIndex, bar.seriesIndex, format);
   if (layout.horizontal) {
     const end = bar.x + bar.w;
     return {
@@ -94,4 +86,40 @@ export function barTooltip(
     };
   }
   return { x: bar.x + bar.w / 2, y: bar.y, placement: 'top', title: bar.category, rows };
+}
+
+/** Tooltip for a line-chart point (or any category-aligned shape): all series at that category. */
+export function categoryTooltip(
+  series: readonly ResolvedSeries[],
+  categoryIndex: number,
+  activeSeriesIndex: number,
+  title: string,
+  x: number,
+  y: number,
+  format: ValueFormatter,
+): TooltipState {
+  return {
+    x,
+    y,
+    placement: 'top',
+    title,
+    rows: categoryRows(series, categoryIndex, activeSeriesIndex, format),
+  };
+}
+
+function categoryRows(
+  series: readonly ResolvedSeries[],
+  categoryIndex: number,
+  activeSeriesIndex: number,
+  format: ValueFormatter,
+): TooltipRow[] {
+  return series.map((s) => {
+    const value = s.data[categoryIndex];
+    return {
+      name: s.name,
+      value: value == null ? '—' : format(value),
+      color: s.color,
+      active: s.index === activeSeriesIndex,
+    };
+  });
 }

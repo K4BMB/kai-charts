@@ -18,6 +18,7 @@ export {
 } from './bar-layout.js';
 export {
   barTooltip,
+  categoryTooltip,
   isEmptyData,
   isLegendVisible,
   resolveSeries,
@@ -27,6 +28,22 @@ export {
   type TooltipRow,
   type TooltipState,
 } from './bar-chart.js';
+export {
+  computeLineLayout,
+  linePath,
+  type CurveType,
+  type LineLayout,
+  type LineLayoutOptions,
+  type LinePoint,
+  type LineSeriesShape,
+} from './line-layout.js';
+export {
+  computeRingLayout,
+  type RingItem,
+  type RingLayout,
+  type RingLayoutOptions,
+  type RingShape,
+} from './ring-layout.js';
 export { clamp, toneColor, type Tone } from './tone.js';
 export { KC_TREND_FORMAT, describeTrend, type TrendDirection, type TrendView } from './trend.js';
 export { buildProgressRows, type ProgressItem, type ProgressRowView } from './progress.js';

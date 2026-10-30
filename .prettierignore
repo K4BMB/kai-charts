@@ -4,3 +4,4 @@ node_modules
 coverage
 pnpm-lock.yaml
 *.tgz
+packages/core/src/data/venezuela.ts

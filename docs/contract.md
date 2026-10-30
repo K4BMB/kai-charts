@@ -501,8 +501,159 @@ export const MOBILE_UNITS: MapMarker[] = [
 
 ---
 
-## Planned next (not in this wave)
+## Line chart — `kc-line-chart` / `LineChart`
 
-`kc-line-chart`, `kc-ring-chart`, `kc-ranking-table`, `kc-month-calendar`, bar-chart options
-(`showValueAxis`, `barWidth`, rounded stack tops, gradient fill). Each will get its own section
-here before implementation.
+Core: `computeLineLayout(options)` → `LineLayout` (`series[]` with `d`, `areaD`, `points[]`;
+`gridLines`, `valueTicks`, `categoryTicks`, `axisLine`, `endLabels`, `baselineY`);
+`categoryTooltip(series, categoryIndex, activeSeriesIndex, title, x, y, format)`.
+
+| Input / prop                                                                            | Type                                           | Default    | Notes                                            |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------- | ---------- | ------------------------------------------------ |
+| `categories`, `series`                                                                  | as bar chart                                   |            | `null` values break the line (gap)               |
+| `curve`                                                                                 | `'linear' \| 'smooth'`                         | `'smooth'` | smooth = monotone cubic, never overshoots        |
+| `area`                                                                                  | `boolean`                                      | `false`    | Soft fill under each line (`fill-opacity` 0.12)  |
+| `includeZero`                                                                           | `boolean`                                      | `true`     | `false` zooms the value axis into the data range |
+| `height`                                                                                | `number`                                       | `280`      |                                                  |
+| `showLegend`                                                                            | `boolean \| 'auto'`                            | `'auto'`   | Toggles series like the bar chart                |
+| `showGrid`                                                                              | `boolean`                                      | `true`     |                                                  |
+| `showValueAxis`                                                                         | `boolean`                                      | `true`     | `false` = the mockup look (no y axis)            |
+| `showCategoryAxis`                                                                      | `boolean`                                      | `true`     |                                                  |
+| `showEndValues`                                                                         | `boolean`                                      | `false`    | Last value of each series printed at its end     |
+| `pointRadius`                                                                           | `number`                                       | `3`        | Points stay focusable even when tiny             |
+| `showTable`, `loading`, `label`, `categoryHeader`, `emptyText`, `locale`, `valueFormat` | as bar chart                                   |            |                                                  |
+| event                                                                                   | `pointClick` / `onPointClick(ChartPointEvent)` |            | click, Enter, Space on a point                   |
+
+DOM (inside `.kc-chart.kc-line-chart > .kc-plot > svg.kc-svg[role=group][aria-label]`, same
+skeleton/empty/legend/table wrappers as the bar chart):
+
+```html
+<line class="kc-grid" … />
+<!-- showGrid -->
+<text class="kc-tick" …>…</text>
+<!-- value ticks, then category ticks (with <title>) -->
+<line class="kc-axis" … />
+<!-- baseline -->
+<path class="kc-area" d="…" style="fill: <color>" data-series="0" />
+<!-- area, per series, before the lines -->
+<path class="kc-line" d="…" style="stroke: <color>" data-series="0" />
+<!-- per series -->
+<circle
+  class="kc-point"
+  cx
+  cy
+  r
+  style="fill: <color>"
+  data-series
+  data-category
+  role="img"
+  tabindex="0"
+  aria-label="May, S1: 10"
+  …events
+/>
+<text class="kc-value" …>30</text>
+<!-- endLabels -->
+```
+
+Tooltip: `categoryTooltip(visibleSeries, point.categoryIndex, point.seriesIndex, point.category, point.x, point.y, format)`.
+
+Tests: (1) one `circle.kc-point` per finite value and one `path.kc-line` per series; (2) gaps split
+the path (`d` contains two `M`); (3) `area` adds `path.kc-area`; (4) default curve emits `C`
+commands, `curve="linear"` does not; (5) es-VE ticks; `showValueAxis=false` → no value ticks;
+(6) `showEndValues` prints the last values; (7) empty/null data → empty state; loading → skeleton;
+(8) legend auto + toggling hides a series' line and points; (9) `pointClick` payload on click and
+Enter; (10) tooltip on focus with one row per series, hidden on blur.
+
+Showcase card (block **Barras** renamed **Barras y líneas**): "Ciudadanos atendidos por jornada"
+— two series `LINE_SAMPLE` (`Jornadas ejecutadas` 20,22,26,24,28,31 · `Actas por jornada (%)` no,
+use `Saldo fiscal` 48,45,43,40,38,36 over May..Oct), `curve="smooth"`, `area`, `showEndValues`,
+hint "Curva monótona (sin rebotes), área suave y valor final de cada serie".
+
+---
+
+## Ring chart — `kc-ring-chart` / `RingChart`
+
+Core: `computeRingLayout({ size, items, format, thickness?, gap? })` → `RingLayout`
+(`cx`, `cy`, `thickness`, `innerRadius`, `rings[]` with `r`, `circumference`, `dash`, `percent`,
+`valueText`, `ariaLabel`, `color`).
+
+| Input / prop                              | Type                                     | Default                                          | Notes                                |
+| ----------------------------------------- | ---------------------------------------- | ------------------------------------------------ | ------------------------------------ |
+| `items`                                   | `RingItem[]`                             | `[]`                                             | `{ name, value, max? (1), color? }`  |
+| `size`                                    | `number`                                 | `200`                                            | viewBox side; rendered width ≤ size  |
+| `thickness`, `gap`                        | `number`                                 | auto / `4`                                       |                                      |
+| `centerLabel`                             | `string`                                 | `''`                                             | Small text above the center value    |
+| `centerValue`                             | `number \| string`                       | —                                                | Numbers formatted with `valueFormat` |
+| `centerTrend`                             | `number`                                 | —                                                | Trend chip under the value           |
+| `invertTrend`                             | `boolean`                                | `false`                                          |                                      |
+| `showLegend`                              | `boolean`                                | `true`                                           | Name + value per ring                |
+| `valueFormat`                             | `ValueFormat`                            | `{ style: 'percent', maximumFractionDigits: 1 }` | Applied to `value`                   |
+| `locale`, `label`, `loading`, `emptyText` | as usual                                 |                                                  |                                      |
+| event                                     | `ringClick` / `onRingClick(item, index)` |                                                  |                                      |
+
+DOM:
+
+```html
+<div class="kc-chart kc-ring">
+  <div class="kc-ring__figure" style="max-width: 200px">
+    <svg class="kc-svg kc-ring__svg" viewBox="0 0 200 200" role="group" aria-label="…">
+      <!-- per ring, outer first -->
+      <circle class="kc-ring__track" cx cy r stroke-width="<thickness>" style="stroke: <color>" />
+      <circle
+        class="kc-ring__arc [kc-ring__arc--empty]"
+        cx
+        cy
+        r
+        stroke-width="<thickness>"
+        style="stroke: <color>"
+        stroke-dasharray="<dash> <circumference>"
+        transform="rotate(-90 cx cy)"
+        role="img"
+        tabindex="0"
+        aria-label="Saldo: 91,7%"
+        …events
+      />
+    </svg>
+    <div class="kc-ring__center">
+      <!-- when centerLabel/centerValue/centerTrend -->
+      <div class="kc-ring__center-label">Saldo</div>
+      <div class="kc-ring__center-value">91,7%</div>
+      <span class="kc-trend …">…</span>
+    </div>
+    <kc-tooltip /> <Tooltip />
+    <!-- anchored at (cx, cy - r) scaled to rendered width -->
+  </div>
+  <ul class="kc-ring__legend">
+    <!-- showLegend -->
+    <li class="kc-ring__legend-item">
+      <i class="kc-ring__legend-swatch" style="background: <color>"></i
+      ><span class="kc-ring__legend-name">Emitidas</span
+      ><span class="kc-ring__legend-value">94,2%</span>
+    </li>
+  </ul>
+</div>
+```
+
+`kc-ring__arc--empty` when `dash === 0`. Tooltip rows: `[{ name, value: valueText, color, active: true }]`.
+
+Tests: (1) one track + one arc per ring, outer radius larger; (2) `stroke-dasharray` = dash and
+circumference, full circle at ≥ 100 %; (3) zero → `kc-ring__arc--empty`; (4) center label/value/
+trend rendered when given, absent otherwise; (5) legend with names and formatted percents,
+hidden with `showLegend=false`; (6) `ringClick` on click/Enter with the item; (7) tooltip on
+focus/blur; (8) empty → empty state; loading → skeleton.
+
+Showcase card (block **Listas** renamed **Listas y anillos**): "Atención nacional" with
+`RINGS = [{ name: 'Saldo', value: 0.917 }, { name: 'Emitidas', value: 0.942 }, { name: 'Recibidas', value: 0.871 }]`,
+`centerLabel="Saldo"`, `centerValue={0.917}`, `centerTrend={0.038}`; hint "Anillos concéntricos
+con valor central y leyenda con cifras (más legible que anillos sin etiqueta)".
+
+---
+
+## Bar chart additions (both renderers, same input names)
+
+New inputs mapped straight to `computeBarLayout` options: `barWidth` (number, default 0.7),
+`showValueAxis` (true), `showCategoryAxis` (true), `roundStackTop` (false). Nothing else changes;
+existing tests stay valid. Add one test: `showValueAxis=false` renders no value ticks and the bars
+start further left. Showcase: change the "Estado de sincronización" card hint to mention the new
+options and use `roundStackTop barRadius="6"`; add nothing else.
+
+---

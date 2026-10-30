@@ -98,4 +98,38 @@ describe('computeBarLayout', () => {
     expect(layout.bars).toEqual([]);
     expect(layout.valueTicks.map((t) => t.label)).toEqual(['0', '1']);
   });
+
+  it('hides axes on demand and reclaims their margins', () => {
+    const full = computeBarLayout(options());
+    const bare = computeBarLayout(options({ showValueAxis: false, showCategoryAxis: false }));
+    expect(bare.valueTicks).toEqual([]);
+    expect(bare.categoryTicks).toEqual([]);
+    expect(bare.gridLines.length).toBe(full.gridLines.length);
+    expect(bare.plot.x).toBeLessThan(full.plot.x);
+    expect(bare.plot.h).toBeGreaterThan(full.plot.h);
+  });
+
+  it('scales bar thickness with barWidth', () => {
+    const single = [options().series[0]];
+    const thin = computeBarLayout(options({ series: single, barWidth: 0.25 }));
+    const wide = computeBarLayout(options({ series: single, barWidth: 1 }));
+    expect(thin.bars[0].w).toBeCloseTo(wide.bars[0].w * 0.25, 0);
+  });
+
+  it('rounds only the outer segment of a stack and hides the seam behind it', () => {
+    const plain = computeBarLayout(options({ stacked: true, barRadius: 4 }));
+    expect(plain.bars.every((b) => b.rx === 0)).toBe(true);
+
+    const rounded = computeBarLayout(options({ stacked: true, barRadius: 4, roundStackTop: true }));
+    const [bottom, top] = rounded.bars.filter((b) => b.categoryIndex === 0);
+    expect(top.rx).toBe(4);
+    expect(bottom.rx).toBe(0);
+    const plainBottom = plain.bars.find((b) => b.key === bottom.key)!;
+    expect(bottom.h).toBeCloseTo(plainBottom.h + 4, 1);
+    expect(bottom.y).toBeCloseTo(plainBottom.y - 4, 1);
+    // Category B has a single segment (S2 is null): it is rounded without a neighbour to grow.
+    const single = rounded.bars.filter((b) => b.categoryIndex === 1);
+    expect(single).toHaveLength(1);
+    expect(single[0].rx).toBe(4);
+  });
 });

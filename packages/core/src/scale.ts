@@ -16,12 +16,20 @@ export function tickStep(span: number, count: number): number {
 }
 
 /**
- * Expands `[min, max]` so it always includes zero and lands on nice tick values.
+ * Expands `[min, max]` to nice tick values. By default the domain always includes zero (bars
+ * must start at zero); pass `includeZero = false` for line charts that zoom into a range.
  * With `integer` the step never goes below 1 (counts should not show 0.5 ticks).
  */
-export function niceDomain(min: number, max: number, count = 5, integer = false): NiceDomain {
-  const lo = Number.isFinite(min) ? Math.min(0, min) : 0;
-  let hi = Number.isFinite(max) ? Math.max(0, max) : 0;
+export function niceDomain(
+  min: number,
+  max: number,
+  count = 5,
+  integer = false,
+  includeZero = true,
+): NiceDomain {
+  let lo = Number.isFinite(min) ? (includeZero ? Math.min(0, min) : min) : 0;
+  let hi = Number.isFinite(max) ? (includeZero ? Math.max(0, max) : max) : 0;
+  if (hi < lo) [lo, hi] = [hi, lo];
   if (hi === lo) hi = lo + 1;
   let step = tickStep(hi - lo, count);
   if (integer && step < 1) step = 1;
