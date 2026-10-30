@@ -28,25 +28,21 @@ describe('KcVenezuelaMap', () => {
   const region = (id: string) => element.querySelector<SVGPathElement>(`path[data-id="${id}"]`)!;
   const text = (selector: string) => element.querySelector(selector)?.textContent?.trim();
 
-  it('renders the 25 regions and the hatched claim zone with a per-instance pattern', () => {
+  it('renders the 26 regions, Guayana Esequiba as a regular state, with uniform borders', () => {
     fixture.detectChanges();
-    expect(regions()).toHaveLength(25);
+    expect(regions()).toHaveLength(26);
     expect(element.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 800 614');
     expect(element.querySelector('svg')?.getAttribute('role')).toBe('group');
     expect(element.querySelector('svg')?.hasAttribute('height')).toBe(false);
-    const claim = element.querySelector('path.kc-map__claim');
-    const pattern = element.querySelector('pattern');
-    expect(claim?.getAttribute('fill')).toBe(`url(#${pattern?.id})`);
-    expect(pattern?.querySelector('.kc-map__hatch-line')).not.toBeNull();
-
-    const other = TestBed.createComponent(KcVenezuelaMap);
-    other.detectChanges();
-    expect(other.nativeElement.querySelector('pattern').id).not.toBe(pattern?.id);
-
-    fixture.componentRef.setInput('showClaimZone', false);
-    fixture.detectChanges();
+    // No hatch pattern, no dashed outline, no special path: every region is drawn the same way.
+    expect(element.querySelector('pattern')).toBeNull();
     expect(element.querySelector('path.kc-map__claim')).toBeNull();
-    expect(regions()).toHaveLength(25);
+    const esequiba = region('VE-GE');
+    expect(esequiba.classList.contains('kc-map__region')).toBe(true);
+    expect(esequiba.classList.contains('kc-map__region--empty')).toBe(true);
+    expect(esequiba.getAttribute('aria-label')).toBe('Guayana Esequiba: Sin datos');
+    expect(esequiba.getAttribute('tabindex')).toBe('0');
+    expect(esequiba.hasAttribute('stroke-dasharray')).toBe(false);
   });
 
   it('paints only the regions with data, scaling the opacity up to 1', () => {
@@ -155,12 +151,12 @@ describe('KcVenezuelaMap', () => {
     fixture.detectChanges();
     expect(text('.kc-map__legend-min')).toBe('3.830');
     expect(text('.kc-map__legend-max')).toBe('5.260');
-    expect(text('.kc-map__legend-empty')).toBe('Sin datos · 3/25');
+    expect(text('.kc-map__legend-empty')).toBe('Sin datos · 3/26');
 
     fixture.componentRef.setInput('data', []);
     fixture.detectChanges();
     expect(element.querySelector('.kc-map__legend')).toBeNull();
-    expect(regions()).toHaveLength(25);
+    expect(regions()).toHaveLength(26);
 
     fixture.componentRef.setInput('data', DATA);
     fixture.componentRef.setInput('showLegend', false);
@@ -174,11 +170,11 @@ describe('KcVenezuelaMap', () => {
     fixture.componentRef.setInput('label', 'Ciudadanos por estado');
     fixture.componentRef.setInput('valueHeader', 'Ciudadanos');
     fixture.detectChanges();
-    expect(element.querySelectorAll('text.kc-map__label')).toHaveLength(25);
-    expect(text('text.kc-map__claim-label')).toBe('Zona en Reclamación');
+    expect(element.querySelectorAll('text.kc-map__label')).toHaveLength(26);
+    expect(element.querySelector('text.kc-map__claim-label')).toBeNull();
     expect(element.querySelector('caption')?.textContent?.trim()).toBe('Ciudadanos por estado');
     expect(element.querySelectorAll('thead th')[1].textContent?.trim()).toBe('Ciudadanos');
-    expect(element.querySelectorAll('tbody tr')).toHaveLength(25);
+    expect(element.querySelectorAll('tbody tr')).toHaveLength(26);
   });
 
   it('shows the loading skeleton instead of the map', () => {

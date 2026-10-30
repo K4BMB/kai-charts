@@ -18,7 +18,6 @@ import {
   MapRegionView,
   TooltipRow,
   TooltipState,
-  VENEZUELA_CLAIM_ZONE,
   VENEZUELA_VIEWBOX,
   ValueFormat,
   buildMapModel,
@@ -41,15 +40,13 @@ export interface MapRegionClickEvent {
   value: number | null;
 }
 
-/** Every `<pattern>` id must be unique in the page, even with several maps rendered. */
-let hatchCounter = 0;
-
 /**
- * Choropleth of Venezuela (23 states, Distrito Capital and Dependencias Federales) that fills
- * in as data arrives: regions without a value stay grey, regions with data are painted with
- * one color whose opacity grows with the value. Optional markers (mobile units, offices) are
- * projected from lat/lng. Geometry and the data join come from `kai-charts-core`
- * (`VENEZUELA_STATES`, `buildMapModel`); this component only wires signals to the template.
+ * Choropleth of Venezuela (the 24 states — Guayana Esequiba included, as Venezuelan law
+ * establishes —, Distrito Capital and Dependencias Federales) that fills in as data arrives:
+ * regions without a value stay grey, regions with data are painted with one color whose opacity
+ * grows with the value. Optional markers (mobile units, offices) are projected from lat/lng.
+ * Geometry and the data join come from `kai-charts-core` (`VENEZUELA_STATES`, `buildMapModel`);
+ * this component only wires signals to the template.
  *
  * ```html
  * <kc-venezuela-map [data]="byState" [markers]="units" highlight="VE-V" label="Ciudadanos" />
@@ -73,10 +70,7 @@ let hatchCounter = 0;
 export class KcVenezuelaMap {
   private readonly config = inject(KC_CONFIG);
   protected readonly width = observeWidth(600);
-  /** Unique id of the hatch pattern of this instance (`kc-hatch-N`). */
-  protected readonly hatchId = `kc-hatch-${hatchCounter++}`;
   protected readonly viewBox = `0 0 ${VENEZUELA_VIEWBOX.width} ${VENEZUELA_VIEWBOX.height}`;
-  protected readonly claimZone = VENEZUELA_CLAIM_ZONE;
 
   /** One value per region; `id` accepts ISO codes (`VE-V`) or names (`Zulia`). */
   readonly data = input<readonly MapDatum[]>([]);
@@ -90,11 +84,7 @@ export class KcVenezuelaMap {
   readonly showLegend = input(true, { transform: booleanAttribute });
   /** Short state names at their label points. */
   readonly showLabels = input(false, { transform: booleanAttribute });
-  /** Guayana Esequiba hatched (the official Venezuelan depiction). */
-  readonly showClaimZone = input(true, { transform: booleanAttribute });
-  /** Text of the claim zone, drawn only with `showLabels`. */
-  readonly claimZoneLabel = input('Zona en Reclamación');
-  /** Mirror table: one row per region (all 25). */
+  /** Mirror table: one row per region (all 26). */
   readonly showTable = input(false, { transform: booleanAttribute });
   /** Small dot on every state capital (name shown in the region tooltip). */
   readonly showCapitals = input(true, { transform: booleanAttribute });

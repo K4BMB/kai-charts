@@ -10,25 +10,6 @@
       [attr.aria-label]="label() || null"
       (mouseleave)="hideTooltip()"
     >
-      <defs>
-        <pattern
-          [attr.id]="hatchId"
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <rect class="kc-map__hatch-bg" width="6" height="6" />
-          <line class="kc-map__hatch-line" x1="0" y1="0" x2="0" y2="6" />
-        </pattern>
-      </defs>
-      @if (showClaimZone()) {
-        <path
-          class="kc-map__claim"
-          [attr.d]="claimZone.path"
-          [attr.fill]="'url(#' + hatchId + ')'"
-        />
-      }
       @for (group of regionGroups(); track $index) {
         @for (r of group; track r.id) {
           <path
@@ -54,11 +35,6 @@
       @if (showLabels()) {
         @for (r of m.regions; track r.id) {
           <text class="kc-map__label" [attr.x]="r.labelX" [attr.y]="r.labelY">{{ r.short }}</text>
-        }
-        @if (showClaimZone()) {
-          <text class="kc-map__claim-label" [attr.x]="claimZone.labelX" [attr.y]="claimZone.labelY">
-            {{ claimZoneLabel() }}
-          </text>
         }
       }
       @for (c of capitals(); track c.id) {
