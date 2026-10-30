@@ -144,7 +144,7 @@
 
 .kc-calendar__dot--many {
   width: auto;
-  min-width: 6px;
+  min-width: 10px;
   height: 6px;
   padding: 0 1px;
   border-radius: 3px;

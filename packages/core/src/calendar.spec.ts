@@ -52,9 +52,9 @@ describe('buildMonthGrid', () => {
     expect(grid.weeks[1][0].ariaLabel).toBe('lunes 5: 2 Ejecutadas');
   });
 
-  it('totals per kind for the legend and reports unknown kinds', () => {
+  it('totals per kind for the legend (visible month only) and reports unknown kinds', () => {
     expect(grid.kinds.map((k) => [k.kind, k.total])).toEqual([
-      ['done', 3],
+      ['done', 2], // the September 28 event is drawn on the padded day but not counted
       ['pending', 4],
       ['moved', 1],
     ]);

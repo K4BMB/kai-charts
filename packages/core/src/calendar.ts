@@ -90,13 +90,15 @@ export function buildMonthGrid(
   const kindIndex = new Map(kindViews.map((k) => [k.kind, k]));
   const unknown = new Set<string>();
   const byDay = new Map<string, CalendarEvent[]>();
+  const monthPrefix = `${year}-${String(month).padStart(2, '0')}-`;
   for (const event of events) {
     const list = byDay.get(event.date);
     if (list) list.push(event);
     else byDay.set(event.date, [event]);
     const kind = kindIndex.get(event.kind);
-    if (kind) kind.total += event.count ?? 1;
-    else unknown.add(event.kind);
+    // Legend totals describe the displayed month only (events on padded days are drawn, not counted).
+    if (kind && event.date.startsWith(monthPrefix)) kind.total += event.count ?? 1;
+    if (!kind) unknown.add(event.kind);
   }
 
   const first = new Date(year, month - 1, 1);
