@@ -44,7 +44,7 @@
 
 .kc-map__region--highlighted {
   stroke: var(--kc-map-highlight, currentColor);
-  stroke-width: 2;
+  stroke-width: 1.5;
 }
 
 .kc-map__region:focus-visible {
@@ -113,6 +113,16 @@
 .kc-map__marker:focus-visible .kc-map__marker-halo {
   stroke: var(--kc-focus, currentColor);
   stroke-opacity: 1;
+}
+
+/* State capitals: small decorative dots, same size in every state. */
+.kc-map__capital {
+  fill: var(--kc-map-capital, currentColor);
+  fill-opacity: 0.75;
+  stroke: var(--kc-map-border, var(--kc-surface, #fff));
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 
 /* Legend: min · gradient · max · empty swatch · filled/total. */

@@ -12,7 +12,8 @@ export interface LegendItem {
 export interface TooltipRow {
   name: string;
   value: string;
-  color: string;
+  /** Swatch color; omit for informational rows (e.g. a capital name). */
+  color?: string;
   active?: boolean;
 }
 

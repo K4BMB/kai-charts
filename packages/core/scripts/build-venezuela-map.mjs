@@ -54,6 +54,34 @@ const SHORT_NAMES = {
 };
 const MAX_LAT = 13; // drops Isla de Aves (15.7° N): it would triple the map height for a dot
 
+// State capitals (Dependencias Federales has no capital; its seat, Gran Roque, is omitted).
+const CAPITALS = {
+  'VE-A': ['Caracas', 10.4806, -66.9036],
+  'VE-B': ['Barcelona', 10.1333, -64.6833],
+  'VE-C': ['San Fernando de Apure', 7.8939, -67.4728],
+  'VE-D': ['Maracay', 10.2469, -67.5958],
+  'VE-E': ['Barinas', 8.6226, -70.2075],
+  'VE-F': ['Ciudad Bolívar', 8.1222, -63.5497],
+  'VE-G': ['Valencia', 10.162, -68.0077],
+  'VE-H': ['San Carlos', 9.6612, -68.5827],
+  'VE-I': ['Coro', 11.4045, -69.6734],
+  'VE-J': ['San Juan de los Morros', 9.9111, -67.3539],
+  'VE-K': ['Barquisimeto', 10.0678, -69.3467],
+  'VE-L': ['Mérida', 8.5897, -71.1561],
+  'VE-M': ['Los Teques', 10.3444, -67.0431],
+  'VE-N': ['Maturín', 9.7457, -63.1832],
+  'VE-O': ['La Asunción', 11.0333, -63.8628],
+  'VE-P': ['Guanare', 9.0418, -69.7421],
+  'VE-R': ['Cumaná', 10.4536, -64.1675],
+  'VE-S': ['San Cristóbal', 7.7669, -72.225],
+  'VE-T': ['Trujillo', 9.3659, -70.4367],
+  'VE-U': ['San Felipe', 10.3399, -68.7425],
+  'VE-V': ['Maracaibo', 10.6427, -71.6125],
+  'VE-X': ['La Guaira', 10.6012, -66.9319],
+  'VE-Y': ['Tucupita', 9.0583, -62.0506],
+  'VE-Z': ['Puerto Ayacucho', 5.6639, -67.6236],
+};
+
 const admin1 = await load('admin1');
 const disputed = await load('disputed');
 
@@ -222,6 +250,15 @@ const output = regions.map((region, regionIndex) => {
     path: d,
     labelX: Number(best.centroid[0].toFixed(1)),
     labelY: Number(best.centroid[1].toFixed(1)),
+    ...(CAPITALS[region.id]
+      ? {
+          capital: {
+            name: CAPITALS[region.id][0],
+            lat: CAPITALS[region.id][1],
+            lng: CAPITALS[region.id][2],
+          },
+        }
+      : {}),
   };
 });
 
@@ -244,6 +281,8 @@ export interface MapRegionGeometry {
   /** Label anchor (centroid of the largest polygon). */
   labelX: number;
   labelY: number;
+  /** State capital (absent for Dependencias Federales and the claim zone). */
+  capital?: { name: string; lat: number; lng: number };
 }
 
 export const VENEZUELA_VIEWBOX = { width: ${WIDTH}, height: ${HEIGHT} } as const;

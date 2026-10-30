@@ -25,6 +25,19 @@ function pathBounds(d: string) {
   };
 }
 
+/** Ray casting over every subpath (`M…Z`) of an absolute path. */
+function pathContains(d: string, x: number, y: number): boolean {
+  let inside = false;
+  for (const sub of d.split('M').filter(Boolean)) {
+    const pts = sub.replace('Z', '').trim().split(' ').map(Number);
+    for (let i = 0, j = pts.length - 2; i < pts.length; j = i, i += 2) {
+      const [xi, yi, xj, yj] = [pts[i], pts[i + 1], pts[j], pts[j + 1]];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+    }
+  }
+  return inside;
+}
+
 describe('Venezuela geometry', () => {
   it('ships the 23 states, Distrito Capital and Dependencias Federales', () => {
     expect(VENEZUELA_STATES).toHaveLength(25);
@@ -34,6 +47,19 @@ describe('Venezuela geometry', () => {
     expect(ids).not.toContain('VE-Q');
     expect(VENEZUELA_STATES.find((s) => s.id === 'VE-X')?.name).toBe('La Guaira');
     expect(VENEZUELA_CLAIM_ZONE.name).toBe('Zona en Reclamación');
+  });
+
+  it('places every state capital inside its own state polygon', () => {
+    const withCapital = VENEZUELA_STATES.filter((s) => s.capital);
+    expect(withCapital).toHaveLength(24); // all but Dependencias Federales
+    expect(VENEZUELA_STATES.find((s) => s.id === 'VE-W')?.capital).toBeUndefined();
+    for (const state of withCapital) {
+      const { x, y } = projectVenezuela(state.capital!.lat, state.capital!.lng);
+      expect(pathContains(state.path, x, y), `${state.capital!.name} inside ${state.name}`).toBe(
+        true,
+      );
+    }
+    expect(VENEZUELA_STATES.find((s) => s.id === 'VE-V')?.capital?.name).toBe('Maracaibo');
   });
 
   it('has valid paths inside the viewBox with label points inside each state box', () => {
@@ -108,6 +134,9 @@ describe('buildMapModel', () => {
     expect(byId['VE-M'].opacity).toBeCloseTo(0.18 + (4940 / 5260) * 0.82, 2);
     expect(byId['VE-K']).toMatchObject({ value: null, hasData: false, opacity: 0, valueText: '—' });
     expect(byId['VE-K'].ariaLabel).toBe('Lara: —');
+    expect(byId['VE-K'].capitalPoint?.name).toBe('Barquisimeto');
+    expect(byId['VE-K'].capitalPoint?.x).toBeGreaterThan(0);
+    expect(byId['VE-W'].capitalPoint).toBeNull();
   });
 
   it('exposes a legend only when some region has data', () => {

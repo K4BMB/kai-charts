@@ -38,6 +38,8 @@ export interface MapRegionView extends MapRegionGeometry {
   opacity: number;
   ariaLabel: string;
   highlighted: boolean;
+  /** Projected state capital in viewBox px, `null` when the region has none. */
+  capitalPoint: { name: string; x: number; y: number } | null;
 }
 
 export interface MapMarkerView {
@@ -163,6 +165,12 @@ export function buildMapModel(
       opacity: clamp(opacity, 0, 1),
       ariaLabel: `${name}: ${valueText}`,
       highlighted: highlight.has(geometry.id),
+      capitalPoint: geometry.capital
+        ? {
+            name: geometry.capital.name,
+            ...projectVenezuela(geometry.capital.lat, geometry.capital.lng),
+          }
+        : null,
     };
   });
 
