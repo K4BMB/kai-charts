@@ -1,6 +1,6 @@
 {
   "name": "kai-charts",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Dependency-free SVG chart components for Angular 20+: standalone, signals, OnPush, themed by CSS tokens.",
   "license": "MIT",
   "author": "Kaissar Mahfoud",
@@ -30,7 +30,7 @@
     "@angular/core": ">=20.0.0"
   },
   "dependencies": {
-    "kai-charts-core": "^0.3.0",
+    "kai-charts-core": "^0.4.0",
     "tslib": "^2.3.0"
   },
   "sideEffects": false,

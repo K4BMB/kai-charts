@@ -7,8 +7,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-30
+
 ### Added
 
+- **Playground v2** in both demos: `#/playground/<chart>` with a picker and one sandbox per
+  component (bar, line, ring, KPI, progress, ranking, table, calendar, map) — editable data
+  (matrix or rows editor), every option, live events and a generated code snippet to copy.
 - **Month calendar** — `kc-month-calendar` / `MonthCalendar`: 6-week grid with event dots per
   kind (tone colors), today/selected states, controlled month navigation (`monthChange`),
   `dayClick`, legend with per-kind totals of the visible month, footer text, locale-aware weekday

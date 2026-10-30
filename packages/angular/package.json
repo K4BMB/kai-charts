@@ -1,6 +1,6 @@
 {
   "name": "kai-charts-angular",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "description": "Angular CLI workspace: the kai-charts library (projects/kai-charts) and its demo app (projects/demo).",
   "license": "MIT",
