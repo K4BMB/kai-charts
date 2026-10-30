@@ -53,6 +53,46 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-ring-chart')).toHaveLength(1);
     expect(compiled.querySelectorAll('kc-ring-chart circle.kc-ring__arc')).toHaveLength(3);
     expect(compiled.querySelector('kc-ring-chart .kc-trend')?.textContent?.trim()).toBe('+3,8%');
+    expect(compiled.querySelectorAll('kc-month-calendar')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-month-calendar .kc-calendar__day')).toHaveLength(42);
+    expect(
+      compiled.querySelector('kc-month-calendar .kc-calendar__title')?.textContent?.trim(),
+    ).toBe('octubre de 2026');
+    expect(compiled.querySelectorAll('kc-ranking-table')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ranking-table .kc-ranking-table__row')).toHaveLength(5);
+    expect(
+      compiled.querySelector('kc-ranking-table th[aria-sort="descending"]')?.textContent?.trim(),
+    ).toBe('Trámites▾');
+  });
+
+  it('controls the table sort and the calendar month from the host', async () => {
+    await TestBed.configureTestingModule({ imports: [Showcase] }).compileComponents();
+    const fixture = TestBed.createComponent(Showcase);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const labels = () =>
+      Array.from(compiled.querySelectorAll('kc-ranking-table .kc-ranking-table__label')).map((l) =>
+        l.textContent?.trim(),
+      );
+    expect(labels()[0]).toBe('Zulia');
+    compiled.querySelector<HTMLButtonElement>('kc-ranking-table th button')!.click();
+    await fixture.whenStable();
+    expect(labels()[0]).toBe('Dtto. Capital');
+    expect(compiled.querySelector('kc-ranking-table th[aria-sort="ascending"]')).not.toBeNull();
+
+    const title = () =>
+      compiled.querySelector('kc-month-calendar .kc-calendar__title')?.textContent?.trim();
+    const [prev, next] = Array.from(
+      compiled.querySelectorAll<HTMLButtonElement>('kc-month-calendar .kc-calendar__nav'),
+    );
+    next.click();
+    await fixture.whenStable();
+    expect(title()).toBe('noviembre de 2026');
+    prev.click();
+    await fixture.whenStable();
+    prev.click();
+    await fixture.whenStable();
+    expect(title()).toBe('septiembre de 2026');
   });
 
   it('applies the loading and empty switches to every chart', async () => {
@@ -70,6 +110,10 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-ranking-list .kc-state--empty')).toHaveLength(2);
     expect(compiled.querySelectorAll('kc-line-chart .kc-state--empty')).toHaveLength(1);
     expect(compiled.querySelectorAll('kc-ring-chart .kc-state--empty')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ranking-table .kc-state--empty')).toHaveLength(1);
+    // The calendar has no empty state: without events it still draws the 42 days, without dots.
+    expect(compiled.querySelectorAll('kc-month-calendar .kc-calendar__day')).toHaveLength(42);
+    expect(compiled.querySelectorAll('kc-month-calendar .kc-calendar__dot')).toHaveLength(0);
     // The map has no empty state: it keeps drawing the grey regions without a legend.
     expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region--empty')).toHaveLength(25);
     expect(compiled.querySelector('kc-venezuela-map .kc-map__legend')).toBeNull();
@@ -82,6 +126,9 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-venezuela-map [aria-busy="true"]')).toHaveLength(1);
     expect(compiled.querySelectorAll('kc-line-chart [aria-busy="true"]')).toHaveLength(1);
     expect(compiled.querySelectorAll('kc-ring-chart [aria-busy="true"]')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ranking-table [aria-busy="true"]')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-month-calendar [aria-busy="true"]')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-month-calendar .kc-calendar__day')).toHaveLength(0);
   });
 });
 

@@ -21,3 +21,5 @@ export { KcRankingList } from './ranking-list/ranking-list';
 export { KcVenezuelaMap, type MapRegionClickEvent } from './venezuela-map/venezuela-map';
 export { KcLineChart } from './line-chart/line-chart';
 export { KcRingChart } from './ring-chart/ring-chart';
+export { KcMonthCalendar, type MonthChangeEvent } from './month-calendar/month-calendar';
+export { KcRankingTable, type SortChangeEvent } from './ranking-table/ranking-table';

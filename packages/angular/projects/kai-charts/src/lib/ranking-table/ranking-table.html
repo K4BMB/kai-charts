@@ -1,0 +1,84 @@
+@if (loading()) {
+  <kc-chart-state kind="loading" [height]="skeletonHeight()" [text]="loadingText" />
+} @else if (isEmpty()) {
+  <kc-chart-state kind="empty" [height]="120" [text]="emptyLabel()" />
+} @else {
+  <table class="kc-ranking-table__table" [attr.aria-label]="caption() ? null : label() || null">
+    @if (caption()) {
+      <caption>
+        {{
+          caption()
+        }}
+      </caption>
+    }
+    <thead>
+      <tr>
+        <th scope="col" class="kc-align--left">{{ entityHeader() }}</th>
+        @for (header of headers(); track header.key) {
+          <th
+            scope="col"
+            [class]="'kc-align--' + header.align"
+            [class.kc-ranking-table__sortable]="header.sortable"
+            [attr.aria-sort]="ariaSort(header)"
+          >
+            @if (header.sortable) {
+              <button type="button" class="kc-ranking-table__sort-btn" (click)="sort(header)">
+                @if (header.sorted === 'desc') {
+                  {{ header.header
+                  }}<span class="kc-ranking-table__sort" aria-hidden="true">▾</span>
+                } @else if (header.sorted === 'asc') {
+                  {{ header.header
+                  }}<span class="kc-ranking-table__sort" aria-hidden="true">▴</span>
+                } @else {
+                  {{ header.header }}
+                }
+              </button>
+            } @else {
+              {{ header.header }}
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of model().rows; track row.id) {
+        <tr
+          class="kc-ranking-table__row kc-ranking-table__row--clickable"
+          [class.kc-ranking-table__row--first]="row.rank === 1"
+          [class.kc-ranking-table__row--active]="row.active"
+          [style.--kc-row-color]="row.color"
+          tabindex="0"
+          [attr.aria-label]="row.ariaLabel"
+          [attr.data-id]="row.id"
+          (click)="activate(row)"
+          (keydown.enter)="activate(row, $event)"
+          (keydown.space)="activate(row, $event)"
+        >
+          <td class="kc-align--left">
+            <div class="kc-ranking-table__entity">
+              @if (showRank()) {
+                <span class="kc-ranking-table__rank" aria-hidden="true">{{ row.rank }}</span>
+              }
+              <div>
+                <div class="kc-ranking-table__label">{{ row.label }}</div>
+                @if (row.sublabel) {
+                  <div class="kc-ranking-table__sublabel">{{ row.sublabel }}</div>
+                }
+              </div>
+            </div>
+          </td>
+          @for (cell of row.cells; track cell.key) {
+            <td [class]="'kc-align--' + cell.align">
+              <span class="kc-ranking-table__value">
+                <span class="kc-ranking-table__text">{{ cell.text }}</span>
+                @if (cell.percent !== null) {
+                  <i class="kc-ranking-table__bar" [style.width.%]="cell.percent"></i>
+                }
+              </span>
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+}

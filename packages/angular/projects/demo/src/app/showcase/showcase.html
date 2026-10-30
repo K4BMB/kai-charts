@@ -209,6 +209,24 @@
 
   <section class="block">
     <h2 class="block__title">Listas y anillos</h2>
+    <section class="card">
+      <h2>Ranking de eficiencia por unidad móvil</h2>
+      <p class="hint">
+        Producción y tiempo medio de atención por trámite · clic en una cabecera numérica para
+        ordenar
+      </p>
+      <kc-ranking-table
+        [rows]="empty() ? [] : tableRows"
+        [columns]="tableColumns"
+        [sortBy]="sortBy()"
+        [sortDirection]="sortDirection()"
+        [loading]="loading()"
+        entityHeader="Estado / Unidad"
+        label="Ranking de eficiencia por unidad móvil"
+        (sortChange)="onSortChange($event)"
+        (rowClick)="onRowClick($event)"
+      />
+    </section>
     <div class="grid">
       <section class="card">
         <h2>Densidad de atención por región</h2>
@@ -249,6 +267,26 @@
           (ringClick)="onRingClick($event)"
         />
       </section>
+
+      <section class="card">
+        <h2>Calendario de jornadas</h2>
+        <p class="hint">
+          Puntos por tipo de evento, mes navegable; el host controla el mes y recibe el día clicado
+        </p>
+        <kc-month-calendar
+          [year]="year()"
+          [month]="month()"
+          [events]="empty() ? [] : calendarEvents"
+          [kinds]="calendarKinds"
+          [loading]="loading()"
+          selected="2026-10-09"
+          today="2026-10-09"
+          footer="Cumplimiento: 89,3 %"
+          label="Calendario de jornadas"
+          (monthChange)="onMonthChange($event)"
+          (dayClick)="onDayClick($event)"
+        />
+      </section>
     </div>
   </section>
 </main>
@@ -258,8 +296,9 @@
     Último clic: <strong>{{ click.category }}</strong> · {{ click.series }} = {{ click.value }}
   } @else {
     Haz clic (o Enter/Espacio con el teclado) sobre una barra, un punto, un anillo, un estado del
-    mapa o una fila de las listas para ver el evento <code>barClick</code> /
-    <code>pointClick</code> / <code>ringClick</code> / <code>regionClick</code> /
-    <code>itemClick</code>.
+    mapa, una fila de las listas o de la tabla o un día del calendario para ver el evento
+    <code>barClick</code> / <code>pointClick</code> / <code>ringClick</code> /
+    <code>regionClick</code> / <code>itemClick</code> / <code>rowClick</code> /
+    <code>dayClick</code>.
   }
 </footer>

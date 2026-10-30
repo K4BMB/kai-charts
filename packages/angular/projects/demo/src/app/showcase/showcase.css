@@ -49,6 +49,11 @@
   font-size: 1.05rem;
 }
 
+/* Full-width card placed above a grid of cards (ranking table in "Listas y anillos"). */
+.block > .card + .grid {
+  margin-top: 16px;
+}
+
 .hint {
   margin: 0 0 12px;
   color: var(--muted);

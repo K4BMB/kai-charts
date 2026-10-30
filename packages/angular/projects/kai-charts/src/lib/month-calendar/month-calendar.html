@@ -1,0 +1,112 @@
+@if (loading()) {
+  <kc-chart-state kind="loading" [height]="320" [text]="loadingText" />
+} @else {
+  <div class="kc-calendar__head">
+    @if (showNav()) {
+      <button
+        type="button"
+        class="kc-calendar__nav"
+        aria-label="Mes anterior"
+        (click)="navigate(-1)"
+      >
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M10 3 5 8l5 5" />
+        </svg>
+      </button>
+    }
+    <h3 class="kc-calendar__title" aria-live="polite">{{ grid().title }}</h3>
+    @if (showNav()) {
+      <button
+        type="button"
+        class="kc-calendar__nav"
+        aria-label="Mes siguiente"
+        (click)="navigate(1)"
+      >
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 3l5 5-5 5" />
+        </svg>
+      </button>
+    }
+  </div>
+  <table class="kc-calendar__grid" role="grid" [attr.aria-label]="label() || null">
+    <thead>
+      <tr>
+        @for (weekday of grid().weekdays; track $index) {
+          <th scope="col" class="kc-calendar__weekday" [attr.abbr]="weekdayNames()[$index]">
+            {{ weekday }}
+          </th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (week of grid().weeks; track $index) {
+        <tr>
+          @for (day of week; track day.iso) {
+            <td class="kc-calendar__cell">
+              <button
+                type="button"
+                class="kc-calendar__day kc-calendar__day--clickable"
+                [class.kc-calendar__day--outside]="!day.inMonth"
+                [class.kc-calendar__day--today]="day.isToday"
+                [class.kc-calendar__day--selected]="day.isSelected"
+                [class.kc-calendar__day--weekend]="day.weekend"
+                [attr.aria-pressed]="day.isSelected ? 'true' : null"
+                [attr.aria-label]="day.ariaLabel"
+                [attr.data-date]="day.iso"
+                (click)="activate(day)"
+                (keydown.enter)="activate(day, $event)"
+                (keydown.space)="activate(day, $event)"
+              >
+                <span class="kc-calendar__number">{{ day.day }}</span>
+                <span class="kc-calendar__dots" aria-hidden="true">
+                  @for (dot of day.dots; track dot.kind) {
+                    <i
+                      class="kc-calendar__dot"
+                      [class.kc-calendar__dot--many]="dot.count > 1"
+                      [style.--kc-dot-color]="dot.color"
+                    ></i>
+                  }
+                </span>
+              </button>
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+  @if (showLegendList()) {
+    <ul class="kc-calendar__legend">
+      @for (kind of grid().kinds; track kind.kind) {
+        <li class="kc-calendar__legend-item">
+          <i class="kc-calendar__legend-swatch" [style.background]="kind.color"></i>{{ kind.name }}
+          <span class="kc-calendar__legend-total">{{ kind.total }}</span>
+        </li>
+      }
+    </ul>
+  }
+  @if (footer()) {
+    <p class="kc-calendar__footer">
+      @if (footerParts().strong) {
+        {{ footerParts().text }} <strong>{{ footerParts().strong }}</strong>
+      } @else {
+        {{ footerParts().text }}
+      }
+    </p>
+  }
+}

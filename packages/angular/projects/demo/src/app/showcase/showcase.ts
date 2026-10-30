@@ -1,25 +1,33 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import {
+  CalendarDayView,
   ChartPointEvent,
   ItemClickEvent,
   KcBarChart,
   KcIcon,
   KcKpiCard,
   KcLineChart,
+  KcMonthCalendar,
   KcProgressList,
   KcRankingList,
+  KcRankingTable,
   KcRingChart,
   KcVenezuelaMap,
   MapDatum,
   MapMarker,
   MapRegionClickEvent,
+  MonthChangeEvent,
   ProgressItem,
   RankingItem,
   RingItem,
+  SortChangeEvent,
+  TableRow,
   VENEZUELA_STATES,
 } from 'kai-charts';
 import {
   AGE_RANGE,
+  CALENDAR_EVENTS,
+  CALENDAR_KINDS,
   CITIZENS_BY_STATE,
   CITIZENS_MAP,
   DENSITY,
@@ -31,12 +39,14 @@ import {
   PROCEDURES_BY_DAY,
   PROCEDURES_BY_TYPE,
   PROCEDURES_BY_TYPE_PHASE_1,
+  RANKING_TABLE_COLUMNS,
+  RANKING_TABLE_ROWS,
   RINGS,
   SYNC_STATE,
 } from '../sample-data';
 import { KpiIcon } from './kpi-icon';
 
-/** What the footer shows after a click on a bar, a point, a ring, a region or a list row. */
+/** What the footer shows after a click on a bar, a point, a ring, a region, a row or a day. */
 interface LastClick {
   category: string;
   series: string;
@@ -53,8 +63,10 @@ const ARRIVAL_INTERVAL = 500;
     KcKpiCard,
     KcIcon,
     KcLineChart,
+    KcMonthCalendar,
     KcProgressList,
     KcRankingList,
+    KcRankingTable,
     KcRingChart,
     KcVenezuelaMap,
     KpiIcon,
@@ -78,6 +90,10 @@ export class Showcase {
     [...CITIZENS_BY_STATE].sort((a, b) => b.value - a.value)[0]?.id ?? '';
   protected readonly lineSample = LINE_SAMPLE;
   protected readonly rings = RINGS;
+  protected readonly calendarKinds = CALENDAR_KINDS;
+  protected readonly calendarEvents = CALENDAR_EVENTS;
+  protected readonly tableColumns = RANKING_TABLE_COLUMNS;
+  protected readonly tableRows = RANKING_TABLE_ROWS;
   protected readonly byType = PROCEDURES_BY_TYPE;
   protected readonly byTypePhase1 = PROCEDURES_BY_TYPE_PHASE_1;
   protected readonly byDay = PROCEDURES_BY_DAY;
@@ -94,6 +110,13 @@ export class Showcase {
   protected readonly mapData = signal<MapDatum[]>(CITIZENS_MAP);
   protected readonly simulating = signal(false);
   private arrivalTimer: ReturnType<typeof setInterval> | null = null;
+
+  /** Controlled sort of the ranking table (updated on `sortChange`). */
+  protected readonly sortBy = signal('procedures');
+  protected readonly sortDirection = signal<'desc' | 'asc'>('desc');
+  /** Controlled month of the calendar (updated on `monthChange`). */
+  protected readonly year = signal(2026);
+  protected readonly month = signal(10);
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this.stopSimulation());
@@ -155,5 +178,28 @@ export class Showcase {
 
   protected onRingClick({ item }: ItemClickEvent<RingItem>): void {
     this.lastClick.set({ category: item.name, series: 'Atención nacional', value: item.value });
+  }
+
+  protected onSortChange({ key, direction }: SortChangeEvent): void {
+    this.sortBy.set(key);
+    this.sortDirection.set(direction);
+  }
+
+  protected onRowClick({ item }: ItemClickEvent<TableRow>): void {
+    const procedures = item.values['procedures'];
+    this.lastClick.set({
+      category: item.label,
+      series: 'Unidad móvil',
+      value: typeof procedures === 'number' ? procedures : 0,
+    });
+  }
+
+  protected onMonthChange({ year, month }: MonthChangeEvent): void {
+    this.year.set(year);
+    this.month.set(month);
+  }
+
+  protected onDayClick(day: CalendarDayView): void {
+    this.lastClick.set({ category: day.iso, series: 'Día', value: day.events.length });
   }
 }
