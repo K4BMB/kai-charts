@@ -343,35 +343,35 @@ be `display:block`). React: `icon={<KpiIcon name={k.icon} />}`.
 
 ## Venezuela map — `kc-venezuela-map` / `VenezuelaMap`
 
-Choropleth of the 23 states + Distrito Capital + Dependencias Federales that **fills in as data
-arrives**: regions without a value stay grey, regions with data are painted with one color whose
-opacity grows with the value (`buildMapModel` → `opacity` 0.18–1). Geometry ships in the core
-(`VENEZUELA_STATES`, `VENEZUELA_CLAIM_ZONE`, `VENEZUELA_VIEWBOX` 800×614, Natural Earth, public
-domain). Optional markers (mobile units) are projected with `projectVenezuela(lat, lng)`.
+Choropleth of the 24 states (Guayana Esequiba included — a Venezuelan state by law, drawn exactly
+like the others; id `VE-GE`, it has no ISO code) + Distrito Capital + Dependencias Federales — 26
+regions — that **fills in as data arrives**: regions without a value stay grey, regions with data
+are painted with one color whose opacity grows with the value (`buildMapModel` → `opacity` 0.18–1).
+Every region shares one border style (same color and width, never dashed, never thickened on
+hover: hover darkens the fill instead). Geometry ships in the core (`VENEZUELA_STATES`,
+`VENEZUELA_VIEWBOX` 800×614, Natural Earth, public domain). Optional markers (mobile units) are projected with `projectVenezuela(lat, lng)`.
 
 Core: `buildMapModel(data, markers, format, { highlight, emptyText, minOpacity })` → `MapModel`
 (`regions`, `markers`, `legend`, `unmatched`, `filled`, `total`); `regionAnchor(region, width)`
 gives the tooltip anchor in px; `normalizeRegionId()` accepts ISO codes or names.
 
-| Input / prop                       | Type                                                                                          | Default                 | Notes                                                                                                                                    |
-| ---------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `data`                             | `MapDatum[]`                                                                                  | `[]`                    | `{ id: 'VE-V' \| 'Zulia', value, label? }`                                                                                               |
-| `markers`                          | `MapMarker[]`                                                                                 | `[]`                    | `{ id, lat, lng, label?, value?, color? }`                                                                                               |
-| `color`                            | `string`                                                                                      | `seriesColor(0)`        | Fill color for regions with data                                                                                                         |
-| `highlight`                        | `string \| string[]`                                                                          | `[]`                    | Ids (or names) drawn with a strong outline                                                                                               |
-| `showLegend`                       | `boolean`                                                                                     | `true`                  | Gradient min→max + empty swatch + `filled/total`                                                                                         |
-| `showLabels`                       | `boolean`                                                                                     | `false`                 | Short state names at their label points                                                                                                  |
-| `showClaimZone`                    | `boolean`                                                                                     | `true`                  | Guayana Esequiba hatched (official VE depiction)                                                                                         |
-| `claimZoneLabel`                   | `string`                                                                                      | `'Zona en Reclamación'` | Drawn only with `showLabels`                                                                                                             |
-| `showTable`                        | `boolean`                                                                                     | `false`                 | Mirror table: state · value (all 25 regions)                                                                                             |
-| `showCapitals`                     | `boolean`                                                                                     | `true`                  | Small dot on every state capital (24; Dependencias Federales has none); the capital name is added as a second tooltip row without swatch |
-| `capitalHeader`                    | `string`                                                                                      | `'Capital'`             | Name of that tooltip row                                                                                                                 |
-| `valueHeader`                      | `string`                                                                                      | `'Valor'`               | Table column header                                                                                                                      |
-| `emptyText`                        | `string`                                                                                      | config                  | Tooltip/table text for regions without data                                                                                              |
-| `minOpacity`                       | `number`                                                                                      | `0.18`                  |                                                                                                                                          |
-| `label`                            | `string`                                                                                      | `''`                    | `aria-label` of the svg                                                                                                                  |
-| `locale`, `valueFormat`, `loading` | as usual                                                                                      |                         |                                                                                                                                          |
-| events                             | `regionClick` / `onRegionClick({ id, name, value })`, `markerClick` / `onMarkerClick(marker)` |                         |                                                                                                                                          |
+| Input / prop                       | Type                                                                                          | Default          | Notes                                                                                                                                                          |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data`                             | `MapDatum[]`                                                                                  | `[]`             | `{ id: 'VE-V' \| 'Zulia', value, label? }`                                                                                                                     |
+| `markers`                          | `MapMarker[]`                                                                                 | `[]`             | `{ id, lat, lng, label?, value?, color? }`                                                                                                                     |
+| `color`                            | `string`                                                                                      | `seriesColor(0)` | Fill color for regions with data                                                                                                                               |
+| `highlight`                        | `string \| string[]`                                                                          | `[]`             | Ids (or names) drawn with a strong outline                                                                                                                     |
+| `showLegend`                       | `boolean`                                                                                     | `true`           | Gradient min→max + empty swatch + `filled/total`                                                                                                               |
+| `showLabels`                       | `boolean`                                                                                     | `false`          | Short state names at their label points                                                                                                                        |
+| `showTable`                        | `boolean`                                                                                     | `false`          | Mirror table: state · value (all 26 regions)                                                                                                                   |
+| `showCapitals`                     | `boolean`                                                                                     | `true`           | Small dot on every state capital (24; Dependencias Federales and Guayana Esequiba have none); the capital name is added as a second tooltip row without swatch |
+| `capitalHeader`                    | `string`                                                                                      | `'Capital'`      | Name of that tooltip row                                                                                                                                       |
+| `valueHeader`                      | `string`                                                                                      | `'Valor'`        | Table column header                                                                                                                                            |
+| `emptyText`                        | `string`                                                                                      | config           | Tooltip/table text for regions without data                                                                                                                    |
+| `minOpacity`                       | `number`                                                                                      | `0.18`           |                                                                                                                                                                |
+| `label`                            | `string`                                                                                      | `''`             | `aria-label` of the svg                                                                                                                                        |
+| `locale`, `valueFormat`, `loading` | as usual                                                                                      |                  |                                                                                                                                                                |
+| events                             | `regionClick` / `onRegionClick({ id, name, value })`, `markerClick` / `onMarkerClick(marker)` |                  |                                                                                                                                                                |
 
 DOM:
 
@@ -379,20 +379,6 @@ DOM:
 <div class="kc-chart kc-map" style="--kc-map-fill: <color>; --kc-map-min: 18%">
   <div class="kc-plot">
     <svg class="kc-svg kc-map__svg" viewBox="0 0 800 614" role="group" aria-label="…">
-      <defs>
-        <pattern
-          id="<unique per instance>"
-          width="6"
-          height="6"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(45)"
-        >
-          <rect class="kc-map__hatch-bg" width="6" height="6" />
-          <line class="kc-map__hatch-line" x1="0" y1="0" x2="0" y2="6" />
-        </pattern>
-      </defs>
-      <path class="kc-map__claim" d="…" fill="url(#<id>)" />
-      <!-- showClaimZone; drawn first -->
       <!-- regions: those without data first, with data next, highlighted last (so outlines stay visible) -->
       <path
         class="kc-map__region kc-map__region--empty"
@@ -414,8 +400,6 @@ DOM:
       />
       <text class="kc-map__label" x y>Zulia</text>
       <!-- showLabels, one per region, after all paths -->
-      <text class="kc-map__claim-label" x y>Zona en Reclamación</text>
-      <!-- showLabels && showClaimZone -->
       <circle class="kc-map__capital" cx cy r="3" aria-hidden="true" />
       <!-- showCapitals: one per region with a capital, after labels and before markers -->
       <g
@@ -438,7 +422,7 @@ DOM:
     <span class="kc-map__legend-min">0</span>
     <span class="kc-map__legend-bar"></span>
     <span class="kc-map__legend-max">5.260</span>
-    <span class="kc-map__legend-empty"><i class="kc-map__legend-swatch"></i>Sin datos · 13/25</span>
+    <span class="kc-map__legend-empty"><i class="kc-map__legend-swatch"></i>Sin datos · 13/26</span>
   </div>
   <kc-chart-table … />
   <!-- showTable: categories = names, series = [{ name: valueHeader, data: values }] -->
@@ -455,15 +439,16 @@ Width comes from `observeWidth` / `useContainerWidth`.
 
 Tests (both renderers):
 
-1. renders 25 `.kc-map__region` paths and the claim path; `showClaimZone=false` removes it;
+1. renders 26 `.kc-map__region` paths, `VE-GE` (Guayana Esequiba) among them as a regular,
+   focusable region; no `<pattern>`, no `.kc-map__claim` path, no `stroke-dasharray`;
 2. regions without data have `kc-map__region--empty` and no inline fill; with data they carry
    `fill-opacity` (max value → `1`) and the fill color;
 3. `highlight="Zulia"` → that path has `kc-map__region--highlighted` and is the last `path`;
 4. tooltip on focus shows the name and formatted value (`Zulia` / `5.260`), hides on blur;
 5. `regionClick` on click and Enter with `{ id: 'VE-V', name: 'Zulia', value: 5260 }`;
 6. markers: one `g.kc-map__marker` per marker with `aria-label`, `markerClick` on click;
-7. legend shows min/max texts and `filled/total` (`3/25`); hidden when no data or `showLegend=false`;
-8. `showLabels` renders 25 `.kc-map__label` texts; `showTable` renders 25 rows;
+7. legend shows min/max texts and `filled/total` (`3/26`); hidden when no data or `showLegend=false`;
+8. `showLabels` renders 26 `.kc-map__label` texts; `showTable` renders 26 rows;
 9. `loading` → `[aria-busy="true"]` and no svg.
 
 Showcase (both demos): block **Mapa** between _Indicadores_ and _Barras_: one wide card
@@ -865,7 +850,7 @@ with a table get **Tabla espejo**; `label` text where the component accepts it):
 - `ranking`: `limit` (number) · `sort` (desc/asc/none) · `showBars` · `showRank`.
 - `table`: `sortBy` (select none/procedures/avg/days) · `sortDirection` (desc/asc) · `limit` · `showRank` · `entityHeader` (text) · `caption` (text). Header clicks update `sortBy`/`sortDirection` (controlled, as in the showcase).
 - `calendar`: `year` (number) · `month` (1–12) · `selected` (text) · `today` (text, default `2026-10-09`) · `weekStartsOn` (select lunes=1/domingo=0) · `showLegend` · `showNav` · `footer` (text). Nav clicks update year/month.
-- `map`: `color` (color) · `highlight` (text, comma-separated ids or names) · `showLegend` · `showLabels` · `showClaimZone` · `showCapitals` · `minOpacity` (range 0–0.6) · `valueHeader` (text).
+- `map`: `color` (color) · `highlight` (text, comma-separated ids or names) · `showLegend` · `showLabels` · `showCapitals` · `minOpacity` (range 0–0.6) · `valueHeader` (text).
 
 Stage: the chart with the current data/options; `.status` shows the last event as
 `Último evento: <eventName> · <summary>` (bar/line: `category · series = value`; ring/progress/

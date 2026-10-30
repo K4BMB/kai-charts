@@ -40,12 +40,14 @@ editable data panel (categories, series, every number) and generates the code to
 Every component exists in both renderers with the same inputs, the same DOM and the same `.kc-*`
 CSS. The DOM/props/tests contract each pair follows lives in [`docs/contract.md`](docs/contract.md).
 
-**Venezuela map.** A choropleth of the 23 states + Distrito Capital + Dependencias Federales that
-fills in as data arrives: states without a value stay grey, states with data get the fill color
-with an opacity proportional to the value. Ids accept ISO 3166-2 codes (`VE-V`) or names
+**Venezuela map.** A choropleth of the 24 states (Guayana Esequiba included, as Venezuelan law
+establishes) + Distrito Capital + Dependencias Federales — 26 regions — that fills in as data
+arrives: states without a value stay grey, states with data get the fill color with an opacity
+proportional to the value. Every state shares the same thin border; nothing is hatched, dashed or
+thickened on hover. Ids accept ISO 3166-2 codes (`VE-V`, `VE-GE` for Guayana Esequiba) or names
 (`Zulia`, `Dtto. Capital`, `Vargas`). State capitals are drawn as small dots (name in the
 tooltip), optional markers by `lat`/`lng` (mobile units), legend min → max with the filled/total
-counter, and the Zona en Reclamación hatched by default (`showClaimZone="false"` hides it).
+counter.
 Geometry comes from Natural Earth (public domain), simplified with shared borders so neighbouring
 states never overlap or leave gaps, and ships inside `kai-charts-core` (≈35 KB) — no external
 data files.

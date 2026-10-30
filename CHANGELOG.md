@@ -7,6 +7,30 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-30
+
+### Changed
+
+- **Venezuela map: Guayana Esequiba is a regular state.** The map now has 26 regions: the former
+  "Zona en Reclamación" (hatched, dashed, non-interactive) is gone and Guayana Esequiba is drawn,
+  filled, focused, listed in the mirror table and counted in the legend exactly like every other
+  state, as Venezuelan law establishes. Its id is `VE-GE` (it has no ISO 3166-2 code);
+  `normalizeRegionId` also accepts `Guayana Esequiba`, `Esequibo` and the old `VE-ZR`.
+- **Uniform state borders.** Every region shares one border style (same color and width, never
+  dashed); hovering a state darkens its fill (`filter: brightness(0.9)`) instead of thickening its
+  outline. Only the explicit `highlight` input and the keyboard focus ring change the stroke.
+- **Translucent tooltip.** `.kc-tooltip` is drawn at 82 % opacity with a 3 px backdrop blur so
+  the chart underneath stays visible; `--kc-tooltip-opacity: 1` restores a solid tooltip.
+- Showcase maps start empty (all grey) and fill in by themselves state by state with a
+  deterministic arrival sequence; "Simular" replays it from empty.
+
+### Removed
+
+- `showClaimZone` / `claimZoneLabel` inputs (Angular and React), `VENEZUELA_CLAIM_ZONE` export,
+  the `.kc-map__claim`, `.kc-map__hatch-*` and `.kc-map__claim-label` classes and the
+  `--kc-map-claim` / `--kc-map-hover` tokens. The map region id `VE-ZR` is replaced by `VE-GE`
+  (still accepted by `normalizeRegionId`).
+
 ## [0.4.0] - 2026-10-30
 
 ### Added
