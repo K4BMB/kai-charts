@@ -1,8 +1,42 @@
-:host {
+/*
+ * Not encapsulated (see playground.ts): every rule is scoped under `.playground` so the shared
+ * panel/stage/form classes style the sandboxes and the editors without a copy per component.
+ * Form controls are scoped to `.panel`: the library draws its own <button>s (calendar days,
+ * sort headers) inside `.stage`.
+ */
+.playground {
   display: block;
 }
 
-.play {
+.playground .chart-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.playground .chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.playground .chip:hover {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.playground .chip--active,
+.playground .chip--active:hover {
+  background: var(--kc-color-1, #2563eb);
+  border-color: var(--kc-color-1, #2563eb);
+  color: #fff;
+}
+
+.playground .play {
   display: grid;
   grid-template-columns: 360px minmax(0, 1fr);
   gap: 16px;
@@ -10,41 +44,49 @@
 }
 
 /* Keep the chart in view while scrolling the long panel. */
-.stage {
+.playground .stage {
   position: sticky;
   top: 16px;
 }
 
 @media (max-width: 900px) {
-  .play {
-    grid-template-columns: 1fr;
+  .playground .play {
+    /* minmax(0, …): a wide rows table must scroll inside the panel, not widen the page. */
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .stage {
+  .playground .stage {
     position: static;
   }
 }
 
-.panel,
-.card {
+.playground .panel,
+.playground .card {
   padding: 16px 20px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--card);
 }
 
-.panel section + section {
+.playground .panel section + section {
   margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 
-h2 {
+.playground .panel h2 {
   margin: 0 0 10px;
   font-size: 1rem;
 }
 
-.field {
+.playground .panel h3 {
+  margin: 12px 0 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.playground .field {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -52,17 +94,17 @@ h2 {
   color: var(--muted);
 }
 
-.check {
+.playground .check {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 0.85rem;
 }
 
-input[type='text'],
-input[type='number'],
-select,
-textarea {
+.playground .panel input[type='text'],
+.playground .panel input[type='number'],
+.playground .panel select,
+.playground .panel textarea {
   width: 100%;
   padding: 6px 8px;
   border: 1px solid var(--border);
@@ -73,12 +115,12 @@ textarea {
   font-size: 0.9rem;
 }
 
-textarea {
+.playground .panel textarea {
   resize: vertical;
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
 }
 
-input[type='color'] {
+.playground .panel input[type='color'] {
   width: 36px;
   height: 32px;
   padding: 2px;
@@ -87,7 +129,13 @@ input[type='color'] {
   background: var(--bg);
 }
 
-button {
+.playground .color-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.playground .panel button {
   padding: 6px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -98,82 +146,117 @@ button {
   cursor: pointer;
 }
 
-button.secondary,
-.series-row button {
+.playground .panel button.secondary {
   background: transparent;
   color: inherit;
 }
 
-button:disabled {
+.playground .panel button:disabled {
   opacity: 0.4;
   cursor: default;
 }
 
-.series-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 12px 0;
-}
-
-.series-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 6px;
-  align-items: center;
-}
-
-.values-wrap {
+.playground .values-wrap {
   max-height: 320px;
   overflow: auto;
   border: 1px solid var(--border);
   border-radius: 8px;
 }
 
-.values {
+.playground .values {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.8rem;
 }
 
-.values th,
-.values td {
+.playground .values th,
+.playground .values td {
   padding: 4px 6px;
   border-bottom: 1px solid var(--border);
   text-align: left;
   white-space: nowrap;
 }
 
-.values thead th {
+.playground .values thead th {
   position: sticky;
   top: 0;
   background: var(--card);
   color: var(--muted);
   font-weight: 600;
+  z-index: 1;
 }
 
-.values input[type='number'] {
+.playground .values input[type='number'] {
   width: 76px;
   padding: 3px 6px;
 }
 
-.actions {
+/* Rows editor: compact cells; the "Quitar" column stays visible while the table scrolls. */
+.playground .rows th,
+.playground .rows td {
+  padding: 3px 4px;
+}
+
+.playground .rows input[type='text'] {
+  width: 104px;
+  padding: 3px 6px;
+}
+
+.playground .rows input[type='number'] {
+  width: 68px;
+}
+
+.playground .rows select {
+  min-width: 96px;
+  padding: 3px 6px;
+}
+
+.playground .rows input[type='color'] {
+  width: 30px;
+  height: 26px;
+}
+
+.playground .rows th:last-child,
+.playground .rows td:last-child {
+  position: sticky;
+  right: 0;
+  background: var(--card);
+  box-shadow: -6px 0 6px -6px rgb(0 0 0 / 0.25);
+}
+
+.playground .rows button {
+  padding: 3px 8px;
+  font-size: 0.78rem;
+}
+
+.playground .actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
 }
 
-.options {
+.playground .options {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px 12px;
 }
 
-.options .wide {
+.playground .options .wide {
   grid-column: 1 / -1;
 }
 
-pre {
+/* Lets the Locale/Formato pair sit directly in the options grid. */
+.playground app-format-fields {
+  display: contents;
+}
+
+.playground .kpi-box {
+  width: 320px;
+  max-width: 100%;
+}
+
+.playground .panel pre {
   margin: 0 0 8px;
   padding: 10px 12px;
   border-radius: 8px;
@@ -183,17 +266,18 @@ pre {
   overflow-x: auto;
 }
 
-.status {
+.playground .panel code,
+.playground .status code {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+
+.playground .status {
   margin-top: 12px;
   color: var(--muted);
   font-size: 0.9rem;
 }
 
-code {
-  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-}
-
-.status code {
+.playground .status code {
   padding: 1px 4px;
   border-radius: 4px;
   background: color-mix(in srgb, currentColor 10%, transparent);

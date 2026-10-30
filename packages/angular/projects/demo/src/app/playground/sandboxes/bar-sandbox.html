@@ -1,0 +1,154 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <app-matrix-editor [(categoriesText)]="categoriesText" [(series)]="series" [json]="json()" />
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="field">
+          Orientación
+          <select [value]="orientation()" (change)="orientation.set($any(text($event)))">
+            <option value="vertical">Vertical</option>
+            <option value="horizontal">Horizontal</option>
+          </select>
+        </label>
+        <label class="field">
+          Leyenda
+          <select [value]="legend()" (change)="legend.set($any(text($event)))">
+            <option value="auto">Automática</option>
+            <option value="true">Siempre</option>
+            <option value="false">Nunca</option>
+          </select>
+        </label>
+        <label class="check"
+          ><input type="checkbox" [checked]="stacked()" (change)="stacked.set(!stacked())" />
+          Apilado</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showValues()"
+            (change)="showValues.set(!showValues())"
+          />
+          Valores</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="showGrid()" (change)="showGrid.set(!showGrid())" />
+          Grilla</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="roundStackTop()"
+            (change)="roundStackTop.set(!roundStackTop())"
+          />
+          Extremo redondeado</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showValueAxis()"
+            (change)="showValueAxis.set(!showValueAxis())"
+          />
+          Eje de valores</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showCategoryAxis()"
+            (change)="showCategoryAxis.set(!showCategoryAxis())"
+          />
+          Eje de categorías</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="showTable()" (change)="showTable.set(!showTable())" />
+          Tabla espejo</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="empty()" (change)="empty.set(!empty())" /> Sin
+          datos</label
+        >
+        <label class="field">
+          Alto: {{ height() }} px
+          <input
+            type="range"
+            min="160"
+            max="480"
+            step="20"
+            [value]="height()"
+            (input)="height.set(+text($event))"
+          />
+        </label>
+        <label class="field">
+          Radio de barra: {{ barRadius() }} px
+          <input
+            type="range"
+            min="0"
+            max="12"
+            step="1"
+            [value]="barRadius()"
+            (input)="barRadius.set(+text($event))"
+          />
+        </label>
+        <label class="field">
+          Ancho de barra: {{ barWidth() }}
+          <input
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.05"
+            [value]="barWidth()"
+            (input)="barWidth.set(+text($event))"
+          />
+        </label>
+        <label class="field wide">
+          Etiqueta accesible (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <app-format-fields [(locale)]="locale" [(format)]="format" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <kc-bar-chart
+        [categories]="categories()"
+        [series]="chartSeries()"
+        [orientation]="orientation()"
+        [stacked]="stacked()"
+        [showValues]="showValues()"
+        [showGrid]="showGrid()"
+        [showValueAxis]="showValueAxis()"
+        [showCategoryAxis]="showCategoryAxis()"
+        [roundStackTop]="roundStackTop()"
+        [barWidth]="barWidth()"
+        [showTable]="showTable()"
+        [showLegend]="legendValue()"
+        [height]="height()"
+        [barRadius]="barRadius()"
+        [loading]="loading()"
+        [label]="label()"
+        [locale]="locale()"
+        [valueFormat]="valueFormat()"
+        (barClick)="onBarClick($event)"
+      />
+    </div>
+    <p class="status" aria-live="polite" appStatus [event]="lastEvent()">
+      Edita los números del panel y el gráfico se actualiza al instante. Clic en una barra para ver
+      <code>barClick</code>.
+    </p>
+  </div>
+</div>

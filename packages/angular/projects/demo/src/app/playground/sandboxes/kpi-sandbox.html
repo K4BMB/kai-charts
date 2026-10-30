@@ -1,0 +1,97 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <div class="options">
+        <label class="field wide">
+          Título (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <label class="field">
+          Valor (value)
+          <input
+            type="number"
+            step="any"
+            [value]="value() ?? ''"
+            (input)="setOptionalNumber(value, $event)"
+          />
+        </label>
+        <label class="field">
+          Tendencia (trend, ratio)
+          <input
+            type="number"
+            step="any"
+            [value]="trend() ?? ''"
+            (input)="setOptionalNumber(trend, $event)"
+          />
+        </label>
+        <label class="field wide">
+          Texto secundario (subtext)
+          <input type="text" [value]="subtext()" (input)="subtext.set(text($event))" />
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="invertTrend()"
+            (change)="invertTrend.set(!invertTrend())"
+          />
+          Invertir tendencia</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="field">
+          Color de acento (color)
+          <span class="color-row">
+            <input
+              type="color"
+              [value]="color() || defaultColor"
+              (input)="color.set(text($event))"
+              aria-label="Color de acento"
+            />
+            <button type="button" class="secondary" (click)="color.set('')" [disabled]="!color()">
+              Por defecto
+            </button>
+          </span>
+        </label>
+        <app-format-fields [(locale)]="locale" [(format)]="format" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <div class="kpi-box">
+        <kc-kpi-card
+          [label]="label()"
+          [value]="value()"
+          [subtext]="subtext()"
+          [trend]="trend()"
+          [invertTrend]="invertTrend()"
+          [color]="color() || undefined"
+          [loading]="loading()"
+          [locale]="locale()"
+          [valueFormat]="valueFormat()"
+        >
+          <app-kpi-icon kcIcon name="calendar" />
+        </kc-kpi-card>
+      </div>
+    </div>
+    <p class="status" aria-live="polite" appStatus>
+      La tarjeta KPI no emite eventos: edita los campos del panel y el valor, la tendencia y los
+      textos se actualizan al instante.
+    </p>
+  </div>
+</div>

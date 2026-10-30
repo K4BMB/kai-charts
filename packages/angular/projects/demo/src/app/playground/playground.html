@@ -1,207 +1,41 @@
-<div class="play">
-  <aside class="panel">
-    <section>
-      <h2>Datos</h2>
-      <label class="field">
-        Categorías (una por línea)
-        <textarea
-          rows="6"
-          [value]="categoriesText()"
-          (input)="categoriesText.set(text($event))"
-        ></textarea>
-      </label>
+<nav class="chart-picker" aria-label="Gráfico">
+  @for (c of charts; track c.id) {
+    <a
+      class="chip"
+      [class.chip--active]="c.id === active()"
+      [href]="'#/playground/' + c.id"
+      [attr.aria-current]="c.id === active() ? 'page' : null"
+      >{{ c.label }}</a
+    >
+  }
+</nav>
 
-      <div class="series-list">
-        @for (s of series(); track $index; let i = $index) {
-          <div class="series-row">
-            <input
-              type="text"
-              [value]="s.name"
-              (input)="onSeriesName(i, $event)"
-              aria-label="Nombre de la serie"
-              placeholder="Nombre"
-            />
-            <input
-              type="color"
-              [value]="s.color || defaultColor(i)"
-              (input)="onSeriesColor(i, $event)"
-              aria-label="Color de la serie"
-            />
-            <button type="button" (click)="removeSeries(i)" [disabled]="series().length === 1">
-              Quitar
-            </button>
-          </div>
-        }
-        <button type="button" class="secondary" (click)="addSeries()">+ Serie</button>
-      </div>
-
-      <div class="values-wrap">
-        <table class="values">
-          <thead>
-            <tr>
-              <th>Categoría</th>
-              @for (s of series(); track $index) {
-                <th>{{ s.name || 'Serie' }}</th>
-              }
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of categories(); track $index; let ci = $index) {
-              <tr>
-                <th>{{ c }}</th>
-                @for (s of series(); track $index; let si = $index) {
-                  <td>
-                    <input
-                      type="number"
-                      [value]="s.data[ci] ?? ''"
-                      (input)="onCell(si, ci, $event)"
-                      [attr.aria-label]="c + ' · ' + s.name"
-                    />
-                  </td>
-                }
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-
-      <div class="actions">
-        <button type="button" (click)="randomize()">Aleatorio</button>
-        <button type="button" (click)="copyJson()">
-          {{ copied() === 'json' ? '¡Copiado!' : 'Copiar JSON' }}
-        </button>
-      </div>
-    </section>
-
-    <section>
-      <h2>Opciones</h2>
-      <div class="options">
-        <label class="field">
-          Orientación
-          <select [value]="orientation()" (change)="orientation.set($any(text($event)))">
-            <option value="vertical">Vertical</option>
-            <option value="horizontal">Horizontal</option>
-          </select>
-        </label>
-        <label class="field">
-          Leyenda
-          <select [value]="legend()" (change)="legend.set($any(text($event)))">
-            <option value="auto">Automática</option>
-            <option value="true">Siempre</option>
-            <option value="false">Nunca</option>
-          </select>
-        </label>
-        <label class="check"
-          ><input type="checkbox" [checked]="stacked()" (change)="stacked.set(!stacked())" />
-          Apilado</label
-        >
-        <label class="check"
-          ><input
-            type="checkbox"
-            [checked]="showValues()"
-            (change)="showValues.set(!showValues())"
-          />
-          Valores</label
-        >
-        <label class="check"
-          ><input type="checkbox" [checked]="showGrid()" (change)="showGrid.set(!showGrid())" />
-          Grilla</label
-        >
-        <label class="check"
-          ><input type="checkbox" [checked]="showTable()" (change)="showTable.set(!showTable())" />
-          Tabla espejo</label
-        >
-        <label class="check"
-          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
-          Cargando</label
-        >
-        <label class="check"
-          ><input type="checkbox" [checked]="empty()" (change)="empty.set(!empty())" /> Sin
-          datos</label
-        >
-        <label class="field">
-          Alto: {{ height() }} px
-          <input
-            type="range"
-            min="160"
-            max="480"
-            step="20"
-            [value]="height()"
-            (input)="height.set(+text($event))"
-          />
-        </label>
-        <label class="field">
-          Radio de barra: {{ barRadius() }} px
-          <input
-            type="range"
-            min="0"
-            max="12"
-            step="1"
-            [value]="barRadius()"
-            (input)="barRadius.set(+text($event))"
-          />
-        </label>
-        <label class="field wide">
-          Etiqueta accesible (label)
-          <input type="text" [value]="label()" (input)="label.set(text($event))" />
-        </label>
-        <label class="field">
-          Locale
-          <select [value]="locale()" (change)="locale.set(text($event))">
-            <option value="es-VE">es-VE</option>
-            <option value="en-US">en-US</option>
-            <option value="pt-BR">pt-BR</option>
-            <option value="de-DE">de-DE</option>
-          </select>
-        </label>
-        <label class="field">
-          Formato
-          <select [value]="format()" (change)="format.set($any(text($event)))">
-            <option value="number">Número</option>
-            <option value="percent">Porcentaje</option>
-            <option value="currency">Moneda VES</option>
-            <option value="compact">Compacto</option>
-          </select>
-        </label>
-      </div>
-    </section>
-
-    <section>
-      <h2>Código</h2>
-      <pre><code>{{ code() }}</code></pre>
-      <button type="button" (click)="copyCode()">
-        {{ copied() === 'code' ? '¡Copiado!' : 'Copiar' }}
-      </button>
-    </section>
-  </aside>
-
-  <div class="stage">
-    <div class="card">
-      <kc-bar-chart
-        [categories]="categories()"
-        [series]="chartSeries()"
-        [orientation]="orientation()"
-        [stacked]="stacked()"
-        [showValues]="showValues()"
-        [showGrid]="showGrid()"
-        [showTable]="showTable()"
-        [showLegend]="legendValue()"
-        [height]="height()"
-        [barRadius]="barRadius()"
-        [loading]="loading()"
-        [label]="label()"
-        [locale]="locale()"
-        [valueFormat]="valueFormat()"
-        (barClick)="onBarClick($event)"
-      />
-    </div>
-    <p class="status" aria-live="polite">
-      @if (lastClick(); as click) {
-        Último clic: <strong>{{ click.category }}</strong> · {{ click.series }} = {{ click.value }}
-      } @else {
-        Edita los números del panel y el gráfico se actualiza al instante. Clic en una barra para
-        ver <code>barClick</code>.
-      }
-    </p>
-  </div>
-</div>
+@switch (active()) {
+  @case ('line') {
+    <app-line-sandbox />
+  }
+  @case ('ring') {
+    <app-ring-sandbox />
+  }
+  @case ('kpi') {
+    <app-kpi-sandbox />
+  }
+  @case ('progress') {
+    <app-progress-sandbox />
+  }
+  @case ('ranking') {
+    <app-ranking-sandbox />
+  }
+  @case ('table') {
+    <app-table-sandbox />
+  }
+  @case ('calendar') {
+    <app-calendar-sandbox />
+  }
+  @case ('map') {
+    <app-map-sandbox />
+  }
+  @default {
+    <app-bar-sandbox />
+  }
+}

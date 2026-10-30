@@ -1,0 +1,70 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <app-rows-editor [columns]="columns" [(rows)]="rows" [json]="items()" />
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="field">
+          Máximo (max)
+          <input
+            type="number"
+            step="any"
+            min="0"
+            placeholder="Automático"
+            [value]="max() ?? ''"
+            (input)="setOptionalNumber(max, $event)"
+          />
+        </label>
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showValues()"
+            (change)="showValues.set(!showValues())"
+          />
+          Valores</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="empty()" (change)="empty.set(!empty())" /> Sin
+          datos</label
+        >
+        <label class="field wide">
+          Etiqueta accesible (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <app-format-fields [(locale)]="locale" [(format)]="format" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <kc-progress-list
+        [items]="chartItems()"
+        [max]="max()"
+        [showValues]="showValues()"
+        [loading]="loading()"
+        [label]="label()"
+        [locale]="locale()"
+        [valueFormat]="valueFormat()"
+        (itemClick)="onItemClick($event)"
+      />
+    </div>
+    <p class="status" aria-live="polite" appStatus [event]="lastEvent()">
+      Edita las filas del panel y la lista se actualiza al instante. Clic en una fila para ver
+      <code>itemClick</code>.
+    </p>
+  </div>
+</div>

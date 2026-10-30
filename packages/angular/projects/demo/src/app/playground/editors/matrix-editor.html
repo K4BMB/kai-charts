@@ -1,0 +1,74 @@
+<label class="field">
+  Categorías (una por línea)
+  <textarea
+    rows="6"
+    [value]="categoriesText()"
+    (input)="categoriesText.set(text($event))"
+  ></textarea>
+</label>
+
+<div class="series-list">
+  @for (s of series(); track $index; let i = $index) {
+    <div class="series-row">
+      <input
+        type="text"
+        [value]="s.name"
+        (input)="onSeriesName(i, $event)"
+        aria-label="Nombre de la serie"
+        placeholder="Nombre"
+      />
+      <input
+        type="color"
+        [value]="s.color || defaultColor(i)"
+        (input)="onSeriesColor(i, $event)"
+        aria-label="Color de la serie"
+      />
+      <button
+        type="button"
+        class="secondary"
+        (click)="removeSeries(i)"
+        [disabled]="series().length === 1"
+      >
+        Quitar
+      </button>
+    </div>
+  }
+  <button type="button" class="secondary" (click)="addSeries()">+ Serie</button>
+</div>
+
+<div class="values-wrap">
+  <table class="values">
+    <thead>
+      <tr>
+        <th>Categoría</th>
+        @for (s of series(); track $index) {
+          <th>{{ s.name || 'Serie' }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (c of categories(); track $index; let ci = $index) {
+        <tr>
+          <th>{{ c }}</th>
+          @for (s of series(); track $index; let si = $index) {
+            <td>
+              <input
+                type="number"
+                [value]="s.data[ci] ?? ''"
+                (input)="onCell(si, ci, $event)"
+                [attr.aria-label]="c + ' · ' + s.name"
+              />
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="actions">
+  <button type="button" (click)="randomize()">Aleatorio</button>
+  <button type="button" (click)="copyJson()">
+    {{ copied() ? '¡Copiado!' : 'Copiar JSON' }}
+  </button>
+</div>

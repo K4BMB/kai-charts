@@ -1,0 +1,128 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <app-rows-editor [columns]="columns" [(rows)]="rows" [json]="items()" />
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="field">
+          Tamaño: {{ size() }} px
+          <input
+            type="range"
+            min="120"
+            max="320"
+            step="10"
+            [value]="size()"
+            (input)="size.set(+text($event))"
+          />
+        </label>
+        <label class="field">
+          Grosor: {{ thickness() === 0 ? 'auto' : thickness() + ' px' }}
+          <input
+            type="range"
+            min="0"
+            max="24"
+            step="1"
+            [value]="thickness()"
+            (input)="thickness.set(+text($event))"
+          />
+        </label>
+        <label class="field">
+          Separación: {{ gap() }} px
+          <input
+            type="range"
+            min="0"
+            max="12"
+            step="1"
+            [value]="gap()"
+            (input)="gap.set(+text($event))"
+          />
+        </label>
+        <label class="field">
+          Texto central (centerLabel)
+          <input type="text" [value]="centerLabel()" (input)="centerLabel.set(text($event))" />
+        </label>
+        <label class="field">
+          Valor central (centerValue)
+          <input
+            type="number"
+            step="any"
+            [value]="centerValue() ?? ''"
+            (input)="setOptionalNumber(centerValue, $event)"
+          />
+        </label>
+        <label class="field">
+          Tendencia central (centerTrend)
+          <input
+            type="number"
+            step="any"
+            [value]="centerTrend() ?? ''"
+            (input)="setOptionalNumber(centerTrend, $event)"
+          />
+        </label>
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="invertTrend()"
+            (change)="invertTrend.set(!invertTrend())"
+          />
+          Invertir tendencia</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showLegend()"
+            (change)="showLegend.set(!showLegend())"
+          />
+          Leyenda</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="empty()" (change)="empty.set(!empty())" /> Sin
+          datos</label
+        >
+        <label class="field wide">
+          Etiqueta accesible (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <app-format-fields [(locale)]="locale" [(format)]="format" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <kc-ring-chart
+        [items]="chartItems()"
+        [size]="size()"
+        [thickness]="thickness() || undefined"
+        [gap]="gap()"
+        [centerLabel]="centerLabel()"
+        [centerValue]="centerValue()"
+        [centerTrend]="centerTrend()"
+        [invertTrend]="invertTrend()"
+        [showLegend]="showLegend()"
+        [loading]="loading()"
+        [label]="label()"
+        [locale]="locale()"
+        [valueFormat]="valueFormat()"
+        (ringClick)="onRingClick($event)"
+      />
+    </div>
+    <p class="status" aria-live="polite" appStatus [event]="lastEvent()">
+      Edita los anillos del panel y el gráfico se actualiza al instante. Clic en un anillo para ver
+      <code>ringClick</code>.
+    </p>
+  </div>
+</div>

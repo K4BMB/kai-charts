@@ -133,11 +133,28 @@ describe('Showcase', () => {
 });
 
 describe('Playground', () => {
-  it('re-renders the chart when a value is edited', async () => {
+  const SANDBOXES: Record<string, string> = {
+    bar: 'kc-bar-chart',
+    line: 'kc-line-chart',
+    ring: 'kc-ring-chart',
+    kpi: 'kc-kpi-card',
+    progress: 'kc-progress-list',
+    ranking: 'kc-ranking-list',
+    table: 'kc-ranking-table',
+    calendar: 'kc-month-calendar',
+    map: 'kc-venezuela-map',
+  };
+
+  async function create(chart: string) {
     await TestBed.configureTestingModule({ imports: [Playground] }).compileComponents();
     const fixture = TestBed.createComponent(Playground);
+    fixture.componentRef.setInput('chart', chart);
     await fixture.whenStable();
-    const compiled = fixture.nativeElement as HTMLElement;
+    return { fixture, compiled: fixture.nativeElement as HTMLElement };
+  }
+
+  it('re-renders the chart when a value is edited', async () => {
+    const { fixture, compiled } = await create('bar');
     const firstBar = () => compiled.querySelector<SVGRectElement>('rect.kc-bar')!;
     const before = firstBar().getAttribute('height');
 
@@ -148,5 +165,68 @@ describe('Playground', () => {
 
     expect(firstBar().getAttribute('height')).not.toBe(before);
     expect(compiled.querySelector('code')?.textContent).toContain('<kc-bar-chart');
+  });
+
+  it('shows the nine chips and marks the active one', async () => {
+    const { compiled } = await create('ring');
+    const chips = Array.from(compiled.querySelectorAll<HTMLAnchorElement>('.chart-picker .chip'));
+    expect(chips).toHaveLength(9);
+    expect(chips.map((c) => c.textContent?.trim())).toEqual([
+      'Barras',
+      'Líneas',
+      'Anillos',
+      'KPI',
+      'Progreso',
+      'Ranking',
+      'Tabla',
+      'Calendario',
+      'Mapa',
+    ]);
+    expect(chips.map((c) => c.getAttribute('href'))).toContain('#/playground/map');
+    const active = compiled.querySelectorAll('.chip--active');
+    expect(active).toHaveLength(1);
+    expect(active[0].textContent?.trim()).toBe('Anillos');
+    expect(active[0].getAttribute('aria-current')).toBe('page');
+    expect(compiled.querySelectorAll('.chip[aria-current="page"]')).toHaveLength(1);
+  });
+
+  it.each(Object.entries(SANDBOXES))('renders the %s sandbox', async (chart, selector) => {
+    const { compiled } = await create(chart);
+    expect(compiled.querySelector(`.stage ${selector}`)).not.toBeNull();
+    expect(compiled.querySelectorAll('.stage .status')).toHaveLength(1);
+    expect(compiled.querySelector('.panel pre code')?.textContent).toContain(`<${selector}`);
+  });
+
+  it('falls back to the bar sandbox for unknown ids', async () => {
+    const { compiled } = await create('nope');
+    expect(compiled.querySelector('.stage kc-bar-chart')).not.toBeNull();
+    expect(compiled.querySelector('.chip--active')?.textContent?.trim()).toBe('Barras');
+  });
+
+  it('re-renders the ranking when a row value is edited', async () => {
+    const { fixture, compiled } = await create('ranking');
+    const firstValue = () =>
+      compiled.querySelector('.kc-ranking__value')?.textContent?.trim() ?? '';
+    const before = firstValue();
+    expect(before).toBe('5.260');
+
+    const cell = compiled.querySelector<HTMLInputElement>('app-rows-editor input[type="number"]')!;
+    cell.value = '0';
+    cell.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    expect(firstValue()).not.toBe(before);
+    expect(firstValue()).toBe('4.940');
+    expect(compiled.querySelector('.panel pre code')?.textContent).toContain('value: 0');
+  });
+
+  it('keeps the table sort controlled from the sandbox and reports the event', async () => {
+    const { fixture, compiled } = await create('table');
+    const status = () => compiled.querySelector('.status')?.textContent?.replace(/\s+/g, ' ');
+    expect(status()).toContain('rowClick');
+    compiled.querySelector<HTMLButtonElement>('kc-ranking-table th button')!.click();
+    await fixture.whenStable();
+    expect(compiled.querySelector('kc-ranking-table th[aria-sort="ascending"]')).not.toBeNull();
+    expect(status()).toContain('Último evento: sortChange · procedures · asc');
   });
 });

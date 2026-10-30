@@ -1,0 +1,145 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <h3>Estados</h3>
+      <app-rows-editor
+        [columns]="stateColumns"
+        [(rows)]="states"
+        [json]="data()"
+        [newRow]="newState"
+        addLabel="+ Estado"
+      />
+      <h3>Marcadores</h3>
+      <app-rows-editor
+        [columns]="markerColumns"
+        [(rows)]="markers"
+        [json]="mapMarkers()"
+        [newRow]="newMarker"
+        addLabel="+ Marcador"
+      />
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="field">
+          Color (color)
+          <span class="color-row">
+            <input
+              type="color"
+              [value]="color() || defaultSwatch"
+              (input)="color.set(text($event))"
+              aria-label="Color de las regiones"
+            />
+            <button type="button" class="secondary" (click)="color.set('')" [disabled]="!color()">
+              Por defecto
+            </button>
+          </span>
+        </label>
+        <label class="field">
+          Resaltar (highlight, ids o nombres)
+          <input
+            type="text"
+            placeholder="VE-V, Miranda"
+            [value]="highlight()"
+            (input)="highlight.set(text($event))"
+          />
+        </label>
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showLegend()"
+            (change)="showLegend.set(!showLegend())"
+          />
+          Leyenda</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showLabels()"
+            (change)="showLabels.set(!showLabels())"
+          />
+          Nombres</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showClaimZone()"
+            (change)="showClaimZone.set(!showClaimZone())"
+          />
+          Zona en Reclamación</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showCapitals()"
+            (change)="showCapitals.set(!showCapitals())"
+          />
+          Capitales</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="showTable()" (change)="showTable.set(!showTable())" />
+          Tabla espejo</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="field">
+          Opacidad mínima: {{ minOpacity() }}
+          <input
+            type="range"
+            min="0"
+            max="0.6"
+            step="0.02"
+            [value]="minOpacity()"
+            (input)="minOpacity.set(+text($event))"
+          />
+        </label>
+        <label class="field">
+          Cabecera del valor (valueHeader)
+          <input type="text" [value]="valueHeader()" (input)="valueHeader.set(text($event))" />
+        </label>
+        <label class="field wide">
+          Etiqueta accesible (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <app-format-fields [(locale)]="locale" [(format)]="format" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <kc-venezuela-map
+        [data]="data()"
+        [markers]="mapMarkers()"
+        [color]="color() || defaultColor"
+        [highlight]="highlightIds()"
+        [showLegend]="showLegend()"
+        [showLabels]="showLabels()"
+        [showClaimZone]="showClaimZone()"
+        [showCapitals]="showCapitals()"
+        [minOpacity]="minOpacity()"
+        [valueHeader]="valueHeader()"
+        [showTable]="showTable()"
+        [loading]="loading()"
+        [label]="label()"
+        [locale]="locale()"
+        [valueFormat]="valueFormat()"
+        (regionClick)="onRegionClick($event)"
+        (markerClick)="onMarkerClick($event)"
+      />
+    </div>
+    <p class="status" aria-live="polite" appStatus [event]="lastEvent()">
+      Edita los estados y marcadores del panel y el mapa se actualiza al instante. Clic en un estado
+      para ver <code>regionClick</code> o en una unidad móvil para ver <code>markerClick</code>.
+    </p>
+  </div>
+</div>

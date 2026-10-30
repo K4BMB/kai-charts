@@ -1,0 +1,96 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <app-rows-editor [columns]="columns" [(rows)]="rows" [json]="tableRows()" />
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="field">
+          Ordenar por (sortBy)
+          <select [value]="sortBy()" (change)="sortBy.set($any(text($event)))">
+            <option value="none">Sin ordenar</option>
+            <option value="procedures">Trámites</option>
+            <option value="avg">Tiempo medio</option>
+            <option value="days">Jornadas</option>
+          </select>
+        </label>
+        <label class="field">
+          Dirección (sortDirection)
+          <select [value]="sortDirection()" (change)="sortDirection.set($any(text($event)))">
+            <option value="desc">Descendente</option>
+            <option value="asc">Ascendente</option>
+          </select>
+        </label>
+        <label class="field">
+          Top N (limit)
+          <input
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Todas"
+            [value]="limit() ?? ''"
+            (input)="setOptionalNumber(limit, $event)"
+          />
+        </label>
+        <label class="check"
+          ><input type="checkbox" [checked]="showRank()" (change)="showRank.set(!showRank())" />
+          Posición</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="empty()" (change)="empty.set(!empty())" /> Sin
+          datos</label
+        >
+        <label class="field">
+          Cabecera (entityHeader)
+          <input type="text" [value]="entityHeader()" (input)="entityHeader.set(text($event))" />
+        </label>
+        <label class="field">
+          Título visible (caption)
+          <input type="text" [value]="caption()" (input)="caption.set(text($event))" />
+        </label>
+        <label class="field wide">
+          Etiqueta accesible (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <app-format-fields [(locale)]="locale" [(format)]="format" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <kc-ranking-table
+        [rows]="chartRows()"
+        [columns]="tableColumns"
+        [sortBy]="sortKey()"
+        [sortDirection]="sortDirection()"
+        [limit]="limit()"
+        [showRank]="showRank()"
+        [entityHeader]="entityHeader()"
+        [caption]="caption()"
+        [loading]="loading()"
+        [label]="label()"
+        [locale]="locale()"
+        [valueFormat]="valueFormat()"
+        (rowClick)="onRowClick($event)"
+        (sortChange)="onSortChange($event)"
+      />
+    </div>
+    <p class="status" aria-live="polite" appStatus [event]="lastEvent()">
+      Edita las filas del panel y la tabla se actualiza al instante. Clic en una fila para ver
+      <code>rowClick</code>; clic en una cabecera numérica para ordenar (<code>sortChange</code>).
+    </p>
+  </div>
+</div>

@@ -1,0 +1,76 @@
+<div class="values-wrap">
+  <table class="values rows">
+    <thead>
+      <tr>
+        @for (col of columns(); track col.key) {
+          <th>{{ col.header }}</th>
+        }
+        <th aria-label="Acciones"></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of rows(); track $index; let i = $index) {
+        <tr>
+          @for (col of columns(); track col.key) {
+            <td>
+              @switch (col.type) {
+                @case ('number') {
+                  <input
+                    type="number"
+                    [value]="row[col.key] ?? ''"
+                    [attr.min]="col.min ?? null"
+                    [attr.max]="col.max ?? null"
+                    [attr.step]="col.step ?? 'any'"
+                    [placeholder]="col.placeholder ?? ''"
+                    (input)="onCell(i, col, $event)"
+                    [attr.aria-label]="col.header + ' · fila ' + (i + 1)"
+                  />
+                }
+                @case ('color') {
+                  <input
+                    type="color"
+                    [value]="color(row, col, i)"
+                    (input)="onCell(i, col, $event)"
+                    [attr.aria-label]="col.header + ' · fila ' + (i + 1)"
+                  />
+                }
+                @case ('select') {
+                  <select
+                    (change)="onCell(i, col, $event)"
+                    [attr.aria-label]="col.header + ' · fila ' + (i + 1)"
+                  >
+                    @for (opt of col.options ?? []; track opt.value) {
+                      <option [value]="opt.value" [selected]="opt.value === text(row, col)">
+                        {{ opt.label }}
+                      </option>
+                    }
+                  </select>
+                }
+                @default {
+                  <input
+                    type="text"
+                    [value]="text(row, col)"
+                    [placeholder]="col.placeholder ?? ''"
+                    (input)="onCell(i, col, $event)"
+                    [attr.aria-label]="col.header + ' · fila ' + (i + 1)"
+                  />
+                }
+              }
+            </td>
+          }
+          <td>
+            <button type="button" class="secondary" (click)="remove(i)">Quitar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="actions">
+  <button type="button" class="secondary" (click)="add()">{{ addLabel() }}</button>
+  <button type="button" (click)="randomize()">Aleatorio</button>
+  <button type="button" (click)="copyJson()">
+    {{ copied() ? '¡Copiado!' : 'Copiar JSON' }}
+  </button>
+</div>

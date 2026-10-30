@@ -1,0 +1,123 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <app-rows-editor
+        [columns]="columns"
+        [(rows)]="rows"
+        [json]="events()"
+        [newRow]="newRow"
+        addLabel="+ Evento"
+      />
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="field">
+          Año (year)
+          <input
+            type="number"
+            min="1970"
+            max="2100"
+            step="1"
+            [value]="year()"
+            (input)="setNumber(year, $event)"
+          />
+        </label>
+        <label class="field">
+          Mes (month, 1–12)
+          <input
+            type="number"
+            min="1"
+            max="12"
+            step="1"
+            [value]="month()"
+            (input)="setNumber(month, $event)"
+          />
+        </label>
+        <label class="field">
+          Seleccionado (selected)
+          <input
+            type="text"
+            placeholder="AAAA-MM-DD"
+            [value]="selected()"
+            (input)="selected.set(text($event))"
+          />
+        </label>
+        <label class="field">
+          Hoy (today)
+          <input
+            type="text"
+            placeholder="AAAA-MM-DD"
+            [value]="today()"
+            (input)="today.set(text($event))"
+          />
+        </label>
+        <label class="field">
+          Primer día (weekStartsOn)
+          <select [value]="weekStartsOn()" (change)="weekStartsOn.set(+text($event))">
+            <option value="1">Lunes</option>
+            <option value="0">Domingo</option>
+          </select>
+        </label>
+        <label class="field">
+          Pie (footer)
+          <input type="text" [value]="footer()" (input)="footer.set(text($event))" />
+        </label>
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showLegend()"
+            (change)="showLegend.set(!showLegend())"
+          />
+          Leyenda</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="showNav()" (change)="showNav.set(!showNav())" />
+          Navegación</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="field wide">
+          Etiqueta accesible (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <app-format-fields [(locale)]="locale" [showFormat]="false" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <kc-month-calendar
+        [year]="year()"
+        [month]="month()"
+        [events]="events()"
+        [kinds]="kinds"
+        [selected]="selected() || undefined"
+        [today]="today() || undefined"
+        [weekStartsOn]="weekStartsOn()"
+        [showLegend]="showLegend()"
+        [showNav]="showNav()"
+        [footer]="footer()"
+        [loading]="loading()"
+        [label]="label()"
+        [locale]="locale()"
+        (dayClick)="onDayClick($event)"
+        (monthChange)="onMonthChange($event)"
+      />
+    </div>
+    <p class="status" aria-live="polite" appStatus [event]="lastEvent()">
+      Edita los eventos del panel y el calendario se actualiza al instante. Clic en un día para ver
+      <code>dayClick</code>; las flechas cambian el mes (<code>monthChange</code>).
+    </p>
+  </div>
+</div>
