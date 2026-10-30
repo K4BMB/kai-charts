@@ -12,6 +12,7 @@ import {
 import { TrendView, ValueFormat, createValueFormatter, describeTrend } from 'kai-charts-core';
 import { optionalNumberAttribute } from '../core/attributes';
 import { KC_CONFIG } from '../core/config';
+import { KcTrendChip } from '../core/trend-chip';
 
 /**
  * Marks the element projected as the icon of a `kc-kpi-card`. It carries no logic: the card
@@ -39,10 +40,10 @@ export class KcIcon {}
  */
 @Component({
   selector: 'kc-kpi-card',
+  imports: [KcTrendChip],
   templateUrl: './kpi-card.html',
   styles: `
     @import 'kai-charts-core/styles/kpi-card.css';
-    @import 'kai-charts-core/styles/trend.css';
   `,
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,

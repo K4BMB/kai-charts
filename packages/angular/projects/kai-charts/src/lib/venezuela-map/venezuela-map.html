@@ -1,0 +1,108 @@
+@if (loading()) {
+  <kc-chart-state kind="loading" [height]="skeletonHeight()" [text]="loadingText" />
+} @else {
+  @let m = model();
+  <div class="kc-plot">
+    <svg
+      class="kc-svg kc-map__svg"
+      [attr.viewBox]="viewBox"
+      role="group"
+      [attr.aria-label]="label() || null"
+      (mouseleave)="hideTooltip()"
+    >
+      <defs>
+        <pattern
+          [attr.id]="hatchId"
+          width="6"
+          height="6"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <rect class="kc-map__hatch-bg" width="6" height="6" />
+          <line class="kc-map__hatch-line" x1="0" y1="0" x2="0" y2="6" />
+        </pattern>
+      </defs>
+      @if (showClaimZone()) {
+        <path
+          class="kc-map__claim"
+          [attr.d]="claimZone.path"
+          [attr.fill]="'url(#' + hatchId + ')'"
+        />
+      }
+      @for (group of regionGroups(); track $index) {
+        @for (r of group; track r.id) {
+          <path
+            class="kc-map__region kc-map__region--clickable"
+            [class.kc-map__region--empty]="!r.hasData"
+            [class.kc-map__region--highlighted]="r.highlighted"
+            [attr.d]="r.path"
+            [style.fill]="r.hasData ? color() : null"
+            [attr.fill-opacity]="r.hasData ? r.opacity : null"
+            role="img"
+            tabindex="0"
+            [attr.aria-label]="r.ariaLabel"
+            [attr.data-id]="r.id"
+            (mouseenter)="showRegionTooltip(r)"
+            (focus)="showRegionTooltip(r)"
+            (blur)="hideTooltip()"
+            (click)="activateRegion(r)"
+            (keydown.enter)="activateRegion(r, $event)"
+            (keydown.space)="activateRegion(r, $event)"
+          />
+        }
+      }
+      @if (showLabels()) {
+        @for (r of m.regions; track r.id) {
+          <text class="kc-map__label" [attr.x]="r.labelX" [attr.y]="r.labelY">{{ r.short }}</text>
+        }
+        @if (showClaimZone()) {
+          <text class="kc-map__claim-label" [attr.x]="claimZone.labelX" [attr.y]="claimZone.labelY">
+            {{ claimZoneLabel() }}
+          </text>
+        }
+      }
+      @for (marker of m.markers; track marker.id; let i = $index) {
+        <g
+          class="kc-map__marker kc-map__marker--clickable"
+          [attr.transform]="'translate(' + marker.x + ' ' + marker.y + ')'"
+          [style.--kc-marker-color]="marker.color"
+          role="img"
+          tabindex="0"
+          [attr.aria-label]="marker.ariaLabel"
+          (mouseenter)="showMarkerTooltip(marker)"
+          (focus)="showMarkerTooltip(marker)"
+          (blur)="hideTooltip()"
+          (click)="activateMarker(i)"
+          (keydown.enter)="activateMarker(i, $event)"
+          (keydown.space)="activateMarker(i, $event)"
+        >
+          <circle class="kc-map__marker-halo" r="9" />
+          <circle class="kc-map__marker-dot" r="4.5" />
+        </g>
+      }
+    </svg>
+    <kc-tooltip [state]="tooltip()" />
+  </div>
+  @if (showLegend() && m.legend.visible) {
+    <div class="kc-map__legend">
+      <span class="kc-map__legend-min">{{ m.legend.minText }}</span>
+      <span class="kc-map__legend-bar"></span>
+      <span class="kc-map__legend-max">{{ m.legend.maxText }}</span>
+      <span class="kc-map__legend-empty"
+        ><i class="kc-map__legend-swatch"></i>{{ emptyLabel() }} · {{ m.filled }}/{{
+          m.total
+        }}</span
+      >
+    </div>
+  }
+  @if (showTable()) {
+    <kc-chart-table
+      [categories]="tableCategories()"
+      [series]="tableSeries()"
+      [format]="formatter()"
+      [caption]="label()"
+      [categoryHeader]="tableHeader"
+      [emptyText]="emptyLabel()"
+    />
+  }
+}

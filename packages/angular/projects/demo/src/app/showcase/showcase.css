@@ -55,6 +55,47 @@
   font-size: 0.85rem;
 }
 
+/* Map card: map on the left (1.4fr), ranking on the right (1fr), stacked on narrow screens. */
+.map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.map-actions button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.map-actions button:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+}
+
+.map-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.map-body {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .map-body {
+    grid-template-columns: 1fr;
+  }
+}
+
 .status {
   margin-top: 24px;
   color: var(--muted);

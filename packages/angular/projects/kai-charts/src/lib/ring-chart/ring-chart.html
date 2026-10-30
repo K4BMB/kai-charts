@@ -1,0 +1,72 @@
+@if (loading()) {
+  <kc-chart-state kind="loading" [height]="size()" [text]="loadingText" />
+} @else if (isEmpty()) {
+  <kc-chart-state kind="empty" [height]="size()" [text]="emptyLabel()" />
+} @else {
+  @let l = layout();
+  <div class="kc-ring__figure" [style.max-width.px]="size()">
+    <svg
+      class="kc-svg kc-ring__svg"
+      [attr.viewBox]="viewBox()"
+      role="group"
+      [attr.aria-label]="label() || null"
+      (mouseleave)="hideTooltip()"
+    >
+      @for (ring of l.rings; track ring.key) {
+        <circle
+          class="kc-ring__track"
+          [attr.cx]="l.cx"
+          [attr.cy]="l.cy"
+          [attr.r]="ring.r"
+          [attr.stroke-width]="l.thickness"
+          [style.stroke]="ring.color"
+        />
+        <circle
+          class="kc-ring__arc"
+          [class.kc-ring__arc--empty]="ring.dash === 0"
+          [attr.cx]="l.cx"
+          [attr.cy]="l.cy"
+          [attr.r]="ring.r"
+          [attr.stroke-width]="l.thickness"
+          [style.stroke]="ring.color"
+          [attr.stroke-dasharray]="ring.dash + ' ' + ring.circumference"
+          [attr.transform]="'rotate(-90 ' + l.cx + ' ' + l.cy + ')'"
+          role="img"
+          tabindex="0"
+          [attr.aria-label]="ring.ariaLabel"
+          (mouseenter)="showTooltip(ring)"
+          (focus)="showTooltip(ring)"
+          (blur)="hideTooltip()"
+          (click)="activate(ring)"
+          (keydown.enter)="activate(ring, $event)"
+          (keydown.space)="activate(ring, $event)"
+        />
+      }
+    </svg>
+    @if (hasCenter()) {
+      <div class="kc-ring__center">
+        @if (centerLabel(); as text) {
+          <div class="kc-ring__center-label">{{ text }}</div>
+        }
+        @if (centerValueText(); as text) {
+          <div class="kc-ring__center-value">{{ text }}</div>
+        }
+        @if (centerTrendView(); as t) {
+          <kc-trend-chip [trend]="t" />
+        }
+      </div>
+    }
+    <kc-tooltip [state]="tooltip()" />
+  </div>
+  @if (showLegend()) {
+    <ul class="kc-ring__legend">
+      @for (ring of l.rings; track ring.key) {
+        <li class="kc-ring__legend-item">
+          <i class="kc-ring__legend-swatch" [style.background]="ring.color"></i
+          ><span class="kc-ring__legend-name">{{ ring.name }}</span
+          ><span class="kc-ring__legend-value">{{ ring.valueText }}</span>
+        </li>
+      }
+    </ul>
+  }
+}

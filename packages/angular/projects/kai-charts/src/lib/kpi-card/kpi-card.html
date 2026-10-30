@@ -14,21 +14,7 @@
     @if (hasMeta()) {
       <div class="kc-kpi__meta">
         @if (trendView(); as t) {
-          <span [class]="'kc-trend kc-trend--' + t.direction + ' kc-tone--' + t.tone">
-            <svg
-              class="kc-trend__arrow"
-              viewBox="0 0 12 12"
-              aria-hidden="true"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M3 9 9 3M4.5 3H9v4.5" />
-            </svg>
-            <span>{{ t.text }}</span>
-          </span>
+          <kc-trend-chip [trend]="t" />
         }
         @if (subtext(); as text) {
           <span class="kc-kpi__subtext">{{ text }}</span>

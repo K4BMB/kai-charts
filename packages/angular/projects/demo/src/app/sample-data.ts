@@ -1,4 +1,4 @@
-import { ChartSeries, ProgressItem, RankingItem } from 'kai-charts';
+import { ChartSeries, MapDatum, MapMarker, ProgressItem, RankingItem, RingItem } from 'kai-charts';
 
 export interface BarSample {
   categories: string[];
@@ -74,6 +74,51 @@ export const CITIZENS_BY_STATE: RankingItem[] = [
   { id: 'VE-K', label: 'Lara', value: 3390 },
   { id: 'VE-B', label: 'Anzoátegui', value: 2980 },
   { id: 'VE-F', label: 'Bolívar', value: 2340 },
+];
+
+/** Ciudadanos atendidos por estado para el mapa (12 de 25 regiones con datos). */
+export const CITIZENS_MAP: MapDatum[] = [
+  { id: 'VE-V', value: 5260 },
+  { id: 'VE-M', value: 4940 },
+  { id: 'VE-A', value: 3830 },
+  { id: 'VE-G', value: 3540 },
+  { id: 'VE-K', value: 3390 },
+  { id: 'VE-B', value: 2980 },
+  { id: 'VE-F', value: 2340 },
+  { id: 'VE-D', value: 2210 },
+  { id: 'VE-S', value: 1870 },
+  { id: 'VE-L', value: 1420 },
+  { id: 'VE-I', value: 1310 },
+  { id: 'VE-N', value: 1190 },
+];
+
+/** Unidades móviles desplegadas (marcadores del mapa). */
+export const MOBILE_UNITS: MapMarker[] = [
+  { id: 'UM-ZUL-02', lat: 10.6427, lng: -71.6125, label: 'UM-ZUL-02 · Maracaibo', value: 14 },
+  { id: 'UM-ZUL-05', lat: 10.3981, lng: -71.4451, label: 'UM-ZUL-05 · Cabimas', value: 9 },
+  { id: 'UM-LAR-04', lat: 10.0678, lng: -69.3467, label: 'UM-LAR-04 · Barquisimeto', value: 11 },
+  { id: 'UM-CAR-04', lat: 10.162, lng: -68.0077, label: 'UM-CAR-04 · Valencia', value: 11 },
+  { id: 'UM-ARA-01', lat: 10.2469, lng: -67.5958, label: 'UM-ARA-01 · Maracay', value: 8 },
+  { id: 'UM-DC-04', lat: 10.4806, lng: -66.9036, label: 'UM-DC-04 · Caracas', value: 10 },
+  { id: 'UM-MIR-04', lat: 10.2442, lng: -66.5906, label: 'UM-MIR-04 · Los Teques', value: 13 },
+  { id: 'UM-BOL-01', lat: 8.2906, lng: -62.7205, label: 'UM-BOL-01 · Puerto Ordaz', value: 7 },
+  { id: 'UM-TAC-01', lat: 7.7669, lng: -72.225, label: 'UM-TAC-01 · San Cristóbal', value: 6 },
+];
+
+/** Ciudadanos atendidos por jornada: dos series mensuales para el gráfico de líneas. */
+export const LINE_SAMPLE: BarSample = {
+  categories: ['May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct'],
+  series: [
+    { name: 'Jornadas ejecutadas', data: [20, 22, 26, 24, 28, 31] },
+    { name: 'Saldo fiscal', data: [48, 45, 43, 40, 38, 36] },
+  ],
+};
+
+/** Atención nacional: anillos concéntricos (ratios). */
+export const RINGS: RingItem[] = [
+  { name: 'Saldo', value: 0.917 },
+  { name: 'Emitidas', value: 0.942 },
+  { name: 'Recibidas', value: 0.871 },
 ];
 
 /** Trámites por tipo (catálogo `journey_procedures`). */

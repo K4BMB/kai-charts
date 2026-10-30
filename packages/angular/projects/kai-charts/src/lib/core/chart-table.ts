@@ -59,15 +59,18 @@ export class KcChartTable {
   readonly format = input.required<ValueFormatter>();
   readonly caption = input('');
   readonly categoryHeader = input('');
+  /** Text for `null`/`undefined` cells. */
+  readonly emptyText = input('—');
 
   protected readonly rows = computed(() => {
     const format = this.format();
     const series = this.series();
+    const empty = this.emptyText();
     return this.categories().map((category, i) => ({
       category,
       cells: series.map((s) => {
         const value = s.data[i];
-        return value == null ? '—' : format(value);
+        return value == null ? empty : format(value);
       }),
     }));
   });

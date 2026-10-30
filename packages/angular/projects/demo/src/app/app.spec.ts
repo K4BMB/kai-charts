@@ -23,7 +23,7 @@ describe('App', () => {
 });
 
 describe('Showcase', () => {
-  it('renders every showcase chart inside the three blocks', async () => {
+  it('renders every showcase chart inside the four blocks', async () => {
     await TestBed.configureTestingModule({ imports: [Showcase] }).compileComponents();
     const fixture = TestBed.createComponent(Showcase);
     await fixture.whenStable();
@@ -31,19 +31,31 @@ describe('Showcase', () => {
     const titles = Array.from(compiled.querySelectorAll('.block__title')).map((t) =>
       t.textContent?.trim(),
     );
-    expect(titles).toEqual(['Indicadores', 'Barras', 'Listas']);
+    expect(titles).toEqual(['Indicadores', 'Mapa', 'Barras y líneas', 'Listas y anillos']);
     expect(compiled.querySelectorAll('kc-kpi-card')).toHaveLength(6);
     expect(compiled.querySelectorAll('kc-kpi-card .kc-kpi__icon svg')).toHaveLength(6);
-    expect(compiled.querySelectorAll('.kc-trend')).toHaveLength(2);
+    expect(compiled.querySelectorAll('kc-kpi-card .kc-trend')).toHaveLength(2);
+    expect(compiled.querySelectorAll('kc-venezuela-map')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region')).toHaveLength(25);
+    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__marker')).toHaveLength(9);
+    expect(compiled.querySelector('.kc-map__region--highlighted')?.getAttribute('data-id')).toBe(
+      'VE-V',
+    );
     expect(compiled.querySelectorAll('kc-bar-chart')).toHaveLength(6);
     expect(compiled.querySelectorAll('rect.kc-bar').length).toBeGreaterThan(50);
+    expect(compiled.querySelectorAll('kc-line-chart')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-line-chart path.kc-line')).toHaveLength(2);
+    expect(compiled.querySelectorAll('kc-line-chart path.kc-area')).toHaveLength(2);
     expect(compiled.querySelectorAll('kc-progress-list')).toHaveLength(1);
     expect(compiled.querySelectorAll('li.kc-progress__item')).toHaveLength(5);
-    expect(compiled.querySelectorAll('kc-ranking-list')).toHaveLength(1);
-    expect(compiled.querySelectorAll('li.kc-ranking__item')).toHaveLength(5);
+    expect(compiled.querySelectorAll('kc-ranking-list')).toHaveLength(2);
+    expect(compiled.querySelectorAll('li.kc-ranking__item')).toHaveLength(10);
+    expect(compiled.querySelectorAll('kc-ring-chart')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ring-chart circle.kc-ring__arc')).toHaveLength(3);
+    expect(compiled.querySelector('kc-ring-chart .kc-trend')?.textContent?.trim()).toBe('+3,8%');
   });
 
-  it('applies the loading and empty switches to KPIs and lists too', async () => {
+  it('applies the loading and empty switches to every chart', async () => {
     await TestBed.configureTestingModule({ imports: [Showcase] }).compileComponents();
     const fixture = TestBed.createComponent(Showcase);
     await fixture.whenStable();
@@ -55,13 +67,21 @@ describe('Showcase', () => {
     empty.click();
     await fixture.whenStable();
     expect(compiled.querySelectorAll('kc-progress-list .kc-state--empty')).toHaveLength(1);
-    expect(compiled.querySelectorAll('kc-ranking-list .kc-state--empty')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ranking-list .kc-state--empty')).toHaveLength(2);
+    expect(compiled.querySelectorAll('kc-line-chart .kc-state--empty')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ring-chart .kc-state--empty')).toHaveLength(1);
+    // The map has no empty state: it keeps drawing the grey regions without a legend.
+    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region--empty')).toHaveLength(25);
+    expect(compiled.querySelector('kc-venezuela-map .kc-map__legend')).toBeNull();
 
     loading.click();
     await fixture.whenStable();
     expect(compiled.querySelectorAll('kc-kpi-card[aria-busy="true"]')).toHaveLength(6);
     expect(compiled.querySelectorAll('kc-progress-list [aria-busy="true"]')).toHaveLength(1);
-    expect(compiled.querySelectorAll('kc-ranking-list [aria-busy="true"]')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ranking-list [aria-busy="true"]')).toHaveLength(2);
+    expect(compiled.querySelectorAll('kc-venezuela-map [aria-busy="true"]')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-line-chart [aria-busy="true"]')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ring-chart [aria-busy="true"]')).toHaveLength(1);
   });
 });
 

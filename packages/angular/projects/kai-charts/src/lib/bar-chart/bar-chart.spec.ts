@@ -85,6 +85,17 @@ describe('KcBarChart', () => {
     expect(element.querySelectorAll('text.kc-tick')).toHaveLength(2 + CATEGORIES.length);
   });
 
+  it('drops the value axis on demand and moves the bars further left', () => {
+    fixture.detectChanges();
+    const withAxis = num(bars()[0], 'x');
+    expect(element.querySelectorAll('text.kc-tick').length).toBeGreaterThan(CATEGORIES.length);
+
+    fixture.componentRef.setInput('showValueAxis', false);
+    fixture.detectChanges();
+    expect(element.querySelectorAll('text.kc-tick')).toHaveLength(CATEGORIES.length);
+    expect(num(bars()[0], 'x')).toBeLessThan(withAxis);
+  });
+
   it('shows the loading skeleton instead of the chart', () => {
     fixture.componentRef.setInput('loading', true);
     fixture.detectChanges();

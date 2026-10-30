@@ -26,17 +26,13 @@ import {
   toLegendItems,
   toggleHidden,
 } from 'kai-charts-core';
+import { legendAttribute } from '../core/attributes';
 import { KcChartState } from '../core/chart-state';
 import { KcChartTable } from '../core/chart-table';
 import { KC_CONFIG } from '../core/config';
 import { KcLegend } from '../core/legend';
 import { observeWidth } from '../core/resize';
 import { KcTooltip } from '../core/tooltip';
-
-/** `showLegend` accepts `true`, `false` or `'auto'` (legend only when there are 2+ series). */
-function legendAttribute(value: unknown): boolean | 'auto' {
-  return value === 'auto' || value === undefined ? 'auto' : booleanAttribute(value);
-}
 
 /**
  * Bar chart: vertical or horizontal, grouped or stacked. Pure SVG, responsive to its
@@ -75,6 +71,14 @@ export class KcBarChart {
   /** Print the value at the end of each bar (the total when stacked). */
   readonly showValues = input(false, { transform: booleanAttribute });
   readonly showGrid = input(true, { transform: booleanAttribute });
+  /** Hide the value axis ticks (the mockup look); grid lines are still drawn. */
+  readonly showValueAxis = input(true, { transform: booleanAttribute });
+  /** Hide the category labels. */
+  readonly showCategoryAxis = input(true, { transform: booleanAttribute });
+  /** Share of each category band occupied by bars, 0.1–1. Thin bars: `0.25`. */
+  readonly barWidth = input(0.7, { transform: numberAttribute });
+  /** Stacked only: round the outer corners of each stack with `barRadius`. */
+  readonly roundStackTop = input(false, { transform: booleanAttribute });
   /** Render the data as an accessible, printable table below the chart. */
   readonly showTable = input(false, { transform: booleanAttribute });
   readonly barRadius = input(2, { transform: numberAttribute });
@@ -124,6 +128,10 @@ export class KcBarChart {
       stacked: this.stacked(),
       showValues: this.showValues(),
       barRadius: this.barRadius(),
+      barWidth: this.barWidth(),
+      showValueAxis: this.showValueAxis(),
+      showCategoryAxis: this.showCategoryAxis(),
+      roundStackTop: this.roundStackTop(),
       categories: this.categories(),
       series: this.visibleSeries(),
       format: this.formatter(),

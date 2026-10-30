@@ -35,7 +35,45 @@
   </section>
 
   <section class="block">
-    <h2 class="block__title">Barras</h2>
+    <h2 class="block__title">Mapa</h2>
+    <section class="card">
+      <h2>Ciudadanos atendidos por estado</h2>
+      <p class="hint">
+        Coropleta que se va llenando a medida que llegan los datos: los estados sin valor quedan en
+        gris y la opacidad crece con el valor. Marcadores = unidades móviles; Zona en Reclamación
+        rayada. Pasa el cursor o usa el teclado para ver el tooltip.
+      </p>
+      <div class="map-actions">
+        <button type="button" (click)="simulateArrival()" [disabled]="simulating()">
+          Simular llegada de datos
+        </button>
+        <button type="button" (click)="resetMap()">Reiniciar</button>
+      </div>
+      <div class="map-body">
+        <kc-venezuela-map
+          [data]="empty() ? [] : mapData()"
+          [markers]="mobileUnits"
+          [highlight]="topStateId"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          valueHeader="Ciudadanos"
+          label="Ciudadanos atendidos por estado"
+          (regionClick)="onRegionClick($event)"
+          (markerClick)="onMarkerClick($event)"
+        />
+        <kc-ranking-list
+          [items]="empty() ? [] : citizensByState"
+          [loading]="loading()"
+          limit="5"
+          label="Top 5 de estados por ciudadanos atendidos"
+          (itemClick)="onRankingClick($event)"
+        />
+      </div>
+    </section>
+  </section>
+
+  <section class="block">
+    <h2 class="block__title">Barras y líneas</h2>
     <div class="grid">
       <section class="card">
         <h2>Trámites por tipo</h2>
@@ -52,7 +90,7 @@
           height="320"
           label="Trámites por tipo"
           categoryHeader="Tipo de trámite"
-          (barClick)="onBarClick($event)"
+          (barClick)="onPointClick($event)"
         />
       </section>
 
@@ -68,19 +106,24 @@
           [showTable]="showTable()"
           label="Trámites por día de jornada"
           categoryHeader="Día"
-          (barClick)="onBarClick($event)"
+          (barClick)="onPointClick($event)"
         />
       </section>
 
       <section class="card">
         <h2>Estado de sincronización</h2>
         <p class="hint">
-          Apilado horizontal con colores propios por serie y total al final de cada barra.
+          Apilado horizontal con colores propios por serie, total al final y extremos redondeados
+          (<code>roundStackTop</code> + <code>barRadius</code>). También existen
+          <code>barWidth</code>, <code>showValueAxis</code> y <code>showCategoryAxis</code> para
+          barras finas sin ejes, al estilo del mockup.
         </p>
         <kc-bar-chart
           orientation="horizontal"
           stacked
           showValues
+          roundStackTop
+          barRadius="6"
           [categories]="syncState.categories"
           [series]="empty() ? noData : syncState.series"
           [loading]="loading()"
@@ -88,7 +131,7 @@
           height="220"
           label="Estado de sincronización por entidad"
           categoryHeader="Entidad"
-          (barClick)="onBarClick($event)"
+          (barClick)="onPointClick($event)"
         />
       </section>
 
@@ -105,7 +148,7 @@
           [showTable]="showTable()"
           label="Ciudadanos por rango de edad"
           categoryHeader="Rango"
-          (barClick)="onBarClick($event)"
+          (barClick)="onPointClick($event)"
         />
       </section>
 
@@ -122,7 +165,7 @@
           height="240"
           label="Variación mensual de trámites"
           categoryHeader="Mes"
-          (barClick)="onBarClick($event)"
+          (barClick)="onPointClick($event)"
         />
       </section>
 
@@ -144,11 +187,28 @@
           emptyText="Aún no hay trámites registrados"
         />
       </section>
+
+      <section class="card">
+        <h2>Ciudadanos atendidos por jornada</h2>
+        <p class="hint">Curva monótona (sin rebotes), área suave y valor final de cada serie</p>
+        <kc-line-chart
+          curve="smooth"
+          area
+          showEndValues
+          [categories]="lineSample.categories"
+          [series]="empty() ? noData : lineSample.series"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          label="Ciudadanos atendidos por jornada"
+          categoryHeader="Mes"
+          (pointClick)="onPointClick($event)"
+        />
+      </section>
     </div>
   </section>
 
   <section class="block">
-    <h2 class="block__title">Listas</h2>
+    <h2 class="block__title">Listas y anillos</h2>
     <div class="grid">
       <section class="card">
         <h2>Densidad de atención por región</h2>
@@ -172,6 +232,23 @@
           (itemClick)="onRankingClick($event)"
         />
       </section>
+
+      <section class="card">
+        <h2>Atención nacional</h2>
+        <p class="hint">
+          Anillos concéntricos con valor central y leyenda con cifras (más legible que anillos sin
+          etiqueta)
+        </p>
+        <kc-ring-chart
+          [items]="empty() ? [] : rings"
+          [loading]="loading()"
+          centerLabel="Saldo"
+          [centerValue]="0.917"
+          [centerTrend]="0.038"
+          label="Atención nacional"
+          (ringClick)="onRingClick($event)"
+        />
+      </section>
     </div>
   </section>
 </main>
@@ -180,7 +257,9 @@
   @if (lastClick(); as click) {
     Último clic: <strong>{{ click.category }}</strong> · {{ click.series }} = {{ click.value }}
   } @else {
-    Haz clic (o Enter/Espacio con el teclado) sobre una barra o una fila de las listas para ver el
-    evento <code>barClick</code> / <code>itemClick</code>.
+    Haz clic (o Enter/Espacio con el teclado) sobre una barra, un punto, un anillo, un estado del
+    mapa o una fila de las listas para ver el evento <code>barClick</code> /
+    <code>pointClick</code> / <code>ringClick</code> / <code>regionClick</code> /
+    <code>itemClick</code>.
   }
 </footer>
