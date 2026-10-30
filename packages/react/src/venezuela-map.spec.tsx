@@ -27,26 +27,24 @@ describe('VenezuelaMap', () => {
     element.querySelector<SVGPathElement>(`path.kc-map__region[data-id="${id}"]`);
   const paths = () => Array.from(element.querySelectorAll<SVGPathElement>('svg path'));
 
-  it('renders the 25 regions and the claim zone, which showClaimZone=false removes', () => {
-    const { rerender } = mount({ label: 'Ciudadanos por estado' });
+  it('renders the 26 regions, Guayana Esequiba as a regular state, with uniform borders', () => {
+    mount({ label: 'Ciudadanos por estado' });
     expect(element.firstElementChild?.className).toBe('kc-chart kc-map');
-    expect(regions()).toHaveLength(25);
-    const claim = element.querySelector('path.kc-map__claim');
-    expect(claim).not.toBeNull();
-    expect(paths()[0]).toBe(claim);
+    expect(regions()).toHaveLength(26);
     const svg = element.querySelector('svg');
     expect(svg?.getAttribute('viewBox')).toBe('0 0 800 614');
     expect(svg?.getAttribute('role')).toBe('group');
     expect(svg?.getAttribute('aria-label')).toBe('Ciudadanos por estado');
     expect(svg?.hasAttribute('height')).toBe(false);
-    // The hatch pattern is referenced by the claim path through a per-instance id.
-    const pattern = element.querySelector('pattern');
-    expect(pattern?.querySelector('.kc-map__hatch-line')).not.toBeNull();
-    expect(claim?.getAttribute('fill')).toBe(`url(#${pattern?.id})`);
-
-    rerender(<VenezuelaMap data={DATA} showClaimZone={false} />);
+    // No hatch pattern, no dashed outline, no special path: every region is drawn the same way.
+    expect(element.querySelector('pattern')).toBeNull();
     expect(element.querySelector('path.kc-map__claim')).toBeNull();
-    expect(regions()).toHaveLength(25);
+    expect(paths()).toHaveLength(26);
+    const esequiba = element.querySelector<SVGPathElement>('path[data-id="VE-GE"]')!;
+    expect(esequiba.classList.contains('kc-map__region--empty')).toBe(true);
+    expect(esequiba.getAttribute('aria-label')).toBe('Guayana Esequiba: Sin datos');
+    expect(esequiba.getAttribute('tabindex')).toBe('0');
+    expect(esequiba.hasAttribute('stroke-dasharray')).toBe(false);
   });
 
   it('paints regions with data by opacity and leaves the others grey', () => {
@@ -63,11 +61,11 @@ describe('VenezuelaMap', () => {
     expect(falcon?.hasAttribute('style')).toBe(false);
     expect(falcon?.hasAttribute('fill-opacity')).toBe(false);
     expect(falcon?.getAttribute('aria-label')).toBe('Falcón: Sin datos');
-    expect(regions().filter((r) => r.classList.contains('kc-map__region--empty'))).toHaveLength(22);
+    expect(regions().filter((r) => r.classList.contains('kc-map__region--empty'))).toHaveLength(23);
     // Draw order: without data first, with data after them.
     const classes = regions().map((r) => r.classList.contains('kc-map__region--empty'));
-    expect(classes.slice(0, 22).every(Boolean)).toBe(true);
-    expect(classes.slice(22).some(Boolean)).toBe(false);
+    expect(classes.slice(0, 23).every(Boolean)).toBe(true);
+    expect(classes.slice(23).some(Boolean)).toBe(false);
     expect(element.querySelector('.kc-map')?.getAttribute('style')).toContain('--kc-map-min: 18%');
   });
 
@@ -162,12 +160,12 @@ describe('VenezuelaMap', () => {
     const legend = element.querySelector('.kc-map__legend');
     expect(legend?.querySelector('.kc-map__legend-min')?.textContent).toBe('3.390');
     expect(legend?.querySelector('.kc-map__legend-max')?.textContent).toBe('5.260');
-    expect(legend?.querySelector('.kc-map__legend-empty')?.textContent).toBe('Sin datos · 3/25');
+    expect(legend?.querySelector('.kc-map__legend-empty')?.textContent).toBe('Sin datos · 3/26');
     expect(legend?.querySelector('.kc-map__legend-swatch')).not.toBeNull();
 
     rerender(<VenezuelaMap data={[]} />);
     expect(element.querySelector('.kc-map__legend')).toBeNull();
-    expect(regions()).toHaveLength(25);
+    expect(regions()).toHaveLength(26);
     expect(element.querySelector('.kc-state--empty')).toBeNull();
 
     rerender(<VenezuelaMap data={DATA} showLegend={false} />);
@@ -176,17 +174,15 @@ describe('VenezuelaMap', () => {
 
   it('renders labels and the mirror table on demand', () => {
     mount({ showLabels: true, showTable: true, label: 'Ciudadanos', valueHeader: 'Ciudadanos' });
-    expect(element.querySelectorAll('text.kc-map__label')).toHaveLength(25);
-    expect(element.querySelector('text.kc-map__claim-label')?.textContent).toBe(
-      'Zona en Reclamación',
-    );
+    expect(element.querySelectorAll('text.kc-map__label')).toHaveLength(26);
+    expect(element.querySelector('text.kc-map__claim-label')).toBeNull();
     expect(element.querySelector('caption')?.textContent).toBe('Ciudadanos');
     expect(element.querySelectorAll('thead th')[1].textContent).toBe('Ciudadanos');
     const rows = Array.from(element.querySelectorAll('tbody tr'));
-    expect(rows).toHaveLength(25);
+    expect(rows).toHaveLength(26);
     const cells = rows.map((r) => r.querySelector('td')?.textContent);
     expect(cells).toContain('5.260');
-    expect(cells.filter((c) => c === 'Sin datos')).toHaveLength(22);
+    expect(cells.filter((c) => c === 'Sin datos')).toHaveLength(23);
   });
 
   it('shows the loading skeleton instead of the svg', () => {
@@ -197,16 +193,14 @@ describe('VenezuelaMap', () => {
     expect(element.querySelector('svg')).toBeNull();
   });
 
-  it('uses a different pattern id per instance', () => {
+  it('renders several instances without any svg id to collide on', () => {
     const { container } = render(
       <>
         <VenezuelaMap data={DATA} />
         <VenezuelaMap data={DATA} />
       </>,
     );
-    const ids = Array.from(container.querySelectorAll('pattern')).map((p) => p.id);
-    expect(ids).toHaveLength(2);
-    expect(ids[0]).not.toBe(ids[1]);
-    expect(ids.every((id) => /^kc-map-hatch-[\w-]+$/.test(id))).toBe(true);
+    expect(container.querySelectorAll('.kc-map')).toHaveLength(2);
+    expect(container.querySelectorAll('svg [id]')).toHaveLength(0);
   });
 });

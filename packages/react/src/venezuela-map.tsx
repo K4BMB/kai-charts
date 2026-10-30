@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useId,
   useMemo,
   useRef,
   useState,
@@ -8,7 +7,6 @@ import {
   type KeyboardEvent,
 } from 'react';
 import {
-  VENEZUELA_CLAIM_ZONE,
   VENEZUELA_VIEWBOX,
   buildMapModel,
   createValueFormatter,
@@ -53,11 +51,7 @@ export interface VenezuelaMapProps {
   showLegend?: boolean;
   /** Short state names at their label points. */
   showLabels?: boolean;
-  /** Guayana Esequiba hatched, as in the official Venezuelan depiction. */
-  showClaimZone?: boolean;
-  /** Text of the claim zone label (drawn only with `showLabels`). */
-  claimZoneLabel?: string;
-  /** Mirror table (all regions): state · value. */
+  /** Mirror table (all 26 regions): state · value. */
   showTable?: boolean;
   /** Small dot on every state capital (its name is added to the region tooltip). Default `true`. */
   showCapitals?: boolean;
@@ -92,7 +86,7 @@ const NO_HIGHLIGHT: readonly string[] = [];
 const { width: VIEW_W, height: VIEW_H } = VENEZUELA_VIEWBOX;
 
 /**
- * Choropleth of Venezuela (23 states + Distrito Capital + Dependencias Federales) that fills in
+ * Choropleth of Venezuela (the 24 states — Guayana Esequiba included —, Distrito Capital and Dependencias Federales) that fills in
  * as data arrives: regions without a value stay grey, regions with data are painted with one
  * color whose opacity grows with the value. Geometry, projection and the model come from
  * `kai-charts-core`; same DOM as the Angular `kc-venezuela-map`.
@@ -108,8 +102,6 @@ export function VenezuelaMap({
   highlight = NO_HIGHLIGHT,
   showLegend = true,
   showLabels = false,
-  showClaimZone = true,
-  claimZoneLabel = 'Zona en Reclamación',
   showTable = false,
   showCapitals = true,
   capitalHeader = 'Capital',
@@ -128,8 +120,6 @@ export function VenezuelaMap({
   const config = useKaiChartsConfig();
   const rootRef = useRef<HTMLDivElement>(null);
   const width = useContainerWidth(rootRef, 600);
-  // One hatch pattern per instance: several maps on a page must not share an svg id.
-  const patternId = `kc-map-hatch-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
@@ -234,25 +224,6 @@ export function VenezuelaMap({
             aria-label={label || undefined}
             onMouseLeave={hideTooltip}
           >
-            <defs>
-              <pattern
-                id={patternId}
-                width="6"
-                height="6"
-                patternUnits="userSpaceOnUse"
-                patternTransform="rotate(45)"
-              >
-                <rect className="kc-map__hatch-bg" width="6" height="6" />
-                <line className="kc-map__hatch-line" x1="0" y1="0" x2="0" y2="6" />
-              </pattern>
-            </defs>
-            {showClaimZone && (
-              <path
-                className="kc-map__claim"
-                d={VENEZUELA_CLAIM_ZONE.path}
-                fill={`url(#${patternId})`}
-              />
-            )}
             {orderedRegions.map((region) => {
               const classes = ['kc-map__region'];
               if (!region.hasData) classes.push('kc-map__region--empty');
@@ -283,15 +254,6 @@ export function VenezuelaMap({
                   {region.short}
                 </text>
               ))}
-            {showLabels && showClaimZone && (
-              <text
-                className="kc-map__claim-label"
-                x={VENEZUELA_CLAIM_ZONE.labelX}
-                y={VENEZUELA_CLAIM_ZONE.labelY}
-              >
-                {claimZoneLabel}
-              </text>
-            )}
             {showCapitals &&
               model.regions.map((region) =>
                 region.capitalPoint ? (

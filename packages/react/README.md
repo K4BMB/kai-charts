@@ -153,28 +153,27 @@ the line into a gap. Own props:
 />
 ```
 
-Choropleth of the 23 states + Distrito Capital + Dependencias Federales (geometry in the core,
-Natural Earth, public domain). Regions without a value stay grey; regions with data share one
-color whose opacity grows with the value, so the map visibly fills in as data arrives. An empty
-`data` array still draws the grey map (there is no empty state). The Guayana Esequiba is drawn
-hatched by default, as in the official depiction (`showClaimZone={false}` hides it).
+Choropleth of the 24 states (Guayana Esequiba included, as Venezuelan law establishes) + Distrito
+Capital + Dependencias Federales — 26 regions, geometry in the core (Natural Earth, public domain).
+Regions without a value stay grey; regions with data share one color whose opacity grows with the
+value, so the map visibly fills in as data arrives. An empty `data` array still draws the grey map
+(there is no empty state). Every region shares the same thin border: nothing is hatched, dashed or
+thickened on hover.
 
-| Prop             | Type                               | Default                 | Description                                       |
-| ---------------- | ---------------------------------- | ----------------------- | ------------------------------------------------- |
-| `data`           | `readonly MapDatum[]`              | `[]`                    | `{ id: 'VE-V' \| 'Zulia', value, label? }`        |
-| `markers`        | `readonly MapMarker[]`             | `[]`                    | `{ id, lat, lng, label?, value?, color? }`        |
-| `color`          | `string`                           | palette 1               | Fill of the regions with data                     |
-| `highlight`      | `string \| readonly string[]`      | `[]`                    | Ids or names drawn with a strong outline          |
-| `showLegend`     | `boolean`                          | `true`                  | Gradient min → max, empty swatch, `filled/total`  |
-| `showLabels`     | `boolean`                          | `false`                 | Short state names                                 |
-| `showClaimZone`  | `boolean`                          | `true`                  | Hatched Guayana Esequiba                          |
-| `claimZoneLabel` | `string`                           | `'Zona en Reclamación'` | Drawn only with `showLabels`                      |
-| `showTable`      | `boolean`                          | `false`                 | Mirror table, all 25 regions                      |
-| `valueHeader`    | `string`                           | `'Valor'`               | Tooltip row name and table column header          |
-| `emptyText`      | `string`                           | config                  | Tooltip/table text for regions without data       |
-| `minOpacity`     | `number`                           | `0.18`                  | Opacity of the lowest value (the highest is 1)    |
-| `onRegionClick`  | `(e: MapRegionClickEvent) => void` | —                       | `{ id, name, value }` (`value` null without data) |
-| `onMarkerClick`  | `(marker: MapMarker) => void`      | —                       | The original marker                               |
+| Prop            | Type                               | Default   | Description                                       |
+| --------------- | ---------------------------------- | --------- | ------------------------------------------------- |
+| `data`          | `readonly MapDatum[]`              | `[]`      | `{ id: 'VE-V' \| 'Zulia', value, label? }`        |
+| `markers`       | `readonly MapMarker[]`             | `[]`      | `{ id, lat, lng, label?, value?, color? }`        |
+| `color`         | `string`                           | palette 1 | Fill of the regions with data                     |
+| `highlight`     | `string \| readonly string[]`      | `[]`      | Ids or names drawn with a strong outline          |
+| `showLegend`    | `boolean`                          | `true`    | Gradient min → max, empty swatch, `filled/total`  |
+| `showLabels`    | `boolean`                          | `false`   | Short state names                                 |
+| `showTable`     | `boolean`                          | `false`   | Mirror table, all 26 regions                      |
+| `valueHeader`   | `string`                           | `'Valor'` | Tooltip row name and table column header          |
+| `emptyText`     | `string`                           | config    | Tooltip/table text for regions without data       |
+| `minOpacity`    | `number`                           | `0.18`    | Opacity of the lowest value (the highest is 1)    |
+| `onRegionClick` | `(e: MapRegionClickEvent) => void` | —         | `{ id, name, value }` (`value` null without data) |
+| `onMarkerClick` | `(marker: MapMarker) => void`      | —         | The original marker                               |
 
 `label`, `locale`, `valueFormat`, `loading`, `className` and `style` work as usual. Regions and
 markers are always focusable (`role="img"`, `aria-label`); the `--clickable` class is added only
@@ -384,10 +383,11 @@ hook are exported for custom charts, together with everything from `kai-charts-c
 
 The stylesheet only uses `.kc-` classes and reads the same `--kc-*` tokens as the Angular
 package: `--kc-color-1..8` for the series palette, `--kc-radius`, `--kc-font-size`,
-`--kc-font-family`, `--kc-tooltip-bg`, `--kc-tooltip-text`, `--kc-grid`, `--kc-axis`, `--kc-text`,
+`--kc-font-family`, `--kc-tooltip-bg`, `--kc-tooltip-text`, `--kc-tooltip-opacity` (0.82; `1` for
+a solid tooltip), `--kc-grid`, `--kc-axis`, `--kc-text`,
 `--kc-muted`, `--kc-border`, `--kc-skeleton`, `--kc-focus`, plus `--kc-success`, `--kc-warning`,
 `--kc-danger`, `--kc-info` for tones, `--kc-kpi-accent` for the KPI icon and `--kc-map-empty`,
-`--kc-map-border`, `--kc-map-highlight`, `--kc-map-claim` for the map. Everything else derives from
+`--kc-map-border`, `--kc-map-highlight` for the map. Everything else derives from
 `currentColor`, so charts follow the text color of their container (light/dark/brand) without
 configuration. The tokens are optional; to override them start from
 `kai-charts-core/styles/tokens.css`.
