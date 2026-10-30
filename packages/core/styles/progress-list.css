@@ -1,0 +1,82 @@
+/* kai-charts · progress list (rows with a bar and a traffic-light tone). */
+.kc-progress {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--kc-font-family, inherit);
+  font-size: var(--kc-font-size, 12px);
+  color: var(--kc-text, inherit);
+}
+
+.kc-progress__item {
+  padding: 8px 0;
+}
+
+.kc-progress__item + .kc-progress__item {
+  border-top: 1px solid var(--kc-border, color-mix(in srgb, currentColor 10%, transparent));
+}
+
+.kc-progress__item--clickable {
+  cursor: pointer;
+}
+
+.kc-progress__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kc-progress__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--kc-row-color, currentColor);
+}
+
+.kc-progress__label {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kc-progress__value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--kc-row-color, currentColor);
+}
+
+.kc-progress__track {
+  height: 6px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: var(--kc-track, color-mix(in srgb, currentColor 8%, transparent));
+  overflow: hidden;
+}
+
+.kc-progress__bar {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--kc-row-color, currentColor);
+  transition: width 240ms ease;
+}
+
+.kc-progress__caption {
+  margin-top: 4px;
+  color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+}
+
+.kc-progress__item:focus-visible {
+  outline: 2px solid var(--kc-focus, currentColor);
+  outline-offset: 2px;
+  border-radius: var(--kc-radius, 6px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kc-progress__bar {
+    transition: none;
+  }
+}

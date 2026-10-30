@@ -18,6 +18,15 @@
   --kc-color-7: #db2777;
   --kc-color-8: #64748b;
 
+  /* Semantic tones: KPI trends, progress lists (traffic light), status chips. */
+  --kc-success: #16a34a;
+  --kc-warning: #f59e0b;
+  --kc-danger: #dc2626;
+  --kc-info: #0ea5e9;
+
+  /* Background behind the charts: borders between map regions, badges. */
+  --kc-surface: #ffffff;
+
   /*
    * Everything else is derived from `currentColor` by default, so charts follow the text
    * color of their container. Uncomment to override.

@@ -27,3 +27,13 @@ export {
   type TooltipRow,
   type TooltipState,
 } from './bar-chart.js';
+export { clamp, toneColor, type Tone } from './tone.js';
+export { KC_TREND_FORMAT, describeTrend, type TrendDirection, type TrendView } from './trend.js';
+export { buildProgressRows, type ProgressItem, type ProgressRowView } from './progress.js';
+export {
+  buildRankingRows,
+  type RankingItem,
+  type RankingOptions,
+  type RankingRowView,
+  type RankingSort,
+} from './ranking.js';
