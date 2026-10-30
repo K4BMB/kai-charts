@@ -13,7 +13,6 @@ import {
   type CalendarDayView,
   type ChartPointEvent,
   type MapDatum,
-  type MapMarker,
   type MapRegionClickEvent,
   type MonthChangeEvent,
   type ProgressItem,
@@ -32,7 +31,6 @@ import {
   DENSITY,
   KPIS,
   LINE_SAMPLE,
-  MOBILE_UNITS,
   MONTHLY_VARIATION,
   NO_DATA,
   PROCEDURES_BY_DAY,
@@ -59,10 +57,7 @@ interface LastEvent {
 }
 
 const PERCENT: Intl.NumberFormatOptions = { style: 'percent', maximumFractionDigits: 0 };
-/** Top of `CITIZENS_BY_STATE`: outlined on the map. */
-const TOP_STATE = 'VE-V';
 const ARRIVAL_INTERVAL_MS = 500;
-const NO_MARKERS: MapMarker[] = [];
 /** Month shown by the calendar at start; `selected`/`today` fall inside it. */
 const CALENDAR_START: MonthChangeEvent = { year: 2026, month: 10 };
 const CALENDAR_DAY = '2026-10-09';
@@ -112,12 +107,6 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
     setLastEvent({ label: item.label, source: 'Ciudadanos', value: item.value });
   const onRegionClick = (e: MapRegionClickEvent) =>
     setLastEvent({ label: e.name, source: 'Mapa', value: e.value ?? '—' });
-  const onMarkerClick = (marker: MapMarker) =>
-    setLastEvent({
-      label: marker.label ?? marker.id,
-      source: 'Unidad móvil',
-      value: marker.value ?? '—',
-    });
   const onRingClick = (item: RingItem) =>
     setLastEvent({ label: item.name, source: 'Anillos', value: item.value });
   const onUnitClick = (row: TableRow) =>
@@ -155,7 +144,9 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
             <h2>Ciudadanos atendidos por estado</h2>
             <p className="hint">
               Coropleta que se va llenando a medida que llegan los datos: los estados sin valor
-              quedan en gris y la opacidad crece con el valor. Marcadores = unidades móviles.
+              quedan en gris y la opacidad crece con el valor. Punto = capital del estado (nombre en
+              el tooltip); Zona en Reclamación rayada. Marcadores por lat/lng y resaltado de
+              estados, en el Playground.
             </p>
             <div className="map-actions">
               <button
@@ -172,14 +163,11 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
             <div className="map-layout">
               <VenezuelaMap
                 data={empty ? [] : mapData}
-                markers={empty ? NO_MARKERS : MOBILE_UNITS}
-                highlight={TOP_STATE}
                 loading={loading}
                 showTable={showTable}
                 valueHeader="Ciudadanos"
                 label="Ciudadanos atendidos por estado"
                 onRegionClick={onRegionClick}
-                onMarkerClick={onMarkerClick}
               />
               <RankingList
                 items={empty ? [] : CITIZENS_BY_STATE}

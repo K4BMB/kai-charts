@@ -12,6 +12,7 @@ import {
   VENEZUELA_VIEWBOX,
   buildMapModel,
   createValueFormatter,
+  mapTooltipPlacement,
   regionAnchor,
   round2,
   seriesColor,
@@ -20,6 +21,7 @@ import {
   type MapMarker,
   type MapMarkerView,
   type MapRegionView,
+  type TooltipRow,
   type TooltipState,
   type ValueFormat,
 } from 'kai-charts-core';
@@ -57,6 +59,10 @@ export interface VenezuelaMapProps {
   claimZoneLabel?: string;
   /** Mirror table (all regions): state · value. */
   showTable?: boolean;
+  /** Small dot on every state capital (its name is added to the region tooltip). Default `true`. */
+  showCapitals?: boolean;
+  /** Name of the capital row in the tooltip. */
+  capitalHeader?: string;
   /** Name of the value in the tooltip and the table column header. */
   valueHeader?: string;
   /** Tooltip/table text for regions without data (defaults to the provider config). */
@@ -105,6 +111,8 @@ export function VenezuelaMap({
   showClaimZone = true,
   claimZoneLabel = 'Zona en Reclamación',
   showTable = false,
+  showCapitals = true,
+  capitalHeader = 'Capital',
   valueHeader = 'Valor',
   emptyText,
   minOpacity = 0.18,
@@ -163,20 +171,19 @@ export function VenezuelaMap({
   const hideTooltip = useCallback(() => setTooltip(null), []);
   const showRegionTooltip = (region: MapRegionView) => {
     const { x, y } = regionAnchor(region, width);
-    setTooltip({
-      x,
-      y,
-      placement: 'top',
-      title: region.name,
-      rows: [{ name: valueHeader, value: region.valueText, color }],
-    });
+    const rows: TooltipRow[] = [{ name: valueHeader, value: region.valueText, color }];
+    if (showCapitals && region.capitalPoint) {
+      rows.push({ name: capitalHeader, value: region.capitalPoint.name });
+    }
+    setTooltip({ x, y, placement: mapTooltipPlacement(x, width), title: region.name, rows });
   };
   const showMarkerTooltip = (marker: MapMarkerView) => {
     const k = width / VIEW_W;
+    const x = round2(marker.x * k);
     setTooltip({
-      x: round2(marker.x * k),
+      x,
       y: round2(marker.y * k),
-      placement: 'top',
+      placement: mapTooltipPlacement(x, width),
       title: marker.label,
       rows: [{ name: valueHeader, value: marker.valueText, color: marker.color }],
     });
@@ -285,6 +292,19 @@ export function VenezuelaMap({
                 {claimZoneLabel}
               </text>
             )}
+            {showCapitals &&
+              model.regions.map((region) =>
+                region.capitalPoint ? (
+                  <circle
+                    key={region.id}
+                    className="kc-map__capital"
+                    cx={region.capitalPoint.x}
+                    cy={region.capitalPoint.y}
+                    r="3"
+                    aria-hidden="true"
+                  />
+                ) : null,
+              )}
             {model.markers.map((marker, index) => (
               <g
                 key={marker.id}

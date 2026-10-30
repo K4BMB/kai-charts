@@ -29,7 +29,9 @@ export function Tooltip({ state }: TooltipProps) {
           key={index}
           className={row.active ? 'kc-tooltip__row kc-tooltip__row--active' : 'kc-tooltip__row'}
         >
-          <span className="kc-tooltip__swatch" style={{ background: row.color }} />
+          {row.color ? (
+            <span className="kc-tooltip__swatch" style={{ background: row.color }} />
+          ) : null}
           <span className="kc-tooltip__name">{row.name}</span>
           <span className="kc-tooltip__value">{row.value}</span>
         </div>
