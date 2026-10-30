@@ -788,6 +788,107 @@ export const CALENDAR_EVENTS: CalendarEvent[] = [
 
 ---
 
+## Playground v2 — one sandbox per component (both demos)
+
+Route `#/playground` keeps working and shows the bar sandbox; `#/playground/<chart>` opens the
+sandbox of one chart. Chart ids and labels (in this order):
+
+| id         | label (ES) | component                             |
+| ---------- | ---------- | ------------------------------------- |
+| `bar`      | Barras     | `kc-bar-chart` / `BarChart`           |
+| `line`     | Líneas     | `kc-line-chart` / `LineChart`         |
+| `ring`     | Anillos    | `kc-ring-chart` / `RingChart`         |
+| `kpi`      | KPI        | `kc-kpi-card` / `KpiCard`             |
+| `progress` | Progreso   | `kc-progress-list` / `ProgressList`   |
+| `ranking`  | Ranking    | `kc-ranking-list` / `RankingList`     |
+| `table`    | Tabla      | `kc-ranking-table` / `RankingTable`   |
+| `calendar` | Calendario | `kc-month-calendar` / `MonthCalendar` |
+| `map`      | Mapa       | `kc-venezuela-map` / `VenezuelaMap`   |
+
+Unknown ids fall back to `bar`. Angular: routes `playground` → redirect to `playground/bar`,
+`playground/:chart` → `Playground` (reads the param with `input()` via `withComponentInputBinding()`
+or `ActivatedRoute`). React: `parseRoute` returns `{ name: 'showcase' } | { name: 'playground'; chart: ChartId }`.
+
+Layout (same classes as today): a picker above the existing `.play` grid.
+
+```html
+<nav class="chart-picker" aria-label="Gráfico">
+  <a class="chip chip--active" href="#/playground/bar" aria-current="page">Barras</a>
+  <a class="chip" href="#/playground/line">Líneas</a> …
+</nav>
+<div class="play">
+  <aside class="panel">
+    <section>Datos…</section>
+    <section>Opciones…</section>
+    <section>Código…</section>
+  </aside>
+  <div class="stage">
+    <div class="card">…the chart…</div>
+    <p class="status" aria-live="polite">…</p>
+  </div>
+</div>
+```
+
+Picker CSS: `.chart-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px }`,
+`.chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: inherit; text-decoration: none; font-size: 0.9rem }`,
+`.chip--active { background: var(--accent); border-color: var(--accent); color: #fff }` (use the
+demo's existing CSS variables; mirror what the header nav uses).
+
+Editors. Two reusable editors cover every chart:
+
+- **Matrix editor** (the existing one: categories textarea, series name/color list, value table,
+  "Aleatorio", "Copiar JSON") → used by `bar` and `line`.
+- **Rows editor**: an editable table with typed columns (`text` | `number` | `color` | `select`),
+  a "Quitar" button per row, "+ Fila" and "Aleatorio" (re-rolls the numeric columns) and
+  "Copiar JSON". Column sets:
+
+| chart      | rows editor columns                                                                                                                                                                | initial rows                              |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `ring`     | name (text) · value (number) · max (number, default 1) · color (color)                                                                                                             | `RINGS`                                   |
+| `progress` | label (text) · value (number) · tone (select neutral/success/warning/danger/info) · caption (text)                                                                                 | `DENSITY`                                 |
+| `ranking`  | label (text) · sublabel (text) · value (number) · color (color)                                                                                                                    | `CITIZENS_BY_STATE`                       |
+| `table`    | label (text) · sublabel (text) · procedures (number) · avg (number) · days (number)                                                                                                | `RANKING_TABLE_ROWS`                      |
+| `calendar` | date (text, `YYYY-MM-DD`) · kind (select from `CALENDAR_KINDS`) · count (number)                                                                                                   | `CALENDAR_EVENTS`                         |
+| `map`      | state (select: the 25 `VENEZUELA_STATES` by `name`, value = id) · value (number); **second** rows editor "Marcadores": label (text) · lat (number) · lng (number) · value (number) | `CITIZENS_MAP` / `MOBILE_UNITS` (markers) |
+| `kpi`      | no rows: fields label (text) · value (number) · subtext (text) · trend (number, ratio) in the "Datos" section                                                                      | `KPIS[0]`                                 |
+
+Options per chart (all charts that format numbers also get **Locale** `es-VE/en-US/pt-BR/de-DE`
+and **Formato** `number/percent/currency/compact` as today; `ring` and `kpi` trend default to
+`percent`; every chart gets **Cargando**; charts with an empty state get **Sin datos**; charts
+with a table get **Tabla espejo**; `label` text where the component accepts it):
+
+- `bar`: today's options + `barWidth` (range 0.1–1 step 0.05) · `showValueAxis` · `showCategoryAxis` · `roundStackTop`.
+- `line`: `curve` (select smooth/linear) · `area` · `includeZero` · `showEndValues` · `showGrid` · `showValueAxis` · `showCategoryAxis` · legend mode · `height` (range) · `pointRadius` (range 0–8).
+- `ring`: `size` (range 120–320) · `thickness` (range 0 = auto … 24) · `gap` (range 0–12) · `centerLabel` · `centerValue` (number) · `centerTrend` (number) · `invertTrend` · `showLegend`.
+- `kpi`: `invertTrend` · `color` (color) · value format; the stage shows the card inside a 320 px wide box with the `calendar` demo icon projected.
+- `progress`: `max` (number, blank = auto) · `showValues`.
+- `ranking`: `limit` (number) · `sort` (desc/asc/none) · `showBars` · `showRank`.
+- `table`: `sortBy` (select none/procedures/avg/days) · `sortDirection` (desc/asc) · `limit` · `showRank` · `entityHeader` (text) · `caption` (text). Header clicks update `sortBy`/`sortDirection` (controlled, as in the showcase).
+- `calendar`: `year` (number) · `month` (1–12) · `selected` (text) · `today` (text, default `2026-10-09`) · `weekStartsOn` (select lunes=1/domingo=0) · `showLegend` · `showNav` · `footer` (text). Nav clicks update year/month.
+- `map`: `color` (color) · `highlight` (text, comma-separated ids or names) · `showLegend` · `showLabels` · `showClaimZone` · `showCapitals` · `minOpacity` (range 0–0.6) · `valueHeader` (text).
+
+Stage: the chart with the current data/options; `.status` shows the last event as
+`Último evento: <eventName> · <summary>` (bar/line: `category · series = value`; ring/progress/
+ranking/table: `label = value`; calendar `dayClick`: `iso · N eventos`, `monthChange`: `year-month`;
+map `regionClick`: `name = value`, `markerClick`: `label`). Before any event: the current hint text.
+
+Code section: snippet for the framework with the data constant and the element/JSX with only the
+non-default props, like today's bar snippet (Angular `<kc-x [rows]="rows" … />` + `const rows = […]`;
+React `<X rows={rows} … />`). "Copiar" copies it.
+
+Tests:
+
+- Angular (`app.spec.ts`): the existing playground test keeps passing on `#/playground/bar`;
+  a new test creates `Playground` with `chart` input set to each of the nine ids and asserts the
+  matching `kc-*` element exists in `.stage`; one test edits the first numeric cell of the ranking
+  rows editor and asserts the first `.kc-ranking__value` text changes; the picker has nine `.chip`
+  and the active one carries `aria-current="page"`.
+- React demo has no unit tests: verify in the browser with a script that visits every
+  `#/playground/<id>` and asserts the stage contains the expected `.kc-<x>` root plus zero console
+  errors, and edits a ranking value.
+
+---
+
 ## Ranking table — `kc-ranking-table` / `RankingTable`
 
 Core: `buildTableModel(rows, columns, format, locale, { sortBy, sortDirection, limit, activeId })`
