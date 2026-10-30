@@ -657,3 +657,260 @@ start further left. Showcase: change the "Estado de sincronización" card hint t
 options and use `roundStackTop barRadius="6"`; add nothing else.
 
 ---
+
+## Month calendar — `kc-month-calendar` / `MonthCalendar`
+
+Core: `buildMonthGrid(year, month, events, kinds, { weekStartsOn, today, selected, locale, weekdayFormat })`
+→ `MonthGrid` (`title`, `weekdays[7]`, `weeks[6][7]` of `CalendarDayView`, `kinds[]` with totals,
+`unknownKinds`); `shiftMonth(year, month, delta)`; `monthTitle()`.
+
+| Input / prop        | Type                                                                                              | Default       | Notes                                                                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `year`, `month`     | `number`                                                                                          | current month | `month` 1–12. Controlled: the host changes them on `monthChange`                                                                           |
+| `events`            | `CalendarEvent[]`                                                                                 | `[]`          | `{ date: 'YYYY-MM-DD', kind, label?, count? }`                                                                                             |
+| `kinds`             | `CalendarKind[]`                                                                                  | `[]`          | `{ kind, name, tone?, color? }` → legend + dot colors                                                                                      |
+| `selected`          | `string`                                                                                          | —             | ISO date highlighted                                                                                                                       |
+| `today`             | `string`                                                                                          | local today   | Override for tests/snapshots                                                                                                               |
+| `weekStartsOn`      | `number`                                                                                          | `1`           | 0 = Sunday                                                                                                                                 |
+| `showLegend`        | `boolean`                                                                                         | `true`        | Kinds with totals                                                                                                                          |
+| `showNav`           | `boolean`                                                                                         | `true`        | Previous/next month buttons                                                                                                                |
+| `footer`            | `string`                                                                                          | `''`          | Free text under the legend (`Cumplimiento: 89,3 %`), rendered with `<strong>` around the part after the colon by the host — here just text |
+| `label`             | `string`                                                                                          | `''`          | `aria-label` of the grid table                                                                                                             |
+| `locale`, `loading` | as usual                                                                                          |               |                                                                                                                                            |
+| events              | `dayClick` / `onDayClick(day: CalendarDayView)`, `monthChange` / `onMonthChange({ year, month })` |               |                                                                                                                                            |
+
+DOM:
+
+```html
+<div class="kc-chart kc-calendar">
+  <div class="kc-calendar__head">
+    <button type="button" class="kc-calendar__nav" aria-label="Mes anterior">
+      ‹svg chevron-left›
+    </button>
+    <!-- showNav -->
+    <h3 class="kc-calendar__title" aria-live="polite">octubre de 2026</h3>
+    <button type="button" class="kc-calendar__nav" aria-label="Mes siguiente">
+      ‹svg chevron-right›
+    </button>
+  </div>
+  <table class="kc-calendar__grid" role="grid" aria-label="…">
+    <thead>
+      <tr>
+        <th scope="col" class="kc-calendar__weekday" abbr="lunes">lun</th>
+        …×7
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <!-- ×6 -->
+        <td class="kc-calendar__cell">
+          <button
+            type="button"
+            class="kc-calendar__day [kc-calendar__day--outside] [kc-calendar__day--today] [kc-calendar__day--selected] [kc-calendar__day--weekend] [kc-calendar__day--clickable]"
+            [aria-pressed]="isSelected"
+            aria-label="lunes 5: 2 Ejecutadas"
+            data-date="2026-10-05"
+          >
+            <span class="kc-calendar__number">5</span>
+            <span class="kc-calendar__dots" aria-hidden="true">
+              <i
+                class="kc-calendar__dot [kc-calendar__dot--many]"
+                style="--kc-dot-color: <color>"
+              ></i>
+              <!-- one per kind; --many when count > 1 -->
+            </span>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <ul class="kc-calendar__legend">
+    <!-- showLegend && kinds.length -->
+    <li class="kc-calendar__legend-item">
+      <i class="kc-calendar__legend-swatch" style="background: <color>"></i>Ejecutadas
+      <span class="kc-calendar__legend-total">3</span>
+    </li>
+  </ul>
+  <p class="kc-calendar__footer">Cumplimiento: <strong>89,3 %</strong></p>
+  <!-- footer: text before the first ':' plain, the rest in <strong>; whole text plain when no ':' -->
+</div>
+```
+
+Chevrons: `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>` (mirror `M6 3l5 5-5 5` for next).
+Clicking nav emits `monthChange` with `shiftMonth(year, month, ±1)` — the component does NOT
+change its own month (controlled), but the demo host does. The `kc-calendar__day--clickable`
+class only with a handler (React) / always (Angular). Loading → `kc-chart-state kind="loading"` height 320.
+
+Tests: (1) 7 weekday headers starting `lun`, 42 day buttons, first `28` outside, `1` inside;
+(2) title `octubre de 2026`; `locale="en-US" weekStartsOn=0` → `S M T W T F S`, `October 2026`;
+(3) dots per kind with colors, `--many` when count > 1, `aria-label` text; (4) `today`/`selected`
+classes and `aria-pressed`; (5) legend totals `3 / 4 / 1`, hidden with `showLegend=false`;
+(6) nav buttons emit `monthChange` `{ year: 2026, month: 9 }` / `{ 2026, 11 }` and December → January
+of the next year; `showNav=false` removes them; (7) `dayClick` on click and Enter with the day
+view (`iso: '2026-10-05'`); (8) footer splits at the colon into `<strong>`; (9) loading → skeleton.
+
+Showcase card (block **Listas y anillos**): "Calendario de jornadas", `CALENDAR_KINDS`,
+`CALENDAR_EVENTS`, initial month 2026-10, `selected="2026-10-09"`, `today="2026-10-09"`,
+`footer="Cumplimiento: 89,3 %"`, host state for year/month updated on `monthChange`, hint
+"Puntos por tipo de evento, mes navegable; el host controla el mes y recibe el día clicado".
+
+```ts
+export const CALENDAR_KINDS: CalendarKind[] = [
+  { kind: 'done', name: 'Ejecutadas', tone: 'success' },
+  { kind: 'pending', name: 'Pendientes', tone: 'info' },
+  { kind: 'moved', name: 'Reprogramadas', tone: 'danger' },
+];
+
+export const CALENDAR_EVENTS: CalendarEvent[] = [
+  { date: '2026-09-28', kind: 'done' },
+  { date: '2026-09-30', kind: 'pending' },
+  { date: '2026-10-02', kind: 'pending' },
+  { date: '2026-10-05', kind: 'done', count: 2 },
+  { date: '2026-10-07', kind: 'pending' },
+  { date: '2026-10-09', kind: 'pending' },
+  { date: '2026-10-12', kind: 'done' },
+  { date: '2026-10-14', kind: 'pending' },
+  { date: '2026-10-16', kind: 'pending' },
+  { date: '2026-10-19', kind: 'done' },
+  { date: '2026-10-21', kind: 'pending' },
+  { date: '2026-10-23', kind: 'pending' },
+  { date: '2026-10-23', kind: 'moved' },
+  { date: '2026-10-26', kind: 'done' },
+  { date: '2026-10-28', kind: 'pending' },
+  { date: '2026-10-30', kind: 'pending' },
+];
+```
+
+---
+
+## Ranking table — `kc-ranking-table` / `RankingTable`
+
+Core: `buildTableModel(rows, columns, format, locale, { sortBy, sortDirection, limit, activeId })`
+→ `{ headers, rows }` (`TableRowView`: `rank`, `id`, `label`, `sublabel`, `color`, `active`,
+`cells[]` with `text`, `align`, `percent`).
+
+| Input / prop                                    | Type                                                                                               | Default             | Notes                                                                             |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------- | --------------------------------------------------------------------------------- |
+| `rows`                                          | `TableRow[]`                                                                                       | `[]`                | `{ id?, label, sublabel?, color?, values: Record<string, number\|string\|null> }` |
+| `columns`                                       | `TableColumn[]`                                                                                    | `[]`                | `{ key, header, type?, format?, bar?, align? }`                                   |
+| `entityHeader`                                  | `string`                                                                                           | `'Estado / Unidad'` | Header of the first (label) column                                                |
+| `sortBy`, `sortDirection`, `limit`, `activeId`  | as core                                                                                            |                     | Controlled; header click emits `sortChange`                                       |
+| `showRank`                                      | `boolean`                                                                                          | `true`              | Rank badge in the first column                                                    |
+| `caption`                                       | `string`                                                                                           | `''`                | `<caption>` (visually shown)                                                      |
+| `label`                                         | `string`                                                                                           | `''`                | `aria-label` of the table when no caption                                         |
+| `locale`, `valueFormat`, `loading`, `emptyText` | as usual                                                                                           |                     |                                                                                   |
+| events                                          | `rowClick` / `onRowClick(row: TableRow, index)`, `sortChange` / `onSortChange({ key, direction })` |                     |                                                                                   |
+
+DOM:
+
+```html
+<div class="kc-chart kc-ranking-table">
+  <table class="kc-ranking-table__table" aria-label="…">
+    <caption>
+      …
+    </caption>
+    <!-- caption -->
+    <thead>
+      <tr>
+        <th scope="col" class="kc-align--left">Estado / Unidad</th>
+        <th
+          scope="col"
+          class="kc-align--right [kc-ranking-table__sortable]"
+          [aria-sort]="descending|ascending|none"
+        >
+          <button type="button" class="kc-ranking-table__sort-btn">
+            Trámites<span class="kc-ranking-table__sort" aria-hidden="true">▾</span>
+          </button>
+          <!-- button only for numeric columns; ▾ desc, ▴ asc, nothing when unsorted -->
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        class="kc-ranking-table__row [kc-ranking-table__row--first] [kc-ranking-table__row--active] [kc-ranking-table__row--clickable]"
+        style="--kc-row-color: <color>"
+        tabindex="0"
+        aria-label="1. Zulia: …"
+        data-id="VE-V"
+      >
+        <td class="kc-align--left">
+          <div class="kc-ranking-table__entity">
+            <span class="kc-ranking-table__rank" aria-hidden="true">1</span>
+            <!-- showRank -->
+            <div>
+              <div class="kc-ranking-table__label">Zulia</div>
+              <div class="kc-ranking-table__sublabel">UM-ZUL-02</div>
+            </div>
+          </div>
+        </td>
+        <td class="kc-align--right">
+          <span class="kc-ranking-table__value">
+            <span class="kc-ranking-table__text">4.620</span>
+            <i class="kc-ranking-table__bar" style="width: 100%"></i>
+            <!-- only when cell.percent !== null -->
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+Header click (numeric columns only): emit `sortChange` with the same key toggling
+`desc → asc → desc`, or `{ key, direction: 'desc' }` for a new key. Loading → skeleton height
+`rows.length * 52 || 200`; empty → empty state 120.
+
+Tests: (1) headers = entityHeader + columns, aligned; (2) rows in input order by default, ranks
+1..N, badge on #1 filled class; (3) `sortBy="procedures"` sorts desc and sets `aria-sort`; header
+click emits `sortChange` `{ key: 'procedures', direction: 'asc' }` when already desc, `{ key: 'avg', direction: 'desc' }` for another column; (4) cells formatted (`4.620`, `21 min` via column format,
+`—` for null); (5) bar `width: 100%` on the max row, none on non-bar columns; (6) `limit=3`;
+(7) `rowClick` on click/Enter with the original row and its index in `rows`; (8) `activeId` class;
+(9) empty/loading states.
+
+Showcase card (block **Listas y anillos**, full-width card above the two lists): "Ranking de
+eficiencia por unidad móvil", hint "Producción y tiempo medio de atención por trámite · clic en
+una cabecera numérica para ordenar", `RANKING_TABLE_COLUMNS` / `RANKING_TABLE_ROWS`, host state
+`sortBy='procedures'` updated on `sortChange`.
+
+```ts
+export const RANKING_TABLE_COLUMNS: TableColumn[] = [
+  { key: 'procedures', header: 'Trámites', bar: true },
+  { key: 'avg', header: 'Tiempo medio', format: (v: number) => `${v} min` },
+  { key: 'days', header: 'Jornadas' },
+];
+
+export const RANKING_TABLE_ROWS: TableRow[] = [
+  {
+    id: 'VE-V',
+    label: 'Zulia',
+    sublabel: 'UM-ZUL-02',
+    values: { procedures: 4620, avg: 18, days: 14 },
+  },
+  {
+    id: 'VE-K',
+    label: 'Lara',
+    sublabel: 'UM-LAR-04',
+    values: { procedures: 4019, avg: 21, days: 11 },
+  },
+  {
+    id: 'VE-G',
+    label: 'Carabobo',
+    sublabel: 'UM-CAR-04',
+    values: { procedures: 4355, avg: 22, days: 11 },
+  },
+  {
+    id: 'VE-M',
+    label: 'Miranda',
+    sublabel: 'UM-MIR-04',
+    values: { procedures: 4290, avg: 23, days: 13 },
+  },
+  {
+    id: 'VE-A',
+    label: 'Dtto. Capital',
+    sublabel: 'UM-DC-04',
+    values: { procedures: 3980, avg: 27, days: 10 },
+  },
+];
+```
+
+---

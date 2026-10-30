@@ -1,0 +1,129 @@
+/* kai-charts · ranking table (rank badge + label column + numeric columns with optional bars). */
+.kc-ranking-table {
+  display: block;
+  overflow-x: auto;
+  font-family: var(--kc-font-family, inherit);
+  font-size: var(--kc-font-size, 12px);
+  color: var(--kc-text, inherit);
+}
+
+.kc-ranking-table__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.kc-ranking-table__table caption {
+  margin-bottom: 6px;
+  text-align: left;
+  font-weight: 600;
+  caption-side: top;
+}
+
+.kc-ranking-table__table th,
+.kc-ranking-table__table td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--kc-border, color-mix(in srgb, currentColor 10%, transparent));
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.kc-ranking-table__table th:first-child,
+.kc-ranking-table__table td:first-child {
+  text-align: left;
+}
+
+.kc-ranking-table__table thead th {
+  padding-top: 0;
+  color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+  font-size: 0.85em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.kc-ranking-table__table th.kc-align--left,
+.kc-ranking-table__table td.kc-align--left {
+  text-align: left;
+}
+
+.kc-ranking-table__table th.kc-align--center,
+.kc-ranking-table__table td.kc-align--center {
+  text-align: center;
+}
+
+.kc-ranking-table__sort {
+  margin-left: 4px;
+  font-size: 0.9em;
+}
+
+.kc-ranking-table__row--clickable {
+  cursor: pointer;
+}
+
+.kc-ranking-table__row--clickable:hover {
+  background: color-mix(in srgb, currentColor 4%, transparent);
+}
+
+.kc-ranking-table__row--active {
+  background: color-mix(in srgb, var(--kc-row-color, currentColor) 8%, transparent);
+}
+
+.kc-ranking-table__row:focus-visible {
+  outline: 2px solid var(--kc-focus, currentColor);
+  outline-offset: -2px;
+}
+
+.kc-ranking-table__entity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kc-ranking-table__rank {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--kc-row-color, currentColor) 12%, transparent);
+  color: var(--kc-row-color, currentColor);
+  font-size: 0.9em;
+  font-weight: 700;
+}
+
+.kc-ranking-table__row--first .kc-ranking-table__rank {
+  background: var(--kc-row-color, currentColor);
+  color: var(--kc-surface, #fff);
+}
+
+.kc-ranking-table__label {
+  font-weight: 600;
+}
+
+.kc-ranking-table__sublabel {
+  color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+  font-size: 0.9em;
+}
+
+/* Number cell with a bar behind the value. */
+.kc-ranking-table__value {
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+}
+
+.kc-ranking-table__bar {
+  position: absolute;
+  inset: auto 0 -6px 0;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--kc-row-color, currentColor);
+  opacity: 0.6;
+}
+
+.kc-ranking-table__text {
+  font-weight: 600;
+}

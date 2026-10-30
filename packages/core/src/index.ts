@@ -71,3 +71,26 @@ export {
   type MapRegionGeometry,
   type MapRegionView,
 } from './venezuela-map.js';
+export {
+  buildMonthGrid,
+  monthTitle,
+  shiftMonth,
+  weekdayLabels,
+  type CalendarDayView,
+  type CalendarDot,
+  type CalendarEvent,
+  type CalendarKind,
+  type CalendarKindView,
+  type MonthGrid,
+  type MonthGridOptions,
+} from './calendar.js';
+export {
+  buildTableModel,
+  type TableCellView,
+  type TableColumn,
+  type TableHeaderView,
+  type TableModel,
+  type TableOptions,
+  type TableRow,
+  type TableRowView,
+} from './ranking-table.js';
