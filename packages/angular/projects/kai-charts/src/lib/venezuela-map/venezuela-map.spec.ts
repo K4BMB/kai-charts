@@ -89,9 +89,33 @@ describe('KcVenezuelaMap', () => {
     expect(text('.kc-tooltip__title')).toBe('Zulia');
     expect(text('.kc-tooltip__name')).toBe('Ciudadanos');
     expect(text('.kc-tooltip__value')).toBe('5.260');
+    // Zulia sits on the west edge: the bubble opens to the right so it stays inside the map.
+    expect(tooltip?.classList.contains('kc-tooltip--right')).toBe(true);
     zulia.dispatchEvent(new FocusEvent('blur'));
     fixture.detectChanges();
     expect(element.querySelector('.kc-tooltip')).toBeNull();
+  });
+
+  it('draws a capital dot in every state and names it in the tooltip; showCapitals=false removes both', () => {
+    fixture.detectChanges();
+    expect(element.querySelectorAll('circle.kc-map__capital')).toHaveLength(24);
+    region('VE-V').dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+    const names = Array.from(element.querySelectorAll('.kc-tooltip__name')).map((n) =>
+      n.textContent?.trim(),
+    );
+    const values = Array.from(element.querySelectorAll('.kc-tooltip__value')).map((n) =>
+      n.textContent?.trim(),
+    );
+    expect(names).toEqual(['Valor', 'Capital']);
+    expect(values).toEqual(['5.260', 'Maracaibo']);
+
+    fixture.componentRef.setInput('showCapitals', false);
+    fixture.detectChanges();
+    expect(element.querySelectorAll('circle.kc-map__capital')).toHaveLength(0);
+    region('VE-V').dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+    expect(element.querySelectorAll('.kc-tooltip__name')).toHaveLength(1);
   });
 
   it('emits regionClick on click and keyboard', () => {

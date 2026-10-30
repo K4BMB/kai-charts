@@ -16,12 +16,14 @@ import {
   MapMarker,
   MapMarkerView,
   MapRegionView,
+  TooltipRow,
   TooltipState,
   VENEZUELA_CLAIM_ZONE,
   VENEZUELA_VIEWBOX,
   ValueFormat,
   buildMapModel,
   createValueFormatter,
+  mapTooltipPlacement,
   regionAnchor,
   seriesColor,
 } from 'kai-charts-core';
@@ -94,6 +96,10 @@ export class KcVenezuelaMap {
   readonly claimZoneLabel = input('Zona en Reclamación');
   /** Mirror table: one row per region (all 25). */
   readonly showTable = input(false, { transform: booleanAttribute });
+  /** Small dot on every state capital (name shown in the region tooltip). */
+  readonly showCapitals = input(true, { transform: booleanAttribute });
+  /** Name of the capital row in the tooltip. */
+  readonly capitalHeader = input('Capital');
   /** Header of the value column in the table and name of the tooltip row. */
   readonly valueHeader = input('Valor');
   /** Tooltip/table text for regions without data (defaults to the global config). */
@@ -153,24 +159,39 @@ export class KcVenezuelaMap {
   protected readonly tableSeries = computed<ChartSeries[]>(() => [
     { name: this.valueHeader(), data: this.model().regions.map((r) => r.value) },
   ]);
+  /** Capital dots, drawn after every region so no state paints over them. */
+  protected readonly capitals = computed(() =>
+    this.showCapitals()
+      ? this.model()
+          .regions.filter((r) => r.capitalPoint)
+          .map((r) => ({ id: r.id, ...r.capitalPoint! }))
+      : [],
+  );
 
   protected showRegionTooltip(region: MapRegionView): void {
     const { x, y } = regionAnchor(region, this.width());
+    const rows: TooltipRow[] = [
+      { name: this.valueHeader(), value: region.valueText, color: this.color() },
+    ];
+    if (this.showCapitals() && region.capitalPoint) {
+      rows.push({ name: this.capitalHeader(), value: region.capitalPoint.name });
+    }
     this.tooltip.set({
       x,
       y,
-      placement: 'top',
+      placement: mapTooltipPlacement(x, this.width()),
       title: region.name,
-      rows: [{ name: this.valueHeader(), value: region.valueText, color: this.color() }],
+      rows,
     });
   }
 
   protected showMarkerTooltip(marker: MapMarkerView): void {
     const k = this.width() / VENEZUELA_VIEWBOX.width;
+    const x = Math.round(marker.x * k * 100) / 100;
     this.tooltip.set({
-      x: Math.round(marker.x * k * 100) / 100,
+      x,
       y: Math.round(marker.y * k * 100) / 100,
-      placement: 'top',
+      placement: mapTooltipPlacement(x, this.width()),
       title: marker.label,
       rows: [{ name: this.valueHeader(), value: marker.valueText, color: marker.color }],
     });

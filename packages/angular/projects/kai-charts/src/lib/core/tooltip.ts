@@ -22,7 +22,9 @@ import { TooltipState } from 'kai-charts-core';
         <div class="kc-tooltip__title">{{ s.title }}</div>
         @for (row of s.rows; track $index) {
           <div class="kc-tooltip__row" [class.kc-tooltip__row--active]="row.active">
-            <span class="kc-tooltip__swatch" [style.background]="row.color"></span>
+            @if (row.color) {
+              <span class="kc-tooltip__swatch" [style.background]="row.color"></span>
+            }
             <span class="kc-tooltip__name">{{ row.name }}</span>
             <span class="kc-tooltip__value">{{ row.value }}</span>
           </div>

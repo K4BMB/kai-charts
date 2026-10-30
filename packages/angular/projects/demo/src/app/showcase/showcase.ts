@@ -14,7 +14,6 @@ import {
   KcRingChart,
   KcVenezuelaMap,
   MapDatum,
-  MapMarker,
   MapRegionClickEvent,
   MonthChangeEvent,
   ProgressItem,
@@ -33,7 +32,6 @@ import {
   DENSITY,
   KPIS,
   LINE_SAMPLE,
-  MOBILE_UNITS,
   MONTHLY_VARIATION,
   NO_DATA,
   PROCEDURES_BY_DAY,
@@ -84,10 +82,6 @@ export class Showcase {
   protected readonly kpis = KPIS;
   protected readonly density = DENSITY;
   protected readonly citizensByState = CITIZENS_BY_STATE;
-  protected readonly mobileUnits = MOBILE_UNITS;
-  /** The state ranked first is outlined on the map. */
-  protected readonly topStateId =
-    [...CITIZENS_BY_STATE].sort((a, b) => b.value - a.value)[0]?.id ?? '';
   protected readonly lineSample = LINE_SAMPLE;
   protected readonly rings = RINGS;
   protected readonly calendarKinds = CALENDAR_KINDS;
@@ -166,14 +160,6 @@ export class Showcase {
 
   protected onRegionClick(event: MapRegionClickEvent): void {
     this.lastClick.set({ category: event.name, series: 'Ciudadanos', value: event.value ?? 0 });
-  }
-
-  protected onMarkerClick(marker: MapMarker): void {
-    this.lastClick.set({
-      category: marker.label ?? marker.id,
-      series: 'Unidad móvil',
-      value: marker.value ?? 0,
-    });
   }
 
   protected onRingClick({ item }: ItemClickEvent<RingItem>): void {

@@ -37,10 +37,10 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-kpi-card .kc-trend')).toHaveLength(2);
     expect(compiled.querySelectorAll('kc-venezuela-map')).toHaveLength(1);
     expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region')).toHaveLength(25);
-    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__marker')).toHaveLength(9);
-    expect(compiled.querySelector('.kc-map__region--highlighted')?.getAttribute('data-id')).toBe(
-      'VE-V',
-    );
+    // Showcase map: capitals in every state, no mobile-unit markers and no highlighted outline.
+    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__capital')).toHaveLength(24);
+    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__marker')).toHaveLength(0);
+    expect(compiled.querySelector('.kc-map__region--highlighted')).toBeNull();
     expect(compiled.querySelectorAll('kc-bar-chart')).toHaveLength(6);
     expect(compiled.querySelectorAll('rect.kc-bar').length).toBeGreaterThan(50);
     expect(compiled.querySelectorAll('kc-line-chart')).toHaveLength(1);
