@@ -9,6 +9,7 @@ import {
   RingItem,
   TableColumn,
   TableRow,
+  VENEZUELA_STATES,
 } from 'kai-charts';
 
 export interface BarSample {
@@ -101,6 +102,17 @@ export const CITIZENS_MAP: MapDatum[] = [
   { id: 'VE-L', value: 1420 },
   { id: 'VE-I', value: 1310 },
   { id: 'VE-N', value: 1190 },
+];
+
+/**
+ * Order in which the showcase map receives its data: the ranked states first, then the rest with
+ * a deterministic value below the Top 5, so the ranking list next to the map stays truthful.
+ */
+export const ARRIVAL_SEQUENCE: MapDatum[] = [
+  ...CITIZENS_MAP,
+  ...VENEZUELA_STATES.filter((state) => !CITIZENS_MAP.some((d) => d.id === state.id)).map(
+    (state, i) => ({ id: state.id, value: 800 + ((i * 731) % 2200) }),
+  ),
 ];
 
 /** Unidades móviles desplegadas (marcadores del mapa). */

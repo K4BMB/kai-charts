@@ -39,9 +39,10 @@
     <section class="card">
       <h2>Ciudadanos atendidos por estado</h2>
       <p class="hint">
-        Coropleta que se va llenando a medida que llegan los datos: los estados sin valor quedan en
-        gris y la opacidad crece con el valor. Punto = capital del estado (nombre en el tooltip);
-        Zona en Reclamación rayada. Marcadores por lat/lng y resaltado de estados, en el Playground.
+        Coropleta que se va llenando a medida que llegan los datos: arranca en gris y cada estado se
+        pinta cuando recibe su valor (aquí llega uno cada 0,4 s; la opacidad crece con el valor).
+        Punto = capital del estado (nombre en el tooltip); Zona en Reclamación rayada. Marcadores
+        por lat/lng y resaltado de estados, en el Playground.
       </p>
       <div class="map-actions">
         <button type="button" (click)="simulateArrival()" [disabled]="simulating()">

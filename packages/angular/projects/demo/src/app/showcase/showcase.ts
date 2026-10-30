@@ -21,14 +21,13 @@ import {
   RingItem,
   SortChangeEvent,
   TableRow,
-  VENEZUELA_STATES,
 } from 'kai-charts';
 import {
   AGE_RANGE,
   CALENDAR_EVENTS,
   CALENDAR_KINDS,
   CITIZENS_BY_STATE,
-  CITIZENS_MAP,
+  ARRIVAL_SEQUENCE,
   DENSITY,
   KPIS,
   LINE_SAMPLE,
@@ -52,7 +51,9 @@ interface LastClick {
 }
 
 /** Interval of the "data arrival" simulation of the map, in ms. */
-const ARRIVAL_INTERVAL = 500;
+const ARRIVAL_INTERVAL = 400;
+/** Delay before the simulation starts by itself after the page shows up, in ms. */
+const ARRIVAL_DELAY = 800;
 
 @Component({
   selector: 'app-showcase',
@@ -100,10 +101,11 @@ export class Showcase {
     maximumFractionDigits: 0,
   };
 
-  /** Map data: starts with the sample and grows while the arrival simulation runs. */
-  protected readonly mapData = signal<MapDatum[]>(CITIZENS_MAP);
+  /** Map data: starts EMPTY (all grey) and grows while the arrival simulation runs. */
+  protected readonly mapData = signal<MapDatum[]>([]);
   protected readonly simulating = signal(false);
   private arrivalTimer: ReturnType<typeof setInterval> | null = null;
+  private autoStartTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** Controlled sort of the ranking table (updated on `sortChange`). */
   protected readonly sortBy = signal('procedures');
@@ -113,29 +115,32 @@ export class Showcase {
   protected readonly month = signal(10);
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.stopSimulation());
+    // The map starts grey and fills in by itself shortly after the page shows up: that is the
+    // behaviour this component exists for, so the visitor sees it without clicking anything.
+    this.autoStartTimer = setTimeout(() => this.simulateArrival(), ARRIVAL_DELAY);
+    inject(DestroyRef).onDestroy(() => {
+      this.stopSimulation();
+      if (this.autoStartTimer !== null) clearTimeout(this.autoStartTimer);
+    });
   }
 
-  /** Fills the states without data one every 500 ms with a random value (800–3.000). */
+  /** Replays the arrival: empties the map and adds one state every 400 ms until all 25 have a value. */
   protected simulateArrival(): void {
     this.stopSimulation();
-    const present = new Set(this.mapData().map((d) => d.id));
-    const pending = VENEZUELA_STATES.map((s) => s.id).filter((id) => !present.has(id));
-    if (pending.length === 0) return;
+    this.mapData.set([]);
+    const pending = [...ARRIVAL_SEQUENCE];
     this.simulating.set(true);
     this.arrivalTimer = setInterval(() => {
-      const id = pending.shift();
-      if (id !== undefined) {
-        const value = 800 + Math.round(Math.random() * 2200);
-        this.mapData.update((data) => [...data, { id, value }]);
-      }
+      const next = pending.shift();
+      if (next) this.mapData.update((data) => [...data, next]);
       if (pending.length === 0) this.stopSimulation();
     }, ARRIVAL_INTERVAL);
   }
 
+  /** Stops the simulation and leaves the map grey again. */
   protected resetMap(): void {
     this.stopSimulation();
-    this.mapData.set(CITIZENS_MAP);
+    this.mapData.set([]);
   }
 
   private stopSimulation(): void {
