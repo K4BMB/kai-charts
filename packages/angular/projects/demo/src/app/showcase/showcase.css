@@ -16,6 +16,21 @@
   gap: 6px;
 }
 
+.block + .block {
+  margin-top: 28px;
+}
+
+.block__title {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));

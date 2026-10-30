@@ -23,13 +23,45 @@ describe('App', () => {
 });
 
 describe('Showcase', () => {
-  it('renders every showcase chart', async () => {
+  it('renders every showcase chart inside the three blocks', async () => {
     await TestBed.configureTestingModule({ imports: [Showcase] }).compileComponents();
     const fixture = TestBed.createComponent(Showcase);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
+    const titles = Array.from(compiled.querySelectorAll('.block__title')).map((t) =>
+      t.textContent?.trim(),
+    );
+    expect(titles).toEqual(['Indicadores', 'Barras', 'Listas']);
+    expect(compiled.querySelectorAll('kc-kpi-card')).toHaveLength(6);
+    expect(compiled.querySelectorAll('kc-kpi-card .kc-kpi__icon svg')).toHaveLength(6);
+    expect(compiled.querySelectorAll('.kc-trend')).toHaveLength(2);
     expect(compiled.querySelectorAll('kc-bar-chart')).toHaveLength(6);
     expect(compiled.querySelectorAll('rect.kc-bar').length).toBeGreaterThan(50);
+    expect(compiled.querySelectorAll('kc-progress-list')).toHaveLength(1);
+    expect(compiled.querySelectorAll('li.kc-progress__item')).toHaveLength(5);
+    expect(compiled.querySelectorAll('kc-ranking-list')).toHaveLength(1);
+    expect(compiled.querySelectorAll('li.kc-ranking__item')).toHaveLength(5);
+  });
+
+  it('applies the loading and empty switches to KPIs and lists too', async () => {
+    await TestBed.configureTestingModule({ imports: [Showcase] }).compileComponents();
+    const fixture = TestBed.createComponent(Showcase);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const [loading, empty] = Array.from(
+      compiled.querySelectorAll<HTMLInputElement>('.controls input'),
+    );
+
+    empty.click();
+    await fixture.whenStable();
+    expect(compiled.querySelectorAll('kc-progress-list .kc-state--empty')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ranking-list .kc-state--empty')).toHaveLength(1);
+
+    loading.click();
+    await fixture.whenStable();
+    expect(compiled.querySelectorAll('kc-kpi-card[aria-busy="true"]')).toHaveLength(6);
+    expect(compiled.querySelectorAll('kc-progress-list [aria-busy="true"]')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-ranking-list [aria-busy="true"]')).toHaveLength(1);
   });
 });
 

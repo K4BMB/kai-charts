@@ -7,9 +7,13 @@ export {
   provideKaiCharts,
   type KaiChartsConfig,
 } from './core/config';
+export { type ItemClickEvent } from './core/events';
 export { observeWidth } from './core/resize';
 export { KcLegend } from './core/legend';
 export { KcTooltip } from './core/tooltip';
 export { KcChartTable } from './core/chart-table';
 export { KcChartState } from './core/chart-state';
 export { KcBarChart } from './bar-chart/bar-chart';
+export { KcIcon, KcKpiCard } from './kpi-card/kpi-card';
+export { KcProgressList } from './progress-list/progress-list';
+export { KcRankingList } from './ranking-list/ranking-list';

@@ -12,111 +12,167 @@
   </label>
 </div>
 
-<main class="grid">
-  <section class="card">
-    <h2>Trámites por tipo</h2>
-    <p class="hint">
-      Horizontal, una serie, valores visibles. Las etiquetas largas caben mejor así.
-    </p>
-    <kc-bar-chart
-      orientation="horizontal"
-      [categories]="byType.categories"
-      [series]="empty() ? noData : byType.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      showValues
-      height="320"
-      label="Trámites por tipo"
-      categoryHeader="Tipo de trámite"
-      (barClick)="onBarClick($event)"
-    />
+<main>
+  <section class="block">
+    <h2 class="block__title">Indicadores</h2>
+    <div class="kpis">
+      @for (k of kpis; track k.label) {
+        <div class="card">
+          <kc-kpi-card
+            [label]="k.label"
+            [value]="k.value"
+            [subtext]="k.subtext"
+            [trend]="k.trend"
+            [invertTrend]="k.invertTrend"
+            [valueFormat]="k.valueFormat"
+            [loading]="loading()"
+          >
+            <app-kpi-icon kcIcon [name]="k.icon" />
+          </kc-kpi-card>
+        </div>
+      }
+    </div>
   </section>
 
-  <section class="card">
-    <h2>Trámites por día</h2>
-    <p class="hint">Vertical, dos series agrupadas. Clic en la leyenda para ocultar una serie.</p>
-    <kc-bar-chart
-      [categories]="byDay.categories"
-      [series]="empty() ? noData : byDay.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      label="Trámites por día de jornada"
-      categoryHeader="Día"
-      (barClick)="onBarClick($event)"
-    />
+  <section class="block">
+    <h2 class="block__title">Barras</h2>
+    <div class="grid">
+      <section class="card">
+        <h2>Trámites por tipo</h2>
+        <p class="hint">
+          Horizontal, una serie, valores visibles. Las etiquetas largas caben mejor así.
+        </p>
+        <kc-bar-chart
+          orientation="horizontal"
+          [categories]="byType.categories"
+          [series]="empty() ? noData : byType.series"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          showValues
+          height="320"
+          label="Trámites por tipo"
+          categoryHeader="Tipo de trámite"
+          (barClick)="onBarClick($event)"
+        />
+      </section>
+
+      <section class="card">
+        <h2>Trámites por día</h2>
+        <p class="hint">
+          Vertical, dos series agrupadas. Clic en la leyenda para ocultar una serie.
+        </p>
+        <kc-bar-chart
+          [categories]="byDay.categories"
+          [series]="empty() ? noData : byDay.series"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          label="Trámites por día de jornada"
+          categoryHeader="Día"
+          (barClick)="onBarClick($event)"
+        />
+      </section>
+
+      <section class="card">
+        <h2>Estado de sincronización</h2>
+        <p class="hint">
+          Apilado horizontal con colores propios por serie y total al final de cada barra.
+        </p>
+        <kc-bar-chart
+          orientation="horizontal"
+          stacked
+          showValues
+          [categories]="syncState.categories"
+          [series]="empty() ? noData : syncState.series"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          height="220"
+          label="Estado de sincronización por entidad"
+          categoryHeader="Entidad"
+          (barClick)="onBarClick($event)"
+        />
+      </section>
+
+      <section class="card">
+        <h2>Rango de edad</h2>
+        <p class="hint">
+          Vertical, una serie, sin leyenda (automático) y con valores sobre las barras.
+        </p>
+        <kc-bar-chart
+          showValues
+          [categories]="ageRange.categories"
+          [series]="empty() ? noData : ageRange.series"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          label="Ciudadanos por rango de edad"
+          categoryHeader="Rango"
+          (barClick)="onBarClick($event)"
+        />
+      </section>
+
+      <section class="card">
+        <h2>Variación mensual</h2>
+        <p class="hint">Valores negativos (eje con cero intermedio) y formato Intl porcentual.</p>
+        <kc-bar-chart
+          showValues
+          [valueFormat]="percent"
+          [categories]="monthlyVariation.categories"
+          [series]="empty() ? noData : monthlyVariation.series"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          height="240"
+          label="Variación mensual de trámites"
+          categoryHeader="Mes"
+          (barClick)="onBarClick($event)"
+        />
+      </section>
+
+      <section class="card">
+        <h2>Jornada sin trámites aún</h2>
+        <p class="hint">
+          Todo en cero no es “sin datos”: se dibuja el eje real con el catálogo. Pasa
+          <code>emptyText</code> para el estado vacío.
+        </p>
+        <kc-bar-chart
+          orientation="horizontal"
+          [categories]="byTypePhase1.categories"
+          [series]="empty() ? noData : byTypePhase1.series"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          height="320"
+          label="Trámites por tipo (jornada sin actas)"
+          categoryHeader="Tipo de trámite"
+          emptyText="Aún no hay trámites registrados"
+        />
+      </section>
+    </div>
   </section>
 
-  <section class="card">
-    <h2>Estado de sincronización</h2>
-    <p class="hint">
-      Apilado horizontal con colores propios por serie y total al final de cada barra.
-    </p>
-    <kc-bar-chart
-      orientation="horizontal"
-      stacked
-      showValues
-      [categories]="syncState.categories"
-      [series]="empty() ? noData : syncState.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      height="220"
-      label="Estado de sincronización por entidad"
-      categoryHeader="Entidad"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
+  <section class="block">
+    <h2 class="block__title">Listas</h2>
+    <div class="grid">
+      <section class="card">
+        <h2>Densidad de atención por región</h2>
+        <p class="hint">Atenciones por 1.000 habitantes · semáforo decidido por el presenter</p>
+        <kc-progress-list
+          [items]="empty() ? [] : density"
+          [loading]="loading()"
+          label="Densidad de atención por región"
+          (itemClick)="onDensityClick($event)"
+        />
+      </section>
 
-  <section class="card">
-    <h2>Rango de edad</h2>
-    <p class="hint">
-      Vertical, una serie, sin leyenda (automático) y con valores sobre las barras.
-    </p>
-    <kc-bar-chart
-      showValues
-      [categories]="ageRange.categories"
-      [series]="empty() ? noData : ageRange.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      label="Ciudadanos por rango de edad"
-      categoryHeader="Rango"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
-
-  <section class="card">
-    <h2>Variación mensual</h2>
-    <p class="hint">Valores negativos (eje con cero intermedio) y formato Intl porcentual.</p>
-    <kc-bar-chart
-      showValues
-      [valueFormat]="percent"
-      [categories]="monthlyVariation.categories"
-      [series]="empty() ? noData : monthlyVariation.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      height="240"
-      label="Variación mensual de trámites"
-      categoryHeader="Mes"
-      (barClick)="onBarClick($event)"
-    />
-  </section>
-
-  <section class="card">
-    <h2>Jornada sin trámites aún</h2>
-    <p class="hint">
-      Todo en cero no es “sin datos”: se dibuja el eje real con el catálogo. Pasa
-      <code>emptyText</code> para el estado vacío.
-    </p>
-    <kc-bar-chart
-      orientation="horizontal"
-      [categories]="byTypePhase1.categories"
-      [series]="empty() ? noData : byTypePhase1.series"
-      [loading]="loading()"
-      [showTable]="showTable()"
-      height="320"
-      label="Trámites por tipo (jornada sin actas)"
-      categoryHeader="Tipo de trámite"
-      emptyText="Aún no hay trámites registrados"
-    />
+      <section class="card">
+        <h2>Ciudadanos atendidos por estado</h2>
+        <p class="hint">Top 5 · últimos 6 meses</p>
+        <kc-ranking-list
+          [items]="empty() ? [] : citizensByState"
+          [loading]="loading()"
+          limit="5"
+          label="Ciudadanos atendidos por estado"
+          (itemClick)="onRankingClick($event)"
+        />
+      </section>
+    </div>
   </section>
 </main>
 
@@ -124,7 +180,7 @@
   @if (lastClick(); as click) {
     Último clic: <strong>{{ click.category }}</strong> · {{ click.series }} = {{ click.value }}
   } @else {
-    Haz clic (o Enter/Espacio con el teclado) sobre una barra para ver el evento
-    <code>barClick</code>.
+    Haz clic (o Enter/Espacio con el teclado) sobre una barra o una fila de las listas para ver el
+    evento <code>barClick</code> / <code>itemClick</code>.
   }
 </footer>

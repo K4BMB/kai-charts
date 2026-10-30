@@ -1,0 +1,38 @@
+@if (loading()) {
+  <kc-chart-state kind="loading" [height]="skeletonHeight()" [text]="loadingText" />
+} @else if (isEmpty()) {
+  <kc-chart-state kind="empty" [height]="120" [text]="emptyLabel()" />
+} @else {
+  @for (row of rows(); track $index) {
+    <li
+      [class]="'kc-progress__item kc-tone--' + row.tone + ' kc-progress__item--clickable'"
+      [style.--kc-row-color]="row.color"
+      tabindex="0"
+      [attr.aria-label]="row.ariaLabel"
+      (click)="activate($index)"
+      (keydown.enter)="activate($index, $event)"
+      (keydown.space)="activate($index, $event)"
+    >
+      <div class="kc-progress__head">
+        <span class="kc-progress__dot" aria-hidden="true"></span>
+        <span class="kc-progress__label">{{ row.label }}</span>
+        @if (showValues()) {
+          <span class="kc-progress__value">{{ row.valueText }}</span>
+        }
+      </div>
+      <div
+        class="kc-progress__track"
+        role="progressbar"
+        aria-valuemin="0"
+        [attr.aria-valuemax]="row.max"
+        [attr.aria-valuenow]="row.value"
+        [attr.aria-label]="row.ariaLabel"
+      >
+        <div class="kc-progress__bar" [style.width.%]="row.percent"></div>
+      </div>
+      @if (row.caption) {
+        <div class="kc-progress__caption">{{ row.caption }}</div>
+      }
+    </li>
+  }
+}

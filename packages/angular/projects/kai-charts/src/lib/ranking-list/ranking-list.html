@@ -1,0 +1,36 @@
+@if (loading()) {
+  <kc-chart-state kind="loading" [height]="skeletonHeight()" [text]="loadingText" />
+} @else if (isEmpty()) {
+  <kc-chart-state kind="empty" [height]="120" [text]="emptyLabel()" />
+} @else {
+  @for (row of rows(); track $index) {
+    <li
+      class="kc-ranking__item kc-ranking__item--clickable"
+      [class.kc-ranking__item--first]="row.rank === 1"
+      [style.--kc-row-color]="row.color"
+      tabindex="0"
+      [attr.aria-label]="row.ariaLabel"
+      (click)="activate(row)"
+      (keydown.enter)="activate(row, $event)"
+      (keydown.space)="activate(row, $event)"
+    >
+      @if (showRank()) {
+        <span class="kc-ranking__rank" aria-hidden="true">{{ row.rank }}</span>
+      }
+      <div class="kc-ranking__body">
+        <div class="kc-ranking__head">
+          <span class="kc-ranking__label">{{ row.label }}</span>
+          @if (row.sublabel) {
+            <span class="kc-ranking__sublabel">{{ row.sublabel }}</span>
+          }
+          <span class="kc-ranking__value">{{ row.valueText }}</span>
+        </div>
+        @if (showBars()) {
+          <div class="kc-ranking__track" aria-hidden="true">
+            <div class="kc-ranking__bar" [style.width.%]="row.percent"></div>
+          </div>
+        }
+      </div>
+    </li>
+  }
+}
