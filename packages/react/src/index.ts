@@ -9,6 +9,10 @@ export { Tooltip, type TooltipProps } from './tooltip';
 export { ChartTable, type ChartTableProps } from './chart-table';
 export { ChartState, type ChartStateProps } from './chart-state';
 export { BarChart, type BarChartProps } from './bar-chart';
+export { Trend, type TrendProps } from './trend';
+export { KpiCard, type KpiCardProps } from './kpi-card';
+export { ProgressList, type ProgressListProps } from './progress-list';
+export { RankingList, type RankingListProps } from './ranking-list';
 
 // Component styles. Vite extracts them to `dist/kai-charts-react.css`; consumers import
 // 'kai-charts-react/styles.css' once (tokens are optional: 'kai-charts-core/styles/tokens.css').

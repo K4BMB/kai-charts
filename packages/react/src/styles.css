@@ -11,3 +11,7 @@
 @import 'kai-charts-core/styles/tooltip.css';
 @import 'kai-charts-core/styles/chart-table.css';
 @import 'kai-charts-core/styles/chart-state.css';
+@import 'kai-charts-core/styles/trend.css';
+@import 'kai-charts-core/styles/kpi-card.css';
+@import 'kai-charts-core/styles/progress-list.css';
+@import 'kai-charts-core/styles/ranking-list.css';
