@@ -52,17 +52,22 @@
   color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
 }
 
-/* Loading: same geometry, text replaced by shimmering blocks. */
+/* Loading: same geometry, text replaced by shimmering blocks. The texts are already `&nbsp;`, so
+   no `color: transparent` here — it would also make the `currentColor`-based background vanish. */
 .kc-kpi--loading .kc-kpi__label,
 .kc-kpi--loading .kc-kpi__value,
 .kc-kpi--loading .kc-kpi__meta {
-  display: inline-block;
-  min-width: 6ch;
+  display: block;
+  width: 12ch;
   border-radius: 4px;
   background: var(--kc-skeleton, color-mix(in srgb, currentColor 8%, transparent));
-  color: transparent;
 }
 
 .kc-kpi--loading .kc-kpi__value {
-  min-width: 5ch;
+  width: 5ch;
+}
+
+.kc-kpi--loading .kc-kpi__meta {
+  width: 10ch;
+  min-height: 1.2em;
 }
