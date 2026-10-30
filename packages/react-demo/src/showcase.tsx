@@ -8,7 +8,6 @@ import {
   RankingList,
   RankingTable,
   RingChart,
-  VENEZUELA_STATES,
   VenezuelaMap,
   type CalendarDayView,
   type ChartPointEvent,
@@ -27,7 +26,7 @@ import {
   CALENDAR_EVENTS,
   CALENDAR_KINDS,
   CITIZENS_BY_STATE,
-  CITIZENS_MAP,
+  ARRIVAL_SEQUENCE,
   DENSITY,
   KPIS,
   LINE_SAMPLE,
@@ -57,46 +56,57 @@ interface LastEvent {
 }
 
 const PERCENT: Intl.NumberFormatOptions = { style: 'percent', maximumFractionDigits: 0 };
-const ARRIVAL_INTERVAL_MS = 500;
+const ARRIVAL_INTERVAL_MS = 400;
+/** Delay before the simulation starts by itself after the page shows up, in ms. */
+const ARRIVAL_DELAY_MS = 800;
 /** Month shown by the calendar at start; `selected`/`today` fall inside it. */
 const CALENDAR_START: MonthChangeEvent = { year: 2026, month: 10 };
 const CALENDAR_DAY = '2026-10-09';
 /** Initial sort of the ranking table (the host owns it and updates it on `onSortChange`). */
 const TABLE_SORT: SortChangeEvent = { key: 'procedures', direction: 'desc' };
 
-/** Adds one random state without data (value 800–3.000); returns the same array when complete. */
+/** Adds the next state of the arrival sequence; returns the same array when complete. */
 function nextArrival(current: MapDatum[]): MapDatum[] {
-  const missing = VENEZUELA_STATES.filter((state) => !current.some((d) => d.id === state.id));
-  if (missing.length === 0) return current;
-  const state = missing[Math.floor(Math.random() * missing.length)];
-  const value = 800 + Math.round(Math.random() * 2200);
-  return [...current, { id: state.id, value }];
+  const next = ARRIVAL_SEQUENCE[current.length];
+  return next ? [...current, next] : current;
 }
 
 /** The reference blocks of the Angular demo (indicadores, mapa, barras y líneas, listas y anillos). */
 export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
   const [lastEvent, setLastEvent] = useState<LastEvent | null>(null);
-  const [mapData, setMapData] = useState<MapDatum[]>(CITIZENS_MAP);
+  // The map starts EMPTY (all grey) and fills in state by state while the simulation runs.
+  const [mapData, setMapData] = useState<MapDatum[]>([]);
   const [simulating, setSimulating] = useState(false);
   // Controlled calendar month and table sort: the components only ask, the host decides.
   const [calendarMonth, setCalendarMonth] = useState<MonthChangeEvent>(CALENDAR_START);
   const [tableSort, setTableSort] = useState<SortChangeEvent>(TABLE_SORT);
 
-  // Data arrival simulation: one more state every 500 ms until the 25 regions have a value.
+  // The simulation starts by itself shortly after the page shows up: that behaviour is what the
+  // map exists for, so the visitor sees it without clicking anything.
+  useEffect(() => {
+    const timer = setTimeout(() => setSimulating(true), ARRIVAL_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+  // Data arrival: one more state every 400 ms, in ARRIVAL_SEQUENCE order, until all 25 have a value.
   useEffect(() => {
     if (!simulating) return undefined;
     const timer = setInterval(() => setMapData(nextArrival), ARRIVAL_INTERVAL_MS);
     return () => clearInterval(timer);
   }, [simulating]);
-  const mapComplete = mapData.length >= VENEZUELA_STATES.length;
+  const mapComplete = mapData.length >= ARRIVAL_SEQUENCE.length;
   useEffect(() => {
     if (mapComplete) setSimulating(false);
   }, [mapComplete]);
 
-  const startSimulation = () => setSimulating(true);
+  /** Replays the arrival from an empty map. */
+  const startSimulation = () => {
+    setMapData([]);
+    setSimulating(true);
+  };
+  /** Stops the simulation and leaves the map grey again. */
   const resetMap = () => {
     setSimulating(false);
-    setMapData(CITIZENS_MAP);
+    setMapData([]);
   };
 
   const onBarClick = (e: ChartPointEvent) =>
@@ -143,16 +153,16 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
           <section className="card">
             <h2>Ciudadanos atendidos por estado</h2>
             <p className="hint">
-              Coropleta que se va llenando a medida que llegan los datos: los estados sin valor
-              quedan en gris y la opacidad crece con el valor. Punto = capital del estado (nombre en
-              el tooltip); Zona en Reclamación rayada. Marcadores por lat/lng y resaltado de
-              estados, en el Playground.
+              Coropleta que se va llenando a medida que llegan los datos: arranca en gris y cada
+              estado se pinta cuando recibe su valor (aquí llega uno cada 0,4 s; la opacidad crece
+              con el valor). Punto = capital del estado (nombre en el tooltip); Zona en Reclamación
+              rayada. Marcadores por lat/lng y resaltado de estados, en el Playground.
             </p>
             <div className="map-actions">
               <button
                 type="button"
                 onClick={startSimulation}
-                disabled={simulating || mapComplete || empty || loading}
+                disabled={simulating || empty || loading}
               >
                 Simular llegada de datos
               </button>
