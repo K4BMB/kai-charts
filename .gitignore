@@ -33,3 +33,6 @@ coverage/
 # System files
 .DS_Store
 Thumbs.db
+
+# Natural Earth downloads used by packages/core/scripts
+.geo-cache/

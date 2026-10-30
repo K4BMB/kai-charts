@@ -37,3 +37,20 @@ export {
   type RankingRowView,
   type RankingSort,
 } from './ranking.js';
+export {
+  VENEZUELA_CLAIM_ZONE,
+  VENEZUELA_STATES,
+  VENEZUELA_VIEWBOX,
+  buildMapModel,
+  normalizeRegionId,
+  projectVenezuela,
+  regionAnchor,
+  type MapDatum,
+  type MapLegend,
+  type MapMarker,
+  type MapMarkerView,
+  type MapModel,
+  type MapModelOptions,
+  type MapRegionGeometry,
+  type MapRegionView,
+} from './venezuela-map.js';

@@ -341,8 +341,168 @@ be `display:block`). React: `icon={<KpiIcon name={k.icon} />}`.
 
 ---
 
+## Venezuela map — `kc-venezuela-map` / `VenezuelaMap`
+
+Choropleth of the 23 states + Distrito Capital + Dependencias Federales that **fills in as data
+arrives**: regions without a value stay grey, regions with data are painted with one color whose
+opacity grows with the value (`buildMapModel` → `opacity` 0.18–1). Geometry ships in the core
+(`VENEZUELA_STATES`, `VENEZUELA_CLAIM_ZONE`, `VENEZUELA_VIEWBOX` 800×614, Natural Earth, public
+domain). Optional markers (mobile units) are projected with `projectVenezuela(lat, lng)`.
+
+Core: `buildMapModel(data, markers, format, { highlight, emptyText, minOpacity })` → `MapModel`
+(`regions`, `markers`, `legend`, `unmatched`, `filled`, `total`); `regionAnchor(region, width)`
+gives the tooltip anchor in px; `normalizeRegionId()` accepts ISO codes or names.
+
+| Input / prop                       | Type                                                                                          | Default                 | Notes                                            |
+| ---------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------- | ------------------------------------------------ |
+| `data`                             | `MapDatum[]`                                                                                  | `[]`                    | `{ id: 'VE-V' \| 'Zulia', value, label? }`       |
+| `markers`                          | `MapMarker[]`                                                                                 | `[]`                    | `{ id, lat, lng, label?, value?, color? }`       |
+| `color`                            | `string`                                                                                      | `seriesColor(0)`        | Fill color for regions with data                 |
+| `highlight`                        | `string \| string[]`                                                                          | `[]`                    | Ids (or names) drawn with a strong outline       |
+| `showLegend`                       | `boolean`                                                                                     | `true`                  | Gradient min→max + empty swatch + `filled/total` |
+| `showLabels`                       | `boolean`                                                                                     | `false`                 | Short state names at their label points          |
+| `showClaimZone`                    | `boolean`                                                                                     | `true`                  | Guayana Esequiba hatched (official VE depiction) |
+| `claimZoneLabel`                   | `string`                                                                                      | `'Zona en Reclamación'` | Drawn only with `showLabels`                     |
+| `showTable`                        | `boolean`                                                                                     | `false`                 | Mirror table: state · value (all 25 regions)     |
+| `valueHeader`                      | `string`                                                                                      | `'Valor'`               | Table column header                              |
+| `emptyText`                        | `string`                                                                                      | config                  | Tooltip/table text for regions without data      |
+| `minOpacity`                       | `number`                                                                                      | `0.18`                  |                                                  |
+| `label`                            | `string`                                                                                      | `''`                    | `aria-label` of the svg                          |
+| `locale`, `valueFormat`, `loading` | as usual                                                                                      |                         |                                                  |
+| events                             | `regionClick` / `onRegionClick({ id, name, value })`, `markerClick` / `onMarkerClick(marker)` |                         |                                                  |
+
+DOM:
+
+```html
+<div class="kc-chart kc-map" style="--kc-map-fill: <color>; --kc-map-min: 18%">
+  <div class="kc-plot">
+    <svg class="kc-svg kc-map__svg" viewBox="0 0 800 614" role="group" aria-label="…">
+      <defs>
+        <pattern
+          id="<unique per instance>"
+          width="6"
+          height="6"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <rect class="kc-map__hatch-bg" width="6" height="6" />
+          <line class="kc-map__hatch-line" x1="0" y1="0" x2="0" y2="6" />
+        </pattern>
+      </defs>
+      <path class="kc-map__claim" d="…" fill="url(#<id>)" />
+      <!-- showClaimZone; drawn first -->
+      <!-- regions: those without data first, with data next, highlighted last (so outlines stay visible) -->
+      <path
+        class="kc-map__region kc-map__region--empty"
+        d="…"
+        role="img"
+        tabindex="0"
+        aria-label="Lara: Sin datos"
+        data-id="VE-K"
+      />
+      <path
+        class="kc-map__region [kc-map__region--highlighted] [kc-map__region--clickable]"
+        d="…"
+        style="fill: <color>"
+        fill-opacity="0.63"
+        role="img"
+        tabindex="0"
+        aria-label="Zulia: 5.260"
+        data-id="VE-V"
+      />
+      <text class="kc-map__label" x y>Zulia</text>
+      <!-- showLabels, one per region, after all paths -->
+      <text class="kc-map__claim-label" x y>Zona en Reclamación</text>
+      <!-- showLabels && showClaimZone -->
+      <g
+        class="kc-map__marker [kc-map__marker--clickable]"
+        transform="translate(x y)"
+        style="--kc-marker-color: <color>"
+        role="img"
+        tabindex="0"
+        aria-label="UM-ZUL-02: 14"
+      >
+        <circle class="kc-map__marker-halo" r="9" />
+        <circle class="kc-map__marker-dot" r="4.5" />
+      </g>
+    </svg>
+    <kc-tooltip /> <Tooltip />
+    <!-- title = region/marker name, one row: value -->
+  </div>
+  <div class="kc-map__legend">
+    <!-- showLegend && legend.visible -->
+    <span class="kc-map__legend-min">0</span>
+    <span class="kc-map__legend-bar"></span>
+    <span class="kc-map__legend-max">5.260</span>
+    <span class="kc-map__legend-empty"><i class="kc-map__legend-swatch"></i>Sin datos · 13/25</span>
+  </div>
+  <kc-chart-table … />
+  <!-- showTable: categories = names, series = [{ name: valueHeader, data: values }] -->
+</div>
+```
+
+Behaviour: hover/focus on a region or marker → tooltip anchored at `regionAnchor(region, width)`
+(marker: its x/y scaled the same way), placement `top`, rows `[{ name: valueHeader, value: valueText, color }]`;
+leave/blur hides it. Click, Enter, Space → `regionClick` with `{ id, name, value }` (value `null`
+without data). `loading` → `kc-chart-state kind="loading"` with height `round(width × 614 / 800)`.
+There is **no empty state**: an empty `data` array still draws the grey map (that is the point).
+Width comes from `observeWidth` / `useContainerWidth`.
+
+Tests (both renderers):
+
+1. renders 25 `.kc-map__region` paths and the claim path; `showClaimZone=false` removes it;
+2. regions without data have `kc-map__region--empty` and no inline fill; with data they carry
+   `fill-opacity` (max value → `1`) and the fill color;
+3. `highlight="Zulia"` → that path has `kc-map__region--highlighted` and is the last `path`;
+4. tooltip on focus shows the name and formatted value (`Zulia` / `5.260`), hides on blur;
+5. `regionClick` on click and Enter with `{ id: 'VE-V', name: 'Zulia', value: 5260 }`;
+6. markers: one `g.kc-map__marker` per marker with `aria-label`, `markerClick` on click;
+7. legend shows min/max texts and `filled/total` (`3/25`); hidden when no data or `showLegend=false`;
+8. `showLabels` renders 25 `.kc-map__label` texts; `showTable` renders 25 rows;
+9. `loading` → `[aria-busy="true"]` and no svg.
+
+Showcase (both demos): block **Mapa** between _Indicadores_ and _Barras_: one wide card
+"Ciudadanos atendidos por estado" with a two-column body (map 1.4fr · ranking list 1fr, stacking
+under 760px). Map: `data = CITIZENS_MAP`, `markers = MOBILE_UNITS`, `highlight = top ranking id`,
+`valueHeader="Ciudadanos"`, `label="Ciudadanos atendidos por estado"`. A button **Simular llegada
+de datos** fills the remaining states one every 500 ms with random values 800–3.000 (so the
+"se va llenando" behaviour is visible), and **Reiniciar** restores `CITIZENS_MAP`. The ranking
+list shows `CITIZENS_BY_STATE` (`limit=5`). "Cargando" checkbox → `loading`; "Tabla espejo" →
+`showTable`.
+
+```ts
+export const CITIZENS_MAP: MapDatum[] = [
+  { id: 'VE-V', value: 5260 },
+  { id: 'VE-M', value: 4940 },
+  { id: 'VE-A', value: 3830 },
+  { id: 'VE-G', value: 3540 },
+  { id: 'VE-K', value: 3390 },
+  { id: 'VE-B', value: 2980 },
+  { id: 'VE-F', value: 2340 },
+  { id: 'VE-D', value: 2210 },
+  { id: 'VE-S', value: 1870 },
+  { id: 'VE-L', value: 1420 },
+  { id: 'VE-I', value: 1310 },
+  { id: 'VE-N', value: 1190 },
+];
+
+export const MOBILE_UNITS: MapMarker[] = [
+  { id: 'UM-ZUL-02', lat: 10.6427, lng: -71.6125, label: 'UM-ZUL-02 · Maracaibo', value: 14 },
+  { id: 'UM-ZUL-05', lat: 10.3981, lng: -71.4451, label: 'UM-ZUL-05 · Cabimas', value: 9 },
+  { id: 'UM-LAR-04', lat: 10.0678, lng: -69.3467, label: 'UM-LAR-04 · Barquisimeto', value: 11 },
+  { id: 'UM-CAR-04', lat: 10.162, lng: -68.0077, label: 'UM-CAR-04 · Valencia', value: 11 },
+  { id: 'UM-ARA-01', lat: 10.2469, lng: -67.5958, label: 'UM-ARA-01 · Maracay', value: 8 },
+  { id: 'UM-DC-04', lat: 10.4806, lng: -66.9036, label: 'UM-DC-04 · Caracas', value: 10 },
+  { id: 'UM-MIR-04', lat: 10.2442, lng: -66.5906, label: 'UM-MIR-04 · Los Teques', value: 13 },
+  { id: 'UM-BOL-01', lat: 8.2906, lng: -62.7205, label: 'UM-BOL-01 · Puerto Ordaz', value: 7 },
+  { id: 'UM-TAC-01', lat: 7.7669, lng: -72.225, label: 'UM-TAC-01 · San Cristóbal', value: 6 },
+];
+```
+
+---
+
 ## Planned next (not in this wave)
 
-`kc-venezuela-map` / `VenezuelaMap` (core geometry in progress), `kc-line-chart`, `kc-ring-chart`,
-`kc-ranking-table`, `kc-month-calendar`, bar-chart options (`showValueAxis`, `barWidth`,
-rounded stack tops, gradient fill). Each will get its own section here before implementation.
+`kc-line-chart`, `kc-ring-chart`, `kc-ranking-table`, `kc-month-calendar`, bar-chart options
+(`showValueAxis`, `barWidth`, rounded stack tops, gradient fill). Each will get its own section
+here before implementation.

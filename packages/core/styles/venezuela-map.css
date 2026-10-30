@@ -1,0 +1,159 @@
+/* kai-charts · Venezuela choropleth map. Root element carries `.kc-map`. */
+.kc-map {
+  display: block;
+  position: relative;
+  font-family: var(--kc-font-family, inherit);
+  font-size: var(--kc-font-size, 12px);
+  color: var(--kc-text, inherit);
+}
+
+.kc-map .kc-plot {
+  position: relative;
+}
+
+.kc-map__svg {
+  display: block;
+  width: 100%;
+  height: auto; /* the viewBox keeps the aspect ratio */
+  overflow: visible;
+}
+
+.kc-map__region {
+  stroke: var(--kc-map-border, var(--kc-surface, #fff));
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  outline: none;
+  transition:
+    fill-opacity 300ms ease,
+    stroke-width 120ms ease;
+}
+
+.kc-map__region--empty {
+  fill: var(--kc-map-empty, color-mix(in srgb, currentColor 10%, transparent));
+}
+
+.kc-map__region--clickable {
+  cursor: pointer;
+}
+
+.kc-map__region:hover {
+  stroke: var(--kc-map-hover, currentColor);
+  stroke-width: 1.5;
+}
+
+.kc-map__region--highlighted {
+  stroke: var(--kc-map-highlight, currentColor);
+  stroke-width: 2;
+}
+
+.kc-map__region:focus-visible {
+  stroke: var(--kc-focus, currentColor);
+  stroke-width: 2.5;
+}
+
+/* Guayana Esequiba: hatched, dashed outline, never interactive. */
+.kc-map__claim {
+  stroke: var(--kc-map-claim, color-mix(in srgb, currentColor 40%, transparent));
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.kc-map__hatch-bg {
+  fill: var(--kc-map-empty, color-mix(in srgb, currentColor 10%, transparent));
+}
+
+.kc-map__hatch-line {
+  stroke: var(--kc-map-claim, color-mix(in srgb, currentColor 40%, transparent));
+  stroke-width: 1.5;
+}
+
+.kc-map__label,
+.kc-map__claim-label {
+  fill: var(--kc-map-label, currentColor);
+  font-size: 11px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  paint-order: stroke;
+  stroke: var(--kc-map-border, var(--kc-surface, #fff));
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.kc-map__claim-label {
+  font-style: italic;
+  opacity: 0.75;
+}
+
+.kc-map__marker {
+  outline: none;
+  cursor: default;
+}
+
+.kc-map__marker--clickable {
+  cursor: pointer;
+}
+
+.kc-map__marker-halo {
+  fill: var(--kc-surface, #fff);
+  fill-opacity: 0.9;
+  stroke: var(--kc-marker-color, currentColor);
+  stroke-opacity: 0.35;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.kc-map__marker-dot {
+  fill: var(--kc-marker-color, currentColor);
+}
+
+.kc-map__marker:focus-visible .kc-map__marker-halo {
+  stroke: var(--kc-focus, currentColor);
+  stroke-opacity: 1;
+}
+
+/* Legend: min · gradient · max · empty swatch · filled/total. */
+.kc-map__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--kc-muted, color-mix(in srgb, currentColor 70%, transparent));
+  font-variant-numeric: tabular-nums;
+}
+
+.kc-map__legend-bar {
+  flex: 1 1 80px;
+  max-width: 160px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--kc-map-fill, currentColor) var(--kc-map-min, 18%), transparent),
+    var(--kc-map-fill, currentColor)
+  );
+}
+
+.kc-map__legend-empty {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.kc-map__legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--kc-map-empty, color-mix(in srgb, currentColor 10%, transparent));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kc-map__region {
+    transition: none;
+  }
+}
