@@ -65,14 +65,6 @@
         <label class="check"
           ><input
             type="checkbox"
-            [checked]="showClaimZone()"
-            (change)="showClaimZone.set(!showClaimZone())"
-          />
-          Zona en Reclamación</label
-        >
-        <label class="check"
-          ><input
-            type="checkbox"
             [checked]="showCapitals()"
             (change)="showCapitals.set(!showCapitals())"
           />
@@ -124,7 +116,6 @@
         [highlight]="highlightIds()"
         [showLegend]="showLegend()"
         [showLabels]="showLabels()"
-        [showClaimZone]="showClaimZone()"
         [showCapitals]="showCapitals()"
         [minOpacity]="minOpacity()"
         [valueHeader]="valueHeader()"

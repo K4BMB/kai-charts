@@ -155,8 +155,8 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
             <p className="hint">
               Coropleta que se va llenando a medida que llegan los datos: arranca en gris y cada
               estado se pinta cuando recibe su valor (aquí llega uno cada 0,4 s; la opacidad crece
-              con el valor). Punto = capital del estado (nombre en el tooltip); Zona en Reclamación
-              rayada. Marcadores por lat/lng y resaltado de estados, en el Playground.
+              con el valor). Guayana Esequiba es un estado más. Punto = capital del estado (nombre
+              en el tooltip). Marcadores por lat/lng y resaltado de estados, en el Playground.
             </p>
             <div className="map-actions">
               <button

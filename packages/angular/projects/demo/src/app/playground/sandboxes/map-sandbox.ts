@@ -68,7 +68,6 @@ export class MapSandbox {
   protected readonly highlight = signal('');
   protected readonly showLegend = signal(true);
   protected readonly showLabels = signal(false);
-  protected readonly showClaimZone = signal(true);
   protected readonly showCapitals = signal(true);
   protected readonly minOpacity = signal(0.18);
   protected readonly valueHeader = signal('Ciudadanos');
@@ -151,7 +150,6 @@ export class MapSandbox {
       );
     if (!this.showLegend()) attrs.push(bind('showLegend', false));
     if (this.showLabels()) attrs.push('showLabels');
-    if (!this.showClaimZone()) attrs.push(bind('showClaimZone', false));
     if (!this.showCapitals()) attrs.push(bind('showCapitals', false));
     if (this.minOpacity() !== 0.18) attrs.push(attr('minOpacity', String(this.minOpacity())));
     if (this.valueHeader() !== 'Valor') attrs.push(attr('valueHeader', this.valueHeader()));

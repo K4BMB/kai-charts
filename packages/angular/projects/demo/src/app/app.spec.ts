@@ -36,7 +36,7 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-kpi-card .kc-kpi__icon svg')).toHaveLength(6);
     expect(compiled.querySelectorAll('kc-kpi-card .kc-trend')).toHaveLength(2);
     expect(compiled.querySelectorAll('kc-venezuela-map')).toHaveLength(1);
-    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region')).toHaveLength(25);
+    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region')).toHaveLength(26);
     // Showcase map: capitals in every state, no mobile-unit markers and no highlighted outline.
     expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__capital')).toHaveLength(24);
     expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__marker')).toHaveLength(0);
@@ -115,7 +115,7 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-month-calendar .kc-calendar__day')).toHaveLength(42);
     expect(compiled.querySelectorAll('kc-month-calendar .kc-calendar__dot')).toHaveLength(0);
     // The map has no empty state: it keeps drawing the grey regions without a legend.
-    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region--empty')).toHaveLength(25);
+    expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region--empty')).toHaveLength(26);
     expect(compiled.querySelector('kc-venezuela-map .kc-map__legend')).toBeNull();
 
     loading.click();

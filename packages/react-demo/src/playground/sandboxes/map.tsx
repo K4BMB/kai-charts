@@ -89,7 +89,6 @@ export function MapSandbox() {
   const [highlightText, setHighlightText] = useState('');
   const [showLegend, setShowLegend] = useState(true);
   const [showLabels, setShowLabels] = useState(false);
-  const [showClaimZone, setShowClaimZone] = useState(true);
   const [showCapitals, setShowCapitals] = useState(true);
   const [minOpacity, setMinOpacity] = useState(0.18);
   const [valueHeader, setValueHeader] = useState('Ciudadanos');
@@ -123,7 +122,6 @@ export function MapSandbox() {
     if (highlight.length > 1) props.push(`highlight={${literal(highlight)}}`);
     if (!showLegend) props.push('showLegend={false}');
     if (showLabels) props.push('showLabels');
-    if (!showClaimZone) props.push('showClaimZone={false}');
     if (!showCapitals) props.push('showCapitals={false}');
     if (minOpacity !== 0.18) props.push(`minOpacity={${minOpacity}}`);
     if (valueHeader !== 'Valor') props.push(`valueHeader="${valueHeader}"`);
@@ -140,7 +138,6 @@ export function MapSandbox() {
     highlight,
     showLegend,
     showLabels,
-    showClaimZone,
     showCapitals,
     minOpacity,
     valueHeader,
@@ -198,7 +195,6 @@ export function MapSandbox() {
           />
           <Check label="Leyenda" checked={showLegend} onChange={setShowLegend} />
           <Check label="Nombres" checked={showLabels} onChange={setShowLabels} />
-          <Check label="Zona en Reclamación" checked={showClaimZone} onChange={setShowClaimZone} />
           <Check label="Capitales" checked={showCapitals} onChange={setShowCapitals} />
           <Check label="Tabla espejo" checked={showTable} onChange={setShowTable} />
           <Check label="Cargando" checked={loading} onChange={setLoading} />
@@ -229,7 +225,6 @@ export function MapSandbox() {
           highlight={highlight}
           showLegend={showLegend}
           showLabels={showLabels}
-          showClaimZone={showClaimZone}
           showCapitals={showCapitals}
           minOpacity={minOpacity}
           valueHeader={valueHeader}
