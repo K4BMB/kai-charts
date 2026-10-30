@@ -9,6 +9,8 @@ export interface ChartTableProps {
   caption?: string;
   /** Header of the first (category) column. */
   categoryHeader?: string;
+  /** Cell text for `null`/`undefined` values (default `—`). */
+  emptyText?: string;
 }
 
 /**
@@ -21,6 +23,7 @@ export function ChartTable({
   format,
   caption = '',
   categoryHeader = '',
+  emptyText = '—',
 }: ChartTableProps) {
   return (
     <div className="kc-table-wrap">
@@ -42,7 +45,7 @@ export function ChartTable({
               <th scope="row">{category}</th>
               {series.map((s, colIndex) => {
                 const value = s.data[rowIndex];
-                return <td key={colIndex}>{value == null ? '—' : format(value)}</td>;
+                return <td key={colIndex}>{value == null ? emptyText : format(value)}</td>;
               })}
             </tr>
           ))}

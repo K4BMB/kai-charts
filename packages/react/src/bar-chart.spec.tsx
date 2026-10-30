@@ -131,6 +131,16 @@ describe('BarChart', () => {
     expect(element.querySelector('.kc-tooltip')).toBeNull();
   });
 
+  it('hides the value axis and moves the bars left with showValueAxis=false', () => {
+    const { rerender } = mount();
+    const withAxisX = num(bars()[0], 'x');
+    expect(element.querySelectorAll('text.kc-tick').length).toBeGreaterThan(CATEGORIES.length);
+
+    rerender(<BarChart categories={CATEGORIES} series={SERIES} showValueAxis={false} />);
+    expect(element.querySelectorAll('text.kc-tick')).toHaveLength(CATEGORIES.length);
+    expect(num(bars()[0], 'x')).toBeLessThan(withAxisX);
+  });
+
   it('takes locale and texts from KaiChartsProvider', () => {
     const { container } = render(
       <KaiChartsProvider config={{ locale: 'en-US', emptyText: 'No data' }}>

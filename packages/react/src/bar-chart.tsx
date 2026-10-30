@@ -47,6 +47,14 @@ export interface BarChartProps {
   /** Render the data as an accessible, printable table below the chart. */
   showTable?: boolean;
   barRadius?: number;
+  /** Share of each category band occupied by bars, 0.1–1 (default 0.7). Thin bars: 0.25. */
+  barWidth?: number;
+  /** `false` hides the value ticks and shrinks their margin (grid lines stay). */
+  showValueAxis?: boolean;
+  /** `false` hides the category labels and shrinks their margin. */
+  showCategoryAxis?: boolean;
+  /** Stacked only: round the outer corners of each stack with `barRadius`. */
+  roundStackTop?: boolean;
   /** Replace the chart by a skeleton with `aria-busy`. */
   loading?: boolean;
   /** Accessible name of the chart; also used as the table caption. */
@@ -86,6 +94,10 @@ export function BarChart({
   showGrid = true,
   showTable = false,
   barRadius = 2,
+  barWidth = 0.7,
+  showValueAxis = true,
+  showCategoryAxis = true,
+  roundStackTop = false,
   loading = false,
   label = '',
   categoryHeader,
@@ -120,6 +132,10 @@ export function BarChart({
         stacked,
         showValues,
         barRadius,
+        barWidth,
+        showValueAxis,
+        showCategoryAxis,
+        roundStackTop,
         categories,
         series: visibleSeries,
         format: formatter,
@@ -131,6 +147,10 @@ export function BarChart({
       stacked,
       showValues,
       barRadius,
+      barWidth,
+      showValueAxis,
+      showCategoryAxis,
+      roundStackTop,
       categories,
       visibleSeries,
       formatter,

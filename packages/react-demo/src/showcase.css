@@ -25,3 +25,45 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Mapa: one wide card, map 1.4fr · ranking 1fr, stacked on narrow screens. */
+.map-layout {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 760px) {
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.map-actions button {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--kc-color-1, #2563eb);
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.map-actions button.secondary {
+  background: transparent;
+  color: inherit;
+}
+
+.map-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

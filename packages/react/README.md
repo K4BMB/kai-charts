@@ -5,12 +5,15 @@ Dependency-free SVG chart and dashboard components for **React 18+**, built on t
 CSS and same behaviour as the Angular package (`kai-charts`): themed by `--kc-*` tokens,
 accessible by default, `Intl` formatting with `es-VE` by default, loading and empty states.
 
-| Component          | Use it for                                                      |
-| ------------------ | --------------------------------------------------------------- |
-| `<BarChart />`     | Vertical/horizontal, grouped/stacked bars, legend, mirror table |
-| `<KpiCard />`      | Headline indicator with icon, trend chip and subtext            |
-| `<ProgressList />` | Rows with a bar and a traffic-light tone (coverage, compliance) |
-| `<RankingList />`  | Top N with rank badge, value and bar relative to the first row  |
+| Component          | Use it for                                                         |
+| ------------------ | ------------------------------------------------------------------ |
+| `<BarChart />`     | Vertical/horizontal, grouped/stacked bars, legend, mirror table    |
+| `<LineChart />`    | Lines over categories, monotone-smooth or linear, area, end values |
+| `<RingChart />`    | Concentric progress rings with center value/trend and legend       |
+| `<VenezuelaMap />` | Choropleth of the 25 regions that fills in as data arrives         |
+| `<KpiCard />`      | Headline indicator with icon, trend chip and subtext               |
+| `<ProgressList />` | Rows with a bar and a traffic-light tone (coverage, compliance)    |
+| `<RankingList />`  | Top N with rank badge, value and bar relative to the first row     |
 
 ## Install
 
@@ -48,30 +51,133 @@ Charts are presentation-only: they receive data already shaped by your view mode
 
 ## `<BarChart />`
 
-| Prop             | Type                                        | Default    | Description                                           |
-| ---------------- | ------------------------------------------- | ---------- | ----------------------------------------------------- |
-| `categories`     | `readonly string[]`                         | —          | Category labels (required)                            |
-| `series`         | `readonly ChartSeries[]`                    | —          | `{ name, data: (number \| null)[], color? }`          |
-| `orientation`    | `'vertical' \| 'horizontal'`                | `vertical` | Use horizontal for long category names                |
-| `stacked`        | `boolean`                                   | `false`    | Stack series instead of grouping them                 |
-| `height`         | `number`                                    | `280`      | px; width follows the container (`ResizeObserver`)    |
-| `showLegend`     | `boolean \| 'auto'`                         | `'auto'`   | `'auto'` = only with 2+ series. Legend toggles series |
-| `showValues`     | `boolean`                                   | `false`    | Value at the end of each bar (total when stacked)     |
-| `showGrid`       | `boolean`                                   | `true`     |                                                       |
-| `showTable`      | `boolean`                                   | `false`    | Mirror table below the chart (a11y, print)            |
-| `barRadius`      | `number`                                    | `2`        |                                                       |
-| `loading`        | `boolean`                                   | `false`    | Skeleton with `aria-busy`                             |
-| `label`          | `string`                                    | `''`       | Accessible name; also the table caption               |
-| `categoryHeader` | `string`                                    | config     | First column header of the table                      |
-| `emptyText`      | `string`                                    | config     | Shown when every value is `null`/`undefined`          |
-| `locale`         | `string`                                    | config     | BCP 47 locale for `Intl`                              |
-| `valueFormat`    | `Intl.NumberFormatOptions \| (v) => string` | —          | e.g. `{ style: 'percent' }`                           |
-| `onBarClick`     | `(e: ChartPointEvent) => void`              | —          | Click, Enter or Space on a bar                        |
-| `className`      | `string`                                    | —          | Added to the root `.kc-chart.kc-bar-chart`            |
-| `style`          | `CSSProperties`                             | —          | Inline style of the root element                      |
+| Prop               | Type                                        | Default    | Description                                           |
+| ------------------ | ------------------------------------------- | ---------- | ----------------------------------------------------- |
+| `categories`       | `readonly string[]`                         | —          | Category labels (required)                            |
+| `series`           | `readonly ChartSeries[]`                    | —          | `{ name, data: (number \| null)[], color? }`          |
+| `orientation`      | `'vertical' \| 'horizontal'`                | `vertical` | Use horizontal for long category names                |
+| `stacked`          | `boolean`                                   | `false`    | Stack series instead of grouping them                 |
+| `height`           | `number`                                    | `280`      | px; width follows the container (`ResizeObserver`)    |
+| `showLegend`       | `boolean \| 'auto'`                         | `'auto'`   | `'auto'` = only with 2+ series. Legend toggles series |
+| `showValues`       | `boolean`                                   | `false`    | Value at the end of each bar (total when stacked)     |
+| `showGrid`         | `boolean`                                   | `true`     |                                                       |
+| `showTable`        | `boolean`                                   | `false`    | Mirror table below the chart (a11y, print)            |
+| `barRadius`        | `number`                                    | `2`        |                                                       |
+| `barWidth`         | `number`                                    | `0.7`      | Share of each band occupied by bars (thin: `0.25`)    |
+| `showValueAxis`    | `boolean`                                   | `true`     | `false` hides the value ticks and their margin        |
+| `showCategoryAxis` | `boolean`                                   | `true`     | `false` hides the category labels                     |
+| `roundStackTop`    | `boolean`                                   | `false`    | Stacked: round the outer end of each stack            |
+| `loading`          | `boolean`                                   | `false`    | Skeleton with `aria-busy`                             |
+| `label`            | `string`                                    | `''`       | Accessible name; also the table caption               |
+| `categoryHeader`   | `string`                                    | config     | First column header of the table                      |
+| `emptyText`        | `string`                                    | config     | Shown when every value is `null`/`undefined`          |
+| `locale`           | `string`                                    | config     | BCP 47 locale for `Intl`                              |
+| `valueFormat`      | `Intl.NumberFormatOptions \| (v) => string` | —          | e.g. `{ style: 'percent' }`                           |
+| `onBarClick`       | `(e: ChartPointEvent) => void`              | —          | Click, Enter or Space on a bar                        |
+| `className`        | `string`                                    | —          | Added to the root `.kc-chart.kc-bar-chart`            |
+| `style`            | `CSSProperties`                             | —          | Inline style of the root element                      |
 
 `ChartPointEvent` is `{ seriesIndex, categoryIndex, series, category, value }`. Zeros are data
 (the axis is drawn); only `null`/`undefined` values count as "no data".
+
+## `<LineChart />`
+
+```tsx
+<LineChart
+  categories={['May', 'Jun', 'Jul']}
+  series={[{ name: 'Jornadas', data: [20, 22, 26] }]}
+  area
+  showEndValues
+  label="Jornadas por mes"
+/>
+```
+
+Same data shape, legend, tooltip, table, states and config as `<BarChart />`; `null` values break
+the line into a gap. Own props:
+
+| Prop               | Type                           | Default    | Description                                       |
+| ------------------ | ------------------------------ | ---------- | ------------------------------------------------- |
+| `curve`            | `'linear' \| 'smooth'`         | `'smooth'` | Smooth = monotone cubic, never overshoots         |
+| `area`             | `boolean`                      | `false`    | Soft fill under each line                         |
+| `includeZero`      | `boolean`                      | `true`     | `false` zooms the value axis into the data range  |
+| `showValueAxis`    | `boolean`                      | `true`     | `false` = no y axis (dashboard look)              |
+| `showCategoryAxis` | `boolean`                      | `true`     |                                                   |
+| `showEndValues`    | `boolean`                      | `false`    | Last value of each series printed at the line end |
+| `pointRadius`      | `number`                       | `3`        | Points stay focusable even when tiny              |
+| `onPointClick`     | `(e: ChartPointEvent) => void` | —          | Click, Enter or Space on a point                  |
+
+## `<RingChart />`
+
+```tsx
+<RingChart
+  items={[
+    { name: 'Saldo', value: 0.917 },
+    { name: 'Emitidas', value: 0.942 },
+  ]}
+  centerLabel="Saldo"
+  centerValue={0.917}
+  centerTrend={0.038}
+/>
+```
+
+| Prop               | Type                                        | Default                                          | Description                                      |
+| ------------------ | ------------------------------------------- | ------------------------------------------------ | ------------------------------------------------ |
+| `items`            | `readonly RingItem[]`                       | `[]`                                             | `{ name, value, max? (1), color? }`, outer first |
+| `size`             | `number`                                    | `200`                                            | viewBox side; rendered width ≤ size              |
+| `thickness`, `gap` | `number`                                    | auto / `4`                                       |                                                  |
+| `centerLabel`      | `string`                                    | `''`                                             | Small text above the center value                |
+| `centerValue`      | `number \| string`                          | —                                                | Numbers formatted with `valueFormat`             |
+| `centerTrend`      | `number`                                    | —                                                | Trend chip under the value                       |
+| `invertTrend`      | `boolean`                                   | `false`                                          |                                                  |
+| `showLegend`       | `boolean`                                   | `true`                                           | Name + value per ring                            |
+| `valueFormat`      | `Intl.NumberFormatOptions \| (v) => string` | `{ style: 'percent', maximumFractionDigits: 1 }` |                                                  |
+| `onRingClick`      | `(item: RingItem, index) => void`           | —                                                | Click, Enter or Space on a ring                  |
+
+`locale`, `label`, `loading`, `emptyText`, `className` and `style` work as in every other chart.
+
+## `<VenezuelaMap />`
+
+```tsx
+<VenezuelaMap
+  data={[
+    { id: 'VE-V', value: 5260 },
+    { id: 'Miranda', value: 4940 },
+  ]}
+  markers={[{ id: 'UM-ZUL-02', lat: 10.6427, lng: -71.6125, label: 'Maracaibo', value: 14 }]}
+  highlight="VE-V"
+  valueHeader="Ciudadanos"
+  label="Ciudadanos atendidos por estado"
+  onRegionClick={({ id, name, value }) => select(id)}
+/>
+```
+
+Choropleth of the 23 states + Distrito Capital + Dependencias Federales (geometry in the core,
+Natural Earth, public domain). Regions without a value stay grey; regions with data share one
+color whose opacity grows with the value, so the map visibly fills in as data arrives. An empty
+`data` array still draws the grey map (there is no empty state). The Guayana Esequiba is drawn
+hatched by default, as in the official depiction (`showClaimZone={false}` hides it).
+
+| Prop             | Type                               | Default                 | Description                                       |
+| ---------------- | ---------------------------------- | ----------------------- | ------------------------------------------------- |
+| `data`           | `readonly MapDatum[]`              | `[]`                    | `{ id: 'VE-V' \| 'Zulia', value, label? }`        |
+| `markers`        | `readonly MapMarker[]`             | `[]`                    | `{ id, lat, lng, label?, value?, color? }`        |
+| `color`          | `string`                           | palette 1               | Fill of the regions with data                     |
+| `highlight`      | `string \| readonly string[]`      | `[]`                    | Ids or names drawn with a strong outline          |
+| `showLegend`     | `boolean`                          | `true`                  | Gradient min → max, empty swatch, `filled/total`  |
+| `showLabels`     | `boolean`                          | `false`                 | Short state names                                 |
+| `showClaimZone`  | `boolean`                          | `true`                  | Hatched Guayana Esequiba                          |
+| `claimZoneLabel` | `string`                           | `'Zona en Reclamación'` | Drawn only with `showLabels`                      |
+| `showTable`      | `boolean`                          | `false`                 | Mirror table, all 25 regions                      |
+| `valueHeader`    | `string`                           | `'Valor'`               | Tooltip row name and table column header          |
+| `emptyText`      | `string`                           | config                  | Tooltip/table text for regions without data       |
+| `minOpacity`     | `number`                           | `0.18`                  | Opacity of the lowest value (the highest is 1)    |
+| `onRegionClick`  | `(e: MapRegionClickEvent) => void` | —                       | `{ id, name, value }` (`value` null without data) |
+| `onMarkerClick`  | `(marker: MapMarker) => void`      | —                       | The original marker                               |
+
+`label`, `locale`, `valueFormat`, `loading`, `className` and `style` work as usual. Regions and
+markers are always focusable (`role="img"`, `aria-label`); the `--clickable` class is added only
+when the matching handler is provided. The width follows the container and the svg keeps the
+800 × 614 aspect ratio.
 
 ## `<KpiCard />`
 
@@ -177,8 +283,9 @@ Defaults: locale `es-VE`, `emptyText` "Sin datos", `loadingText` "Cargando…", 
 
 `Legend`, `Tooltip`, `ChartTable`, `ChartState`, `Trend` and the `useContainerWidth(ref, fallback)`
 hook are exported for custom charts, together with everything from `kai-charts-core`
-(`computeBarLayout`, `createValueFormatter`, `describeTrend`, `buildProgressRows`,
-`buildRankingRows`, `seriesColor`, `toneColor`, types…).
+(`computeBarLayout`, `computeLineLayout`, `computeRingLayout`, `buildMapModel`,
+`createValueFormatter`, `describeTrend`, `buildProgressRows`, `buildRankingRows`, `seriesColor`,
+`toneColor`, types…).
 
 ## Theming
 
@@ -186,7 +293,8 @@ The stylesheet only uses `.kc-` classes and reads the same `--kc-*` tokens as th
 package: `--kc-color-1..8` for the series palette, `--kc-radius`, `--kc-font-size`,
 `--kc-font-family`, `--kc-tooltip-bg`, `--kc-tooltip-text`, `--kc-grid`, `--kc-axis`, `--kc-text`,
 `--kc-muted`, `--kc-border`, `--kc-skeleton`, `--kc-focus`, plus `--kc-success`, `--kc-warning`,
-`--kc-danger`, `--kc-info` for tones and `--kc-kpi-accent` for the KPI icon. Everything else derives from
+`--kc-danger`, `--kc-info` for tones, `--kc-kpi-accent` for the KPI icon and `--kc-map-empty`,
+`--kc-map-border`, `--kc-map-highlight`, `--kc-map-claim` for the map. Everything else derives from
 `currentColor`, so charts follow the text color of their container (light/dark/brand) without
 configuration. The tokens are optional; to override them start from
 `kai-charts-core/styles/tokens.css`.
