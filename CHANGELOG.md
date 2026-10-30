@@ -9,10 +9,25 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- `kai-charts-core`: `buildMonthGrid`/`shiftMonth`/`monthTitle` (6-week month grid with events
-  bucketed per day and kind) and `buildTableModel` (sortable, limitable ranking table with
-  per-column formats and bar percentages), plus `month-calendar.css` and `ranking-table.css`.
-  Renderers for both follow in the next release.
+- **Month calendar** — `kc-month-calendar` / `MonthCalendar`: 6-week grid with event dots per
+  kind (tone colors), today/selected states, controlled month navigation (`monthChange`),
+  `dayClick`, legend with per-kind totals of the visible month, footer text, locale-aware weekday
+  labels (`weekStartsOn`).
+- **Ranking table** — `kc-ranking-table` / `RankingTable`: rank badge, label + sublabel,
+  numeric columns with per-column formats and an optional bar, controlled sorting from the
+  headers (`sortChange`), `limit`, `activeId`, `rowClick`, caption, loading/empty states.
+- Venezuela map: state capitals drawn as small dots in every state (`showCapitals`, default on)
+  with the capital name as a second tooltip row (`capitalHeader`); edge-aware tooltip placement
+  (`mapTooltipPlacement`) so bubbles over Zulia or Delta Amacuro stay inside the chart.
+- Core: `buildMonthGrid`/`shiftMonth`/`monthTitle`/`weekdayLabels`, `buildTableModel`,
+  `capital` on `MapRegionGeometry` and `capitalPoint` on `MapRegionView`; `TooltipRow.color` is
+  optional (rows without swatch); `month-calendar.css`, `ranking-table.css`.
+- Demos: "Calendario de jornadas" and "Ranking de eficiencia por unidad móvil" cards; the
+  showcase map now shows capitals instead of sample markers and no highlighted outline.
+
+### Changed
+
+- Highlighted map regions use a 1.5 px outline (was 2 px).
 
 ## [0.3.0] - 2026-10-30
 
