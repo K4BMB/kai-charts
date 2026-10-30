@@ -16,6 +16,13 @@ export { RankingList, type RankingListProps } from './ranking-list';
 export { VenezuelaMap, type MapRegionClickEvent, type VenezuelaMapProps } from './venezuela-map';
 export { LineChart, type LineChartProps } from './line-chart';
 export { RingChart, type RingChartProps } from './ring-chart';
+export { MonthCalendar, type MonthCalendarProps, type MonthChangeEvent } from './month-calendar';
+export {
+  RankingTable,
+  type RankingTableProps,
+  type SortChangeEvent,
+  type SortDirection,
+} from './ranking-table';
 
 // Component styles. Vite extracts them to `dist/kai-charts-react.css`; consumers import
 // 'kai-charts-react/styles.css' once (tokens are optional: 'kai-charts-core/styles/tokens.css').

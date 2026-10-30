@@ -1,10 +1,14 @@
 import type {
+  CalendarEvent,
+  CalendarKind,
   ChartSeries,
   MapDatum,
   MapMarker,
   ProgressItem,
   RankingItem,
   RingItem,
+  TableColumn,
+  TableRow,
 } from 'kai-charts-react';
 
 export interface BarSample {
@@ -181,4 +185,72 @@ export const RINGS: RingItem[] = [
   { name: 'Saldo', value: 0.917 },
   { name: 'Emitidas', value: 0.942 },
   { name: 'Recibidas', value: 0.871 },
+];
+
+/** Tipos de evento del calendario de jornadas (leyenda y color de los puntos). */
+export const CALENDAR_KINDS: CalendarKind[] = [
+  { kind: 'done', name: 'Ejecutadas', tone: 'success' },
+  { kind: 'pending', name: 'Pendientes', tone: 'info' },
+  { kind: 'moved', name: 'Reprogramadas', tone: 'danger' },
+];
+
+/** Jornadas de octubre de 2026 (más dos de septiembre visibles en la primera semana). */
+export const CALENDAR_EVENTS: CalendarEvent[] = [
+  { date: '2026-09-28', kind: 'done' },
+  { date: '2026-09-30', kind: 'pending' },
+  { date: '2026-10-02', kind: 'pending' },
+  { date: '2026-10-05', kind: 'done', count: 2 },
+  { date: '2026-10-07', kind: 'pending' },
+  { date: '2026-10-09', kind: 'pending' },
+  { date: '2026-10-12', kind: 'done' },
+  { date: '2026-10-14', kind: 'pending' },
+  { date: '2026-10-16', kind: 'pending' },
+  { date: '2026-10-19', kind: 'done' },
+  { date: '2026-10-21', kind: 'pending' },
+  { date: '2026-10-23', kind: 'pending' },
+  { date: '2026-10-23', kind: 'moved' },
+  { date: '2026-10-26', kind: 'done' },
+  { date: '2026-10-28', kind: 'pending' },
+  { date: '2026-10-30', kind: 'pending' },
+];
+
+/** Columnas del ranking de eficiencia por unidad móvil. */
+export const RANKING_TABLE_COLUMNS: TableColumn[] = [
+  { key: 'procedures', header: 'Trámites', bar: true },
+  { key: 'avg', header: 'Tiempo medio', format: (v: number) => `${v} min` },
+  { key: 'days', header: 'Jornadas' },
+];
+
+/** Unidades móviles con su producción, tiempo medio de atención y jornadas. */
+export const RANKING_TABLE_ROWS: TableRow[] = [
+  {
+    id: 'VE-V',
+    label: 'Zulia',
+    sublabel: 'UM-ZUL-02',
+    values: { procedures: 4620, avg: 18, days: 14 },
+  },
+  {
+    id: 'VE-K',
+    label: 'Lara',
+    sublabel: 'UM-LAR-04',
+    values: { procedures: 4019, avg: 21, days: 11 },
+  },
+  {
+    id: 'VE-G',
+    label: 'Carabobo',
+    sublabel: 'UM-CAR-04',
+    values: { procedures: 4355, avg: 22, days: 11 },
+  },
+  {
+    id: 'VE-M',
+    label: 'Miranda',
+    sublabel: 'UM-MIR-04',
+    values: { procedures: 4290, avg: 23, days: 13 },
+  },
+  {
+    id: 'VE-A',
+    label: 'Dtto. Capital',
+    sublabel: 'UM-DC-04',
+    values: { procedures: 3980, avg: 27, days: 10 },
+  },
 ];

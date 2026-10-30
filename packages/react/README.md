@@ -5,15 +5,17 @@ Dependency-free SVG chart and dashboard components for **React 18+**, built on t
 CSS and same behaviour as the Angular package (`kai-charts`): themed by `--kc-*` tokens,
 accessible by default, `Intl` formatting with `es-VE` by default, loading and empty states.
 
-| Component          | Use it for                                                         |
-| ------------------ | ------------------------------------------------------------------ |
-| `<BarChart />`     | Vertical/horizontal, grouped/stacked bars, legend, mirror table    |
-| `<LineChart />`    | Lines over categories, monotone-smooth or linear, area, end values |
-| `<RingChart />`    | Concentric progress rings with center value/trend and legend       |
-| `<VenezuelaMap />` | Choropleth of the 25 regions that fills in as data arrives         |
-| `<KpiCard />`      | Headline indicator with icon, trend chip and subtext               |
-| `<ProgressList />` | Rows with a bar and a traffic-light tone (coverage, compliance)    |
-| `<RankingList />`  | Top N with rank badge, value and bar relative to the first row     |
+| Component           | Use it for                                                         |
+| ------------------- | ------------------------------------------------------------------ |
+| `<BarChart />`      | Vertical/horizontal, grouped/stacked bars, legend, mirror table    |
+| `<LineChart />`     | Lines over categories, monotone-smooth or linear, area, end values |
+| `<RingChart />`     | Concentric progress rings with center value/trend and legend       |
+| `<VenezuelaMap />`  | Choropleth of the 25 regions that fills in as data arrives         |
+| `<KpiCard />`       | Headline indicator with icon, trend chip and subtext               |
+| `<ProgressList />`  | Rows with a bar and a traffic-light tone (coverage, compliance)    |
+| `<RankingList />`   | Top N with rank badge, value and bar relative to the first row     |
+| `<RankingTable />`  | Sortable columns, rank badge, label + sublabel, per-column bars    |
+| `<MonthCalendar />` | Month grid with event dots per kind, legend totals, controlled nav |
 
 ## Install
 
@@ -266,6 +268,97 @@ const citizens: RankingItem[] = [
 | `className`   | `string`                                    | —       | Added to the root `.kc-chart.kc-ranking`                             |
 | `style`       | `CSSProperties`                             | —       |                                                                      |
 
+## `<RankingTable />`
+
+```tsx
+const columns: TableColumn[] = [
+  { key: 'procedures', header: 'Trámites', bar: true },
+  { key: 'avg', header: 'Tiempo medio', format: (v: number) => `${v} min` },
+];
+const rows: TableRow[] = [
+  { id: 'VE-V', label: 'Zulia', sublabel: 'UM-ZUL-02', values: { procedures: 4620, avg: 18 } },
+  { id: 'VE-K', label: 'Lara', sublabel: 'UM-LAR-04', values: { procedures: 4019, avg: 21 } },
+];
+
+const [sort, setSort] = useState<SortChangeEvent>({ key: 'procedures', direction: 'desc' });
+<RankingTable
+  rows={rows}
+  columns={columns}
+  sortBy={sort.key}
+  sortDirection={sort.direction}
+  onSortChange={setSort}
+/>;
+```
+
+| Prop                             | Type                                        | Default             | Description                                                                        |
+| -------------------------------- | ------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------- |
+| `rows`                           | `readonly TableRow[]`                       | `[]`                | `{ id?, label, sublabel?, color?, values: Record<key, number \| string \| null> }` |
+| `columns`                        | `readonly TableColumn[]`                    | `[]`                | `{ key, header, type?, format?, bar?, align? }`; `text` columns are not sortable   |
+| `entityHeader`                   | `string`                                    | `'Estado / Unidad'` | Header of the label column                                                         |
+| `sortBy`                         | `string`                                    | —                   | Controlled: header clicks only call `onSortChange`                                 |
+| `sortDirection`                  | `'desc' \| 'asc'`                           | `'desc'`            |                                                                                    |
+| `limit`                          | `number`                                    | —                   | Rows kept after sorting                                                            |
+| `activeId`                       | `string`                                    | —                   | Row drawn with the `--active` class                                                |
+| `showRank`                       | `boolean`                                   | `true`              | Rank badge (filled on the first row)                                               |
+| `caption`                        | `string`                                    | `''`                | Visible `<caption>`                                                                |
+| `label`                          | `string`                                    | `''`                | `aria-label` of the table when there is no caption                                 |
+| `valueFormat`                    | `Intl.NumberFormatOptions \| (v) => string` | —                   | Table-wide format; a column `format` wins                                          |
+| `locale`, `loading`, `emptyText` | as usual                                    |                     | Skeleton height `rows.length * 52`                                                 |
+| `onRowClick`                     | `(row: TableRow, index) => void`            | —                   | The original row (matched by `id`/`label`) and its index in `rows`                 |
+| `onSortChange`                   | `(e: SortChangeEvent) => void`              | —                   | `{ key, direction }`: same key toggles `desc → asc → desc`, new key `desc`         |
+| `className`                      | `string`                                    | —                   | Added to the root `.kc-chart.kc-ranking-table`                                     |
+| `style`                          | `CSSProperties`                             | —                   |                                                                                    |
+
+Numeric headers are real `<button>`s with `aria-sort`; `null` values render as `—` and sink to
+the bottom whatever the direction. Bars (`bar: true`) are relative to the column maximum.
+
+## `<MonthCalendar />`
+
+```tsx
+const kinds: CalendarKind[] = [
+  { kind: 'done', name: 'Ejecutadas', tone: 'success' },
+  { kind: 'pending', name: 'Pendientes', tone: 'info' },
+];
+const events: CalendarEvent[] = [
+  { date: '2026-10-05', kind: 'done', count: 2 },
+  { date: '2026-10-09', kind: 'pending' },
+];
+
+const [period, setPeriod] = useState({ year: 2026, month: 10 });
+<MonthCalendar
+  year={period.year}
+  month={period.month}
+  events={events}
+  kinds={kinds}
+  selected="2026-10-09"
+  footer="Cumplimiento: 89,3 %"
+  onMonthChange={setPeriod}
+  onDayClick={(day) => open(day.iso, day.events)}
+/>;
+```
+
+| Prop            | Type                             | Default       | Description                                                      |
+| --------------- | -------------------------------- | ------------- | ---------------------------------------------------------------- |
+| `year`, `month` | `number`                         | current month | `month` 1–12. Controlled: update them on `onMonthChange`         |
+| `events`        | `readonly CalendarEvent[]`       | `[]`          | `{ date: 'YYYY-MM-DD', kind, label?, count? }`                   |
+| `kinds`         | `readonly CalendarKind[]`        | `[]`          | `{ kind, name, tone?, color? }` → legend entries and dot colors  |
+| `selected`      | `string`                         | —             | ISO date drawn as selected (`aria-pressed`)                      |
+| `today`         | `string`                         | local today   | ISO date drawn as today (override in tests/snapshots)            |
+| `weekStartsOn`  | `number`                         | `1`           | `0` = Sunday                                                     |
+| `showLegend`    | `boolean`                        | `true`        | One total per kind                                               |
+| `showNav`       | `boolean`                        | `true`        | Previous/next month buttons                                      |
+| `footer`        | `string`                         | `''`          | Text under the legend; the part after the first `:` goes in bold |
+| `label`         | `string`                         | `''`          | `aria-label` of the grid                                         |
+| `locale`        | `string`                         | config        | Month title and weekday names                                    |
+| `loading`       | `boolean`                        | `false`       | Skeleton of 320 px                                               |
+| `onDayClick`    | `(day: CalendarDayView) => void` | —             | Click, Enter or Space on a day (`iso`, `events`, `dots`…)        |
+| `onMonthChange` | `(e: { year, month }) => void`   | —             | Target month computed with `shiftMonth(year, month, ±1)`         |
+| `className`     | `string`                         | —             | Added to the root `.kc-chart.kc-calendar`                        |
+| `style`         | `CSSProperties`                  | —             |                                                                  |
+
+The grid is always 6 × 7 (stable height); days outside the month are muted, weekends get the
+`--weekend` class and each day exposes an `aria-label` with its events (`lunes 5: 2 Ejecutadas`).
+
 ### Global configuration
 
 ```tsx
@@ -283,9 +376,9 @@ Defaults: locale `es-VE`, `emptyText` "Sin datos", `loadingText` "Cargando…", 
 
 `Legend`, `Tooltip`, `ChartTable`, `ChartState`, `Trend` and the `useContainerWidth(ref, fallback)`
 hook are exported for custom charts, together with everything from `kai-charts-core`
-(`computeBarLayout`, `computeLineLayout`, `computeRingLayout`, `buildMapModel`,
-`createValueFormatter`, `describeTrend`, `buildProgressRows`, `buildRankingRows`, `seriesColor`,
-`toneColor`, types…).
+(`computeBarLayout`, `computeLineLayout`, `computeRingLayout`, `buildMapModel`, `buildMonthGrid`,
+`shiftMonth`, `buildTableModel`, `createValueFormatter`, `describeTrend`, `buildProgressRows`,
+`buildRankingRows`, `seriesColor`, `toneColor`, types…).
 
 ## Theming
 

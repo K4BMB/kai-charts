@@ -8,6 +8,11 @@
   margin: 0 0 12px;
 }
 
+/* Full-width card (ranking table) above a card grid inside the same block. */
+.block > .card + .grid {
+  margin-top: 16px;
+}
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

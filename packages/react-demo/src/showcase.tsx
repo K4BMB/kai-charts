@@ -3,22 +3,30 @@ import {
   BarChart,
   KpiCard,
   LineChart,
+  MonthCalendar,
   ProgressList,
   RankingList,
+  RankingTable,
   RingChart,
   VENEZUELA_STATES,
   VenezuelaMap,
+  type CalendarDayView,
   type ChartPointEvent,
   type MapDatum,
   type MapMarker,
   type MapRegionClickEvent,
+  type MonthChangeEvent,
   type ProgressItem,
   type RankingItem,
   type RingItem,
+  type SortChangeEvent,
+  type TableRow,
 } from 'kai-charts-react';
 import { KpiIcon } from './kpi-icon';
 import {
   AGE_RANGE,
+  CALENDAR_EVENTS,
+  CALENDAR_KINDS,
   CITIZENS_BY_STATE,
   CITIZENS_MAP,
   DENSITY,
@@ -30,6 +38,8 @@ import {
   PROCEDURES_BY_DAY,
   PROCEDURES_BY_TYPE,
   PROCEDURES_BY_TYPE_PHASE_1,
+  RANKING_TABLE_COLUMNS,
+  RANKING_TABLE_ROWS,
   RINGS,
   SYNC_STATE,
 } from './sample-data';
@@ -53,6 +63,11 @@ const PERCENT: Intl.NumberFormatOptions = { style: 'percent', maximumFractionDig
 const TOP_STATE = 'VE-V';
 const ARRIVAL_INTERVAL_MS = 500;
 const NO_MARKERS: MapMarker[] = [];
+/** Month shown by the calendar at start; `selected`/`today` fall inside it. */
+const CALENDAR_START: MonthChangeEvent = { year: 2026, month: 10 };
+const CALENDAR_DAY = '2026-10-09';
+/** Initial sort of the ranking table (the host owns it and updates it on `onSortChange`). */
+const TABLE_SORT: SortChangeEvent = { key: 'procedures', direction: 'desc' };
 
 /** Adds one random state without data (value 800–3.000); returns the same array when complete. */
 function nextArrival(current: MapDatum[]): MapDatum[] {
@@ -68,6 +83,9 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
   const [lastEvent, setLastEvent] = useState<LastEvent | null>(null);
   const [mapData, setMapData] = useState<MapDatum[]>(CITIZENS_MAP);
   const [simulating, setSimulating] = useState(false);
+  // Controlled calendar month and table sort: the components only ask, the host decides.
+  const [calendarMonth, setCalendarMonth] = useState<MonthChangeEvent>(CALENDAR_START);
+  const [tableSort, setTableSort] = useState<SortChangeEvent>(TABLE_SORT);
 
   // Data arrival simulation: one more state every 500 ms until the 25 regions have a value.
   useEffect(() => {
@@ -102,6 +120,10 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
     });
   const onRingClick = (item: RingItem) =>
     setLastEvent({ label: item.name, source: 'Anillos', value: item.value });
+  const onUnitClick = (row: TableRow) =>
+    setLastEvent({ label: row.label, source: 'Unidad móvil', value: row.values.procedures ?? '—' });
+  const onDayClick = (day: CalendarDayView) =>
+    setLastEvent({ label: day.iso, source: 'Día', value: day.events.length });
   const common = { loading, showTable, onBarClick };
 
   return (
@@ -301,6 +323,23 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
 
         <section className="block">
           <h2 className="block__title">Listas y anillos</h2>
+          <section className="card">
+            <h2>Ranking de eficiencia por unidad móvil</h2>
+            <p className="hint">
+              Producción y tiempo medio de atención por trámite · clic en una cabecera numérica para
+              ordenar
+            </p>
+            <RankingTable
+              rows={empty ? [] : RANKING_TABLE_ROWS}
+              columns={RANKING_TABLE_COLUMNS}
+              sortBy={tableSort.key}
+              sortDirection={tableSort.direction}
+              loading={loading}
+              label="Ranking de eficiencia por unidad móvil"
+              onSortChange={setTableSort}
+              onRowClick={onUnitClick}
+            />
+          </section>
           <div className="grid">
             <section className="card">
               <h2>Densidad de atención por región</h2>
@@ -343,6 +382,27 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
                 onRingClick={onRingClick}
               />
             </section>
+
+            <section className="card">
+              <h2>Calendario de jornadas</h2>
+              <p className="hint">
+                Puntos por tipo de evento, mes navegable; el host controla el mes y recibe el día
+                clicado
+              </p>
+              <MonthCalendar
+                year={calendarMonth.year}
+                month={calendarMonth.month}
+                events={empty ? [] : CALENDAR_EVENTS}
+                kinds={CALENDAR_KINDS}
+                selected={CALENDAR_DAY}
+                today={CALENDAR_DAY}
+                footer="Cumplimiento: 89,3 %"
+                loading={loading}
+                label="Calendario de jornadas"
+                onMonthChange={setCalendarMonth}
+                onDayClick={onDayClick}
+              />
+            </section>
           </div>
         </section>
       </main>
@@ -355,8 +415,9 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
         ) : (
           <>
             Haz clic (o Enter/Espacio con el teclado) sobre una barra, un punto, un estado, un
-            anillo o una fila para ver los eventos <code>onBarClick</code> /{' '}
-            <code>onPointClick</code> / <code>onRegionClick</code> / <code>onItemClick</code>.
+            anillo, una fila o un día para ver los eventos <code>onBarClick</code> /{' '}
+            <code>onPointClick</code> / <code>onRegionClick</code> / <code>onItemClick</code> /{' '}
+            <code>onRowClick</code> / <code>onDayClick</code>.
           </>
         )}
       </footer>
