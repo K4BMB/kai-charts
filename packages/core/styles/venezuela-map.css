@@ -18,6 +18,9 @@
   overflow: visible;
 }
 
+/* Every region shares one border style: same color and width, never dashed, never thickened
+   on hover (hover darkens the fill instead) — the only exceptions are the explicit `highlight`
+   input and the keyboard focus ring. */
 .kc-map__region {
   stroke: var(--kc-map-border, var(--kc-surface, #fff));
   stroke-width: 1;
@@ -26,7 +29,7 @@
   outline: none;
   transition:
     fill-opacity 300ms ease,
-    stroke-width 120ms ease;
+    filter 120ms ease;
 }
 
 .kc-map__region--empty {
@@ -38,8 +41,7 @@
 }
 
 .kc-map__region:hover {
-  stroke: var(--kc-map-hover, currentColor);
-  stroke-width: 1.5;
+  filter: brightness(0.9);
 }
 
 .kc-map__region--highlighted {
@@ -52,26 +54,7 @@
   stroke-width: 2.5;
 }
 
-/* Guayana Esequiba: hatched, dashed outline, never interactive. */
-.kc-map__claim {
-  stroke: var(--kc-map-claim, color-mix(in srgb, currentColor 40%, transparent));
-  stroke-width: 1;
-  stroke-dasharray: 4 3;
-  vector-effect: non-scaling-stroke;
-  pointer-events: none;
-}
-
-.kc-map__hatch-bg {
-  fill: var(--kc-map-empty, color-mix(in srgb, currentColor 10%, transparent));
-}
-
-.kc-map__hatch-line {
-  stroke: var(--kc-map-claim, color-mix(in srgb, currentColor 40%, transparent));
-  stroke-width: 1.5;
-}
-
-.kc-map__label,
-.kc-map__claim-label {
+.kc-map__label {
   fill: var(--kc-map-label, currentColor);
   font-size: 11px;
   text-anchor: middle;
@@ -81,11 +64,6 @@
   stroke: var(--kc-map-border, var(--kc-surface, #fff));
   stroke-width: 3;
   stroke-linejoin: round;
-}
-
-.kc-map__claim-label {
-  font-style: italic;
-  opacity: 0.75;
 }
 
 .kc-map__marker {

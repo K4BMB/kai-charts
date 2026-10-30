@@ -1,17 +1,23 @@
-/* kai-charts · tooltip (absolutely positioned inside `.kc-plot`) */
+/* kai-charts · tooltip (absolutely positioned inside `.kc-plot`). Semi-transparent so the chart
+   underneath stays visible; `--kc-tooltip-opacity: 1` makes it solid again. */
 .kc-tooltip {
   position: absolute;
   z-index: 10;
   min-width: 120px;
   padding: 6px 10px;
   border-radius: var(--kc-radius, 6px);
-  background: var(--kc-tooltip-bg, #1f2937);
+  background: color-mix(
+    in srgb,
+    var(--kc-tooltip-bg, #1f2937) calc(var(--kc-tooltip-opacity, 0.82) * 100%),
+    transparent
+  );
   color: var(--kc-tooltip-text, #f9fafb);
   font-family: var(--kc-font-family, inherit);
   font-size: var(--kc-font-size, 12px);
   line-height: 1.4;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgb(0 0 0 / 0.18);
+  backdrop-filter: blur(3px);
   transform: translate(-50%, calc(-100% - 8px));
   pointer-events: none;
 }

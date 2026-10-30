@@ -1,6 +1,6 @@
 {
   "name": "kai-charts-core",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Framework-agnostic core of kai-charts: layouts, scales, Intl formatting, palette tokens and CSS. Used by kai-charts (Angular) and kai-charts-react.",
   "license": "MIT",
   "author": "Kaissar Mahfoud",

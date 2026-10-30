@@ -1,6 +1,5 @@
 import { createValueFormatter } from './format.js';
 import {
-  VENEZUELA_CLAIM_ZONE,
   VENEZUELA_STATES,
   VENEZUELA_VIEWBOX,
   buildMapModel,
@@ -39,20 +38,27 @@ function pathContains(d: string, x: number, y: number): boolean {
 }
 
 describe('Venezuela geometry', () => {
-  it('ships the 23 states, Distrito Capital and Dependencias Federales', () => {
-    expect(VENEZUELA_STATES).toHaveLength(25);
+  it('ships the 24 states (Guayana Esequiba included), Distrito Capital and Dependencias Federales', () => {
+    expect(VENEZUELA_STATES).toHaveLength(26);
     const ids = VENEZUELA_STATES.map((s) => s.id);
     expect(ids).toContain('VE-A');
     expect(ids).toContain('VE-Z');
+    expect(ids).toContain('VE-GE');
     expect(ids).not.toContain('VE-Q');
+    expect(ids).not.toContain('VE-ZR');
     expect(VENEZUELA_STATES.find((s) => s.id === 'VE-X')?.name).toBe('La Guaira');
-    expect(VENEZUELA_CLAIM_ZONE.name).toBe('Zona en Reclamación');
+    // Guayana Esequiba is a regular region: same shape data as any other state, nothing special.
+    const esequiba = VENEZUELA_STATES.find((s) => s.id === 'VE-GE')!;
+    expect(esequiba.name).toBe('Guayana Esequiba');
+    expect(esequiba.short).toBe('G. Esequiba');
+    expect(esequiba.path.startsWith('M')).toBe(true);
   });
 
   it('places every state capital inside its own state polygon', () => {
     const withCapital = VENEZUELA_STATES.filter((s) => s.capital);
-    expect(withCapital).toHaveLength(24); // all but Dependencias Federales
+    expect(withCapital).toHaveLength(24); // all but Dependencias Federales and Guayana Esequiba
     expect(VENEZUELA_STATES.find((s) => s.id === 'VE-W')?.capital).toBeUndefined();
+    expect(VENEZUELA_STATES.find((s) => s.id === 'VE-GE')?.capital).toBeUndefined();
     for (const state of withCapital) {
       const { x, y } = projectVenezuela(state.capital!.lat, state.capital!.lng);
       expect(pathContains(state.path, x, y), `${state.capital!.name} inside ${state.name}`).toBe(
@@ -100,7 +106,11 @@ describe('normalizeRegionId', () => {
     expect(normalizeRegionId('Caracas')).toBe('VE-A');
     expect(normalizeRegionId('Vargas')).toBe('VE-X');
     expect(normalizeRegionId('La Guaira')).toBe('VE-X');
-    expect(normalizeRegionId('Esequibo')).toBe('VE-ZR');
+    expect(normalizeRegionId('Esequibo')).toBe('VE-GE');
+    expect(normalizeRegionId('Guayana Esequiba')).toBe('VE-GE');
+    expect(normalizeRegionId('ve-ge')).toBe('VE-GE');
+    // Id used before 0.5 for the same region.
+    expect(normalizeRegionId('VE-ZR')).toBe('VE-GE');
   });
 
   it('returns undefined for unknown input', () => {
@@ -121,7 +131,7 @@ describe('buildMapModel', () => {
   it('joins values to regions, scales opacity between min and max and reports unmatched ids', () => {
     const model = buildMapModel(data, [], es);
     const byId = Object.fromEntries(model.regions.map((r) => [r.id, r]));
-    expect(model.total).toBe(25);
+    expect(model.total).toBe(26);
     expect(model.filled).toBe(3);
     expect(model.unmatched).toEqual(['Narnia']);
     expect(byId['VE-V']).toMatchObject({

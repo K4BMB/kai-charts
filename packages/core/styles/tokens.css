@@ -40,6 +40,7 @@
    * --kc-focus: currentColor;                                      keyboard focus ring
    * --kc-tooltip-bg: #1f2937;
    * --kc-tooltip-text: #f9fafb;
+   * --kc-tooltip-opacity: 0.82;                                    1 = solid tooltip
    * --kc-font-family: inherit;
    * --kc-font-size: 12px;
    * --kc-radius: 6px;

@@ -55,7 +55,6 @@ export {
   type RankingSort,
 } from './ranking.js';
 export {
-  VENEZUELA_CLAIM_ZONE,
   VENEZUELA_STATES,
   VENEZUELA_VIEWBOX,
   buildMapModel,

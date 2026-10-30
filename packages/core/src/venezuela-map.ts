@@ -4,13 +4,12 @@ import { clamp } from './tone.js';
 import { ValueFormatter } from './types.js';
 import {
   MapRegionGeometry,
-  VENEZUELA_CLAIM_ZONE,
   VENEZUELA_PROJECTION,
   VENEZUELA_STATES,
   VENEZUELA_VIEWBOX,
 } from './data/venezuela.js';
 
-export { VENEZUELA_CLAIM_ZONE, VENEZUELA_STATES, VENEZUELA_VIEWBOX, type MapRegionGeometry };
+export { VENEZUELA_STATES, VENEZUELA_VIEWBOX, type MapRegionGeometry };
 
 /** A value for one region. `id` may be an ISO 3166-2 code (`VE-V`) or the state name. */
 export interface MapDatum {
@@ -93,28 +92,28 @@ const ALIASES: Record<string, string> = {
   'estado vargas': 'VE-X',
   'dependencias federales': 'VE-W',
   'dep federales': 'VE-W',
-  esequibo: 'VE-ZR',
-  'guayana esequiba': 'VE-ZR',
-  'zona en reclamacion': 'VE-ZR',
+  esequibo: 'VE-GE',
+  'estado guayana esequiba': 'VE-GE',
+  'zona en reclamacion': 'VE-GE',
+  // Id used by kai-charts < 0.5 for the same region.
+  've zr': 'VE-GE',
 };
 
 const BY_NAME = new Map<string, string>();
-for (const region of [...VENEZUELA_STATES, VENEZUELA_CLAIM_ZONE]) {
+for (const region of VENEZUELA_STATES) {
   BY_NAME.set(fold(region.name), region.id);
   BY_NAME.set(fold(region.short), region.id);
 }
 for (const [alias, id] of Object.entries(ALIASES)) BY_NAME.set(alias, id);
 
 /**
- * Resolves `VE-V`, `ve-v`, `Zulia`, `zulia`, `Dtto. Capital`, `Vargas`… to the ISO 3166-2 id.
- * Returns `undefined` for unknown input.
+ * Resolves `VE-V`, `ve-v`, `Zulia`, `zulia`, `Dtto. Capital`, `Vargas`… to the region id
+ * (ISO 3166-2 code, or `VE-GE` for Guayana Esequiba). Returns `undefined` for unknown input.
  */
 export function normalizeRegionId(input: string): string | undefined {
   const trimmed = input.trim();
   const iso = trimmed.toUpperCase();
-  if (/^VE-[A-Z]{1,2}$/.test(iso)) {
-    return VENEZUELA_STATES.some((s) => s.id === iso) || iso === 'VE-ZR' ? iso : undefined;
-  }
+  if (/^VE-[A-Z]{1,2}$/.test(iso) && VENEZUELA_STATES.some((s) => s.id === iso)) return iso;
   return BY_NAME.get(fold(trimmed));
 }
 
