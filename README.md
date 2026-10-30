@@ -25,13 +25,29 @@ editable data panel (categories, series, every number) and generates the code to
 
 ## Components
 
-| Component     | Angular            | React          | Status  |
-| ------------- | ------------------ | -------------- | ------- |
-| Bar chart     | `kc-bar-chart`     | `BarChart`     | ✅ v0.1 |
-| Donut chart   | `kc-donut-chart`   | `DonutChart`   | planned |
-| Line chart    | `kc-line-chart`    | `LineChart`    | planned |
-| KPI card      | `kc-kpi-card`      | `KpiCard`      | planned |
-| Progress list | `kc-progress-list` | `ProgressList` | planned |
+| Component      | Angular             | React           | Status  |
+| -------------- | ------------------- | --------------- | ------- |
+| Bar chart      | `kc-bar-chart`      | `BarChart`      | ✅ v0.1 |
+| KPI card       | `kc-kpi-card`       | `KpiCard`       | ✅ v0.2 |
+| Progress list  | `kc-progress-list`  | `ProgressList`  | ✅ v0.2 |
+| Ranking list   | `kc-ranking-list`   | `RankingList`   | ✅ v0.2 |
+| Venezuela map  | `kc-venezuela-map`  | `VenezuelaMap`  | ✅ v0.3 |
+| Line chart     | `kc-line-chart`     | `LineChart`     | ✅ v0.3 |
+| Ring chart     | `kc-ring-chart`     | `RingChart`     | ✅ v0.3 |
+| Month calendar | `kc-month-calendar` | `MonthCalendar` | planned |
+| Ranking table  | `kc-ranking-table`  | `RankingTable`  | planned |
+
+Every component exists in both renderers with the same inputs, the same DOM and the same `.kc-*`
+CSS. The DOM/props/tests contract each pair follows lives in [`docs/contract.md`](docs/contract.md).
+
+**Venezuela map.** A choropleth of the 23 states + Distrito Capital + Dependencias Federales that
+fills in as data arrives: states without a value stay grey, states with data get the fill color
+with an opacity proportional to the value. Ids accept ISO 3166-2 codes (`VE-V`) or names
+(`Zulia`, `Dtto. Capital`, `Vargas`). Optional markers by `lat`/`lng` (mobile units), legend
+min → max with the filled/total counter, and the Zona en Reclamación hatched by default
+(`showClaimZone="false"` hides it). Geometry comes from Natural Earth (public domain), simplified
+with shared borders so neighbouring states never overlap or leave gaps, and ships inside
+`kai-charts-core` (≈32 KB) — no external data files.
 
 Out of scope for v1: zoom, complex animations, export.
 
