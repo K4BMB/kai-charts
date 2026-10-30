@@ -6,7 +6,7 @@ import {
   type MapMarker,
   type MapRegionClickEvent,
 } from 'kai-charts-react';
-import { CITIZENS_MAP, MOBILE_UNITS } from '../../sample-data';
+import { CITIZENS_MAP } from '../../sample-data';
 import { Check, ColorField, LocaleFormatFields, RangeField, TextField } from '../fields';
 import { RowsEditor, type RowsColumn } from '../rows-editor';
 import { SandboxLayout, type LastEvent } from '../sandbox-layout';
@@ -45,13 +45,9 @@ const MARKER_COLUMNS: RowsColumn<MarkerRow>[] = [
 ];
 
 const INITIAL_STATES: StateRow[] = CITIZENS_MAP.map((d) => ({ id: d.id, value: d.value ?? null }));
-const INITIAL_MARKERS: MarkerRow[] = MOBILE_UNITS.map((m) => ({
-  id: m.id,
-  label: m.label ?? '',
-  lat: m.lat,
-  lng: m.lng,
-  value: m.value ?? null,
-}));
+// Markers (mobile units by lat/lng) start empty so the sandbox opens like the showcase: only the
+// small capital dots. "+ Marcador" adds one; the big pins are an opt-in feature, not a default.
+const INITIAL_MARKERS: MarkerRow[] = [];
 
 /** Next state without data (or the first one), with a random value. */
 const newStateRow = (rows: readonly StateRow[]): StateRow => {

@@ -453,12 +453,13 @@ Tests (both renderers):
 
 Showcase (both demos): block **Mapa** between _Indicadores_ and _Barras_: one wide card
 "Ciudadanos atendidos por estado" with a two-column body (map 1.4fr · ranking list 1fr, stacking
-under 760px). Map: `data = CITIZENS_MAP`, `markers = MOBILE_UNITS`, `highlight = top ranking id`,
-`valueHeader="Ciudadanos"`, `label="Ciudadanos atendidos por estado"`. A button **Simular llegada
-de datos** fills the remaining states one every 500 ms with random values 800–3.000 (so the
-"se va llenando" behaviour is visible), and **Reiniciar** restores `CITIZENS_MAP`. The ranking
-list shows `CITIZENS_BY_STATE` (`limit=5`). "Cargando" checkbox → `loading`; "Tabla espejo" →
-`showTable`.
+under 760px). Map: `data` starts **empty** (every state grey), no `markers`, no `highlight`,
+`valueHeader="Ciudadanos"`, `label="Ciudadanos atendidos por estado"`; the only dots are the
+capitals. 800 ms after the page shows up the map fills in by itself, one state every 400 ms, in
+`ARRIVAL_SEQUENCE` order (the `CITIZENS_MAP` states first, then the rest with deterministic values
+below the Top 5) so the "se va llenando" behaviour is seen without clicking. **Simular llegada de
+datos** replays it from empty; **Reiniciar** empties the map. The ranking list shows
+`CITIZENS_BY_STATE` (`limit=5`). "Cargando" checkbox → `loading`; "Tabla espejo" → `showTable`.
 
 ```ts
 export const CITIZENS_MAP: MapDatum[] = [
@@ -827,15 +828,15 @@ Editors. Two reusable editors cover every chart:
   a "Quitar" button per row, "+ Fila" and "Aleatorio" (re-rolls the numeric columns) and
   "Copiar JSON". Column sets:
 
-| chart      | rows editor columns                                                                                                                                                                | initial rows                              |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `ring`     | name (text) · value (number) · max (number, default 1) · color (color)                                                                                                             | `RINGS`                                   |
-| `progress` | label (text) · value (number) · tone (select neutral/success/warning/danger/info) · caption (text)                                                                                 | `DENSITY`                                 |
-| `ranking`  | label (text) · sublabel (text) · value (number) · color (color)                                                                                                                    | `CITIZENS_BY_STATE`                       |
-| `table`    | label (text) · sublabel (text) · procedures (number) · avg (number) · days (number)                                                                                                | `RANKING_TABLE_ROWS`                      |
-| `calendar` | date (text, `YYYY-MM-DD`) · kind (select from `CALENDAR_KINDS`) · count (number)                                                                                                   | `CALENDAR_EVENTS`                         |
-| `map`      | state (select: the 25 `VENEZUELA_STATES` by `name`, value = id) · value (number); **second** rows editor "Marcadores": label (text) · lat (number) · lng (number) · value (number) | `CITIZENS_MAP` / `MOBILE_UNITS` (markers) |
-| `kpi`      | no rows: fields label (text) · value (number) · subtext (text) · trend (number, ratio) in the "Datos" section                                                                      | `KPIS[0]`                                 |
+| chart      | rows editor columns                                                                                                                                                                | initial rows                                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `ring`     | name (text) · value (number) · max (number, default 1) · color (color)                                                                                                             | `RINGS`                                                                                                          |
+| `progress` | label (text) · value (number) · tone (select neutral/success/warning/danger/info) · caption (text)                                                                                 | `DENSITY`                                                                                                        |
+| `ranking`  | label (text) · sublabel (text) · value (number) · color (color)                                                                                                                    | `CITIZENS_BY_STATE`                                                                                              |
+| `table`    | label (text) · sublabel (text) · procedures (number) · avg (number) · days (number)                                                                                                | `RANKING_TABLE_ROWS`                                                                                             |
+| `calendar` | date (text, `YYYY-MM-DD`) · kind (select from `CALENDAR_KINDS`) · count (number)                                                                                                   | `CALENDAR_EVENTS`                                                                                                |
+| `map`      | state (select: the 26 `VENEZUELA_STATES` by `name`, value = id) · value (number); **second** rows editor "Marcadores": label (text) · lat (number) · lng (number) · value (number) | `CITIZENS_MAP` / markers **empty** (the big pins are opt-in: the sandbox opens like the showcase, capitals only) |
+| `kpi`      | no rows: fields label (text) · value (number) · subtext (text) · trend (number, ratio) in the "Datos" section                                                                      | `KPIS[0]`                                                                                                        |
 
 Options per chart (all charts that format numbers also get **Locale** `es-VE/en-US/pt-BR/de-DE`
 and **Formato** `number/percent/currency/compact` as today; `ring` and `kpi` trend default to

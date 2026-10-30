@@ -8,7 +8,7 @@ import {
   VENEZUELA_STATES,
   seriesColor,
 } from 'kai-charts';
-import { CITIZENS_MAP, MOBILE_UNITS } from '../../sample-data';
+import { CITIZENS_MAP } from '../../sample-data';
 import { CodeBox } from '../editors/code-box';
 import { inputValue } from '../editors/dom';
 import { EventStatus, SandboxEvent } from '../editors/event-status';
@@ -53,15 +53,9 @@ export class MapSandbox {
   protected readonly states = signal<EditorRow[]>(
     CITIZENS_MAP.map((d) => ({ id: d.id, value: d.value ?? null })),
   );
-  protected readonly markers = signal<EditorRow[]>(
-    MOBILE_UNITS.map((m) => ({
-      id: m.id,
-      label: m.label ?? '',
-      lat: m.lat,
-      lng: m.lng,
-      value: m.value ?? null,
-    })),
-  );
+  // Markers (mobile units by lat/lng) start empty so the sandbox opens like the showcase: only the
+  // small capital dots. "+ Marcador" adds one; the big pins are an opt-in feature, not a default.
+  protected readonly markers = signal<EditorRow[]>([]);
 
   // Options
   protected readonly color = signal('');

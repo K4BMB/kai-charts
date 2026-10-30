@@ -4,7 +4,6 @@ import type {
   CalendarKind,
   ChartSeries,
   MapDatum,
-  MapMarker,
   ProgressItem,
   RankingItem,
   RingItem,
@@ -168,19 +167,6 @@ export const ARRIVAL_SEQUENCE: MapDatum[] = [
   ...VENEZUELA_STATES.filter((state) => !CITIZENS_MAP.some((d) => d.id === state.id)).map(
     (state, i) => ({ id: state.id, value: 800 + ((i * 731) % 2200) }),
   ),
-];
-
-/** Unidades móviles desplegadas (marcadores del mapa, lat/lng reales). */
-export const MOBILE_UNITS: MapMarker[] = [
-  { id: 'UM-ZUL-02', lat: 10.6427, lng: -71.6125, label: 'UM-ZUL-02 · Maracaibo', value: 14 },
-  { id: 'UM-ZUL-05', lat: 10.3981, lng: -71.4451, label: 'UM-ZUL-05 · Cabimas', value: 9 },
-  { id: 'UM-LAR-04', lat: 10.0678, lng: -69.3467, label: 'UM-LAR-04 · Barquisimeto', value: 11 },
-  { id: 'UM-CAR-04', lat: 10.162, lng: -68.0077, label: 'UM-CAR-04 · Valencia', value: 11 },
-  { id: 'UM-ARA-01', lat: 10.2469, lng: -67.5958, label: 'UM-ARA-01 · Maracay', value: 8 },
-  { id: 'UM-DC-04', lat: 10.4806, lng: -66.9036, label: 'UM-DC-04 · Caracas', value: 10 },
-  { id: 'UM-MIR-04', lat: 10.2442, lng: -66.5906, label: 'UM-MIR-04 · Los Teques', value: 13 },
-  { id: 'UM-BOL-01', lat: 8.2906, lng: -62.7205, label: 'UM-BOL-01 · Puerto Ordaz', value: 7 },
-  { id: 'UM-TAC-01', lat: 7.7669, lng: -72.225, label: 'UM-TAC-01 · San Cristóbal', value: 6 },
 ];
 
 /** Ciudadanos atendidos por jornada: dos series mensuales para la línea. */
