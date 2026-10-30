@@ -24,7 +24,7 @@ export function App() {
   }, [theme]);
 
   useEffect(() => {
-    document.title = TITLES[route];
+    document.title = TITLES[route.name];
   }, [route]);
 
   return (
@@ -37,10 +37,10 @@ export function App() {
           <p>Gráficos SVG para React 18+ · sin dependencias · colores por tokens CSS</p>
         </div>
         <nav className="nav" aria-label="Secciones">
-          <a href="#/" className={route === 'showcase' ? 'active' : undefined}>
+          <a href="#/" className={route.name === 'showcase' ? 'active' : undefined}>
             Vitrina
           </a>
-          <a href="#/playground" className={route === 'playground' ? 'active' : undefined}>
+          <a href="#/playground" className={route.name === 'playground' ? 'active' : undefined}>
             Playground
           </a>
           <a href="../angular/">Demo Angular</a>
@@ -57,7 +57,7 @@ export function App() {
               <option value="brand">Marca</option>
             </select>
           </label>
-          {route === 'showcase' && (
+          {route.name === 'showcase' && (
             <>
               <label>
                 <input
@@ -88,8 +88,8 @@ export function App() {
         </div>
       </header>
 
-      {route === 'playground' ? (
-        <Playground />
+      {route.name === 'playground' ? (
+        <Playground chart={route.chart} />
       ) : (
         <Showcase loading={loading} empty={empty} showTable={showTable} />
       )}
