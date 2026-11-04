@@ -55,22 +55,28 @@ export {
   type RankingSort,
 } from './ranking.js';
 export {
+  VENEZUELA_MAP,
   VENEZUELA_STATES,
   VENEZUELA_VIEWBOX,
   buildMapModel,
   mapTooltipPlacement,
   normalizeRegionId,
+  projectPoint,
   projectVenezuela,
   regionAnchor,
+  resolveRegionId,
   type MapDatum,
   type MapLegend,
   type MapMarker,
   type MapMarkerView,
   type MapModel,
   type MapModelOptions,
+  type MapProjection,
   type MapRegionGeometry,
   type MapRegionView,
+  type RegionMapGeometry,
 } from './venezuela-map.js';
+export { STATE_MAPS, hasStateMap, loadStateMap, type StateMapInfo } from './state-map.js';
 export {
   buildMonthGrid,
   monthTitle,

@@ -2,32 +2,18 @@
 // Geometry: Natural Earth 10m (public domain). The 23 states, Distrito Capital, Dependencias
 // Federales and the state of Guayana Esequiba (outline from the "disputed areas" layer, drawn as
 // a regular state as Venezuelan law establishes).
-// Projection: equirectangular, lon/lat → px with the parameters below (see projectVenezuela()).
+// Projection: equirectangular, lon/lat → px with the parameters below (see projectPoint()).
 // Simplified with shared borders (tolerance 0.6px at 800px wide).
-
-export interface MapRegionGeometry {
-  /** ISO 3166-2 code, e.g. `VE-V` (`VE-GE` for Guayana Esequiba, which has no ISO code). */
-  id: string;
-  name: string;
-  /** Short label for small maps. */
-  short: string;
-  /** SVG path in viewBox coordinates. */
-  path: string;
-  /** Label anchor (centroid of the largest polygon). */
-  labelX: number;
-  labelY: number;
-  /** State capital (absent for Dependencias Federales and Guayana Esequiba). */
-  capital?: { name: string; lat: number; lng: number };
-}
+import type { MapProjection, MapRegionGeometry } from './map-types.js';
 
 export const VENEZUELA_VIEWBOX = { width: 800, height: 614 } as const;
 
-export const VENEZUELA_PROJECTION = {
+export const VENEZUELA_PROJECTION: MapProjection = {
   minLng: -73.541149,
   maxLat: 12.34892,
   cosMid: 0.993720910529776,
   scale: 51.7991152962846,
-} as const;
+};
 
 /** The 26 regions of the Venezuelan map, sorted by id. */
 export const VENEZUELA_STATES: readonly MapRegionGeometry[] = [

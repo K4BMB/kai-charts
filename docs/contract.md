@@ -492,7 +492,106 @@ export const MOBILE_UNITS: MapMarker[] = [
 
 ---
 
-## Line chart — `kc-line-chart` / `LineChart`
+## State map — `kc-state-map` / `StateMap`
+
+The same choropleth as the Venezuela map, one level down: **one state, filled in municipality by
+municipality**. 26 maps (24 states incl. Guayana Esequiba, Distrito Capital, Dependencias
+Federales): 335 municipalities in total, plus Guayana Esequiba and Dependencias Federales as
+single-region maps (no municipal division). Distrito Capital (Libertador) and La Guaira (Vargas)
+also have one municipality. Every map carries the **state capital** (`geometry.capital`, none for
+Dependencias Federales and Guayana Esequiba) and every municipality its **seat**
+(`regions[].capital`, 332 of 335) so the "capital de estado y municipios" requirement holds.
+
+Core (`kai-charts-core`): `loadStateMap(state)` → `Promise<RegionMapGeometry>` by id (`VE-V`),
+name (`Zulia`) or alias (`Esequibo`); each state is a lazy chunk (2–46 KB), cached after the first
+load; rejects for unknown states (`hasStateMap()` checks first). `STATE_MAPS` lists
+`{ id, name, regions }` for pickers. `buildMapModel(data, markers, format, { geometry })` joins
+data with THAT geometry (`resolveRegionId(geometry, input)` accepts the slug id `maracaibo`, the
+name with any accents/case `Maracaibo`, the short name `J. E. Lossada` and the INE code `2308`).
+The model has `capital` (state capital projected in px) besides `regions[].capitalPoint` (seats).
+`regionAnchor(region, width, geometry.viewBox.width)` and `projectPoint(geometry.projection, lat,
+lng)` replace the national-map-only helpers inside the renderer. Municipality ids are slugs of the
+official name (`san-francisco`); `code` is the 4-digit INE code (state + municipality).
+
+Inputs / props: **all of the Venezuela map's** (`data`, `markers`, `color`, `highlight`,
+`showLegend`, `showLabels`, `showTable`, `showCapitals`, `capitalHeader`, `valueHeader`,
+`emptyText`, `minOpacity`, `label`, `locale`, `valueFormat`, `loading`, events) plus:
+
+| Input / prop       | Type                | Default                  | Notes                                                                                                       |
+| ------------------ | ------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `state`            | `string`            | `''`                     | State id, name or alias; the geometry is loaded with `loadStateMap` (skeleton meanwhile)                    |
+| `geometry`         | `RegionMapGeometry` | `undefined`              | Preloaded geometry (sync render, no skeleton); when set, `state` is ignored                                 |
+| `regionHeader`     | `string`            | `'Municipio'`            | Header of the first table column (the Venezuela map keeps the config `categoryHeader`)                      |
+| `unknownStateText` | `string`            | `'Estado no disponible'` | Text of the empty state shown when `state` is unknown (`hasStateMap` false) or the load fails               |
+| `regionClick`      | event               |                          | `{ id, name, value, code? }` — `code` is the INE code of the municipality (`undefined` on the national map) |
+
+DOM: **identical to the Venezuela map** (`.kc-chart.kc-map`, `.kc-map__region[data-id=<slug>]`,
+labels, `.kc-map__capital` seats, markers, tooltip, legend `filled/total`, table) with the state's
+own `viewBox` (`0 0 800 <height>`), plus the state capital drawn **after** the seats and before
+the markers:
+
+```html
+<circle class="kc-map__capital kc-map__capital--state" cx cy r="4.5" aria-hidden="true" />
+<!-- showCapitals && model.capital (state maps only; the national map never renders it) -->
+```
+
+Both renderers reuse the Venezuela map's implementation instead of copying it: Angular keeps one
+template (`venezuela-map.html`) and one abstract `@Directive() KcRegionMapBase` with every input,
+output, computed and handler, parameterised by an abstract `geometry` signal;
+`KcVenezuelaMap extends KcRegionMapBase` (constant `VENEZUELA_MAP`) and `KcStateMap extends
+KcRegionMapBase` (loaded geometry). React exports an internal `RegionMap({ geometry, …props })`
+that `VenezuelaMap` (geometry `VENEZUELA_MAP`) and `StateMap` (hook `useStateMap(state, geometry)`)
+render. Skeleton height while the geometry loads: `round(width × 614 / 800)`; once loaded,
+`round(width × viewBox.height / viewBox.width)`. Changing `state` shows the skeleton again and
+swaps the regions when the new chunk arrives (stale responses are ignored: keep a request token).
+Tooltip rows on a municipality: `[{ name: valueHeader, value, color }, { name: capitalHeader, value: seat }]`
+(the second only when `showCapitals` and the municipality has a seat). Everything else (hover,
+focus, click, Enter, Space, `highlight`, `showLabels` with `short`, table, legend) behaves exactly
+as on the national map.
+
+Tests (both renderers; load Zulia once with `await loadStateMap('Zulia')` in `beforeAll` and pass
+it as `geometry` for the sync cases):
+
+1. `geometry` = Zulia → 21 `.kc-map__region` with slug `data-id`s (`maracaibo`,
+   `jesus-enrique-lossada`), svg `viewBox="0 0 800 <zulia.viewBox.height>"`, no skeleton;
+2. `state="Zulia"` (no `geometry`) → `[aria-busy="true"]` skeleton first, 21 regions after the
+   promise resolves (`await fixture.whenStable()` / `await findBy…`); `state="Falcón"` afterwards →
+   skeleton again, then 25 regions;
+3. data by name and INE code (`{ id: 'Maracaibo', value: 5260 }`, `{ id: <code of cabimas>, value: 900 }`)
+   paints those two (fill-opacity `1` on the max), legend reads `2/21`;
+4. `showCapitals` (default) → 21 `circle.kc-map__capital` seats + exactly one
+   `.kc-map__capital--state` (Maracaibo); `showCapitals=false` removes all 22;
+5. tooltip on focus of `maracaibo`: title `Maracaibo`, rows `Ciudadanos 5.260` and `Capital Maracaibo`;
+6. `regionClick` on click and Enter with `{ id: 'maracaibo', name: 'Maracaibo', value: 5260, code: <code> }`;
+7. `state="Narnia"` → `kc-chart-state kind="empty"` with `Estado no disponible` and no svg;
+8. `showTable` → 21 rows, first header `Municipio` (`regionHeader`), caption = `label`;
+9. `geometry` = Guayana Esequiba (`await loadStateMap('VE-GE')`) → 1 region
+   `guayana-esequiba`, no `.kc-map__capital--state` (no capital), legend `0/1` hidden without data;
+10. the Venezuela map still renders no `.kc-map__capital--state` and its tests are untouched.
+
+Showcase (both demos): card **"Municipios por estado"** right after the _Mapa_ card, same width.
+Header row: a `<select>` labelled `Estado` with the 26 `STATE_MAPS` names (value = id, default
+`VE-V`), buttons **Simular llegada de datos** / **Reiniciar** (same wording as the national map).
+Body: `kc-state-map` / `<StateMap>` with `valueHeader="Ciudadanos"`, `label="Ciudadanos atendidos
+por municipio"`, data starting **empty** and filling in by itself 800 ms after the geometry loads,
+one municipality every 400 ms in geometry order with deterministic values
+`300 + ((i * 157) % 2500)`; selecting another state empties and restarts the arrival. Clicking a
+state on the national map above selects it here (drill-down). Hint: "Mismo mapa un nivel más
+abajo: cada estado se llena por municipios. Punto grande = capital del estado; puntos pequeños =
+capitales de municipio. Guayana Esequiba y Dependencias Federales no tienen división municipal
+oficial, así que se dibujan como una sola región."
+
+Playground: new sandbox **`state`** (label `Estado`, after `map` in the picker): options
+`state` (select of `STATE_MAPS`, default `VE-V`) · `color` · `highlight` (text) · `showLegend` ·
+`showLabels` · `showCapitals` · `showTable` · `minOpacity` · `valueHeader` · Locale/Format ·
+`loading`; data: rows editor `Municipios` with columns municipality (select of the loaded
+geometry's regions by name, value = id) · value, prefilled with the first 5 municipalities of the
+selected state and random values 300–2.800; when the state changes the rows are rebuilt for the new
+geometry. Generated code shows `<kc-state-map state="VE-V" [data]="data" …>` /
+`<StateMap state="VE-V" data={data} …/>`. Status shows `regionClick` with the municipality
+`code`.
+
+---
 
 Core: `computeLineLayout(options)` → `LineLayout` (`series[]` with `d`, `areaD`, `points[]`;
 `gridLines`, `valueTicks`, `categoryTicks`, `axisLine`, `endLabels`, `baselineY`);
@@ -790,6 +889,7 @@ sandbox of one chart. Chart ids and labels (in this order):
 | `table`    | Tabla      | `kc-ranking-table` / `RankingTable`   |
 | `calendar` | Calendario | `kc-month-calendar` / `MonthCalendar` |
 | `map`      | Mapa       | `kc-venezuela-map` / `VenezuelaMap`   |
+| `state`    | Estado     | `kc-state-map` / `StateMap`           |
 
 Unknown ids fall back to `bar`. Angular: routes `playground` → redirect to `playground/bar`,
 `playground/:chart` → `Playground` (reads the param with `input()` via `withComponentInputBinding()`
@@ -836,6 +936,7 @@ Editors. Two reusable editors cover every chart:
 | `table`    | label (text) · sublabel (text) · procedures (number) · avg (number) · days (number)                                                                                                | `RANKING_TABLE_ROWS`                                                                                             |
 | `calendar` | date (text, `YYYY-MM-DD`) · kind (select from `CALENDAR_KINDS`) · count (number)                                                                                                   | `CALENDAR_EVENTS`                                                                                                |
 | `map`      | state (select: the 26 `VENEZUELA_STATES` by `name`, value = id) · value (number); **second** rows editor "Marcadores": label (text) · lat (number) · lng (number) · value (number) | `CITIZENS_MAP` / markers **empty** (the big pins are opt-in: the sandbox opens like the showcase, capitals only) |
+| `state`    | municipality (select: the regions of the loaded `loadStateMap(state)` geometry by `name`, value = id) · value (number); rebuilt when `state` changes                               | first 5 municipalities of `VE-V`, values 300–2.800                                                               |
 | `kpi`      | no rows: fields label (text) · value (number) · subtext (text) · trend (number, ratio) in the "Datos" section                                                                      | `KPIS[0]`                                                                                                        |
 
 Options per chart (all charts that format numbers also get **Locale** `es-VE/en-US/pt-BR/de-DE`
@@ -852,6 +953,7 @@ with a table get **Tabla espejo**; `label` text where the component accepts it):
 - `table`: `sortBy` (select none/procedures/avg/days) · `sortDirection` (desc/asc) · `limit` · `showRank` · `entityHeader` (text) · `caption` (text). Header clicks update `sortBy`/`sortDirection` (controlled, as in the showcase).
 - `calendar`: `year` (number) · `month` (1–12) · `selected` (text) · `today` (text, default `2026-10-09`) · `weekStartsOn` (select lunes=1/domingo=0) · `showLegend` · `showNav` · `footer` (text). Nav clicks update year/month.
 - `map`: `color` (color) · `highlight` (text, comma-separated ids or names) · `showLegend` · `showLabels` · `showCapitals` · `minOpacity` (range 0–0.6) · `valueHeader` (text).
+- `state`: `state` (select of `STATE_MAPS`, default `VE-V`) · `color` · `highlight` (text) · `showLegend` · `showLabels` · `showCapitals` · `minOpacity` (range 0–0.6) · `valueHeader` (text). Changing `state` reloads the geometry and rebuilds the rows.
 
 Stage: the chart with the current data/options; `.status` shows the last event as
 `Último evento: <eventName> · <summary>` (bar/line: `category · series = value`; ring/progress/

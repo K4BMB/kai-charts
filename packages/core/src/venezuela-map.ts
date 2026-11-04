@@ -2,14 +2,25 @@ import { seriesColor } from './palette.js';
 import { round2 } from './text.js';
 import { clamp } from './tone.js';
 import { ValueFormatter } from './types.js';
-import {
-  MapRegionGeometry,
-  VENEZUELA_PROJECTION,
+import type { MapProjection, MapRegionGeometry, RegionMapGeometry } from './data/map-types.js';
+import { VENEZUELA_PROJECTION, VENEZUELA_STATES, VENEZUELA_VIEWBOX } from './data/venezuela.js';
+
+export {
   VENEZUELA_STATES,
   VENEZUELA_VIEWBOX,
-} from './data/venezuela.js';
+  type MapProjection,
+  type MapRegionGeometry,
+  type RegionMapGeometry,
+};
 
-export { VENEZUELA_STATES, VENEZUELA_VIEWBOX, type MapRegionGeometry };
+/** The national map: the 26 regions (states) of Venezuela. State maps come from `loadStateMap()`. */
+export const VENEZUELA_MAP: RegionMapGeometry = {
+  id: 'VE',
+  name: 'Venezuela',
+  viewBox: VENEZUELA_VIEWBOX,
+  projection: VENEZUELA_PROJECTION,
+  regions: VENEZUELA_STATES,
+};
 
 /** A value for one region. `id` may be an ISO 3166-2 code (`VE-V`) or the state name. */
 export interface MapDatum {
@@ -37,7 +48,7 @@ export interface MapRegionView extends MapRegionGeometry {
   opacity: number;
   ariaLabel: string;
   highlighted: boolean;
-  /** Projected state capital in viewBox px, `null` when the region has none. */
+  /** Projected capital (state capital / municipal seat) in viewBox px, `null` when none. */
   capitalPoint: { name: string; x: number; y: number } | null;
 }
 
@@ -66,9 +77,11 @@ export interface MapModel {
   legend: MapLegend;
   /** Ids from `data` that matched no region (typos, unsupported names). */
   unmatched: string[];
-  /** Regions with data / total regions, e.g. "12 de 25". */
+  /** Regions with data / total regions, e.g. "12 de 26". */
   filled: number;
   total: number;
+  /** Capital of the whole map (the state capital on a state map) in viewBox px, `null` when none. */
+  capital: { name: string; x: number; y: number } | null;
 }
 
 export interface MapModelOptions {
@@ -76,15 +89,26 @@ export interface MapModelOptions {
   emptyText?: string;
   /** Opacity of the lowest value; the highest is always 1. */
   minOpacity?: number;
+  /** Map to join the data with (default: the national map, `VENEZUELA_MAP`). */
+  geometry?: RegionMapGeometry;
 }
 
-/** Lon/lat → viewBox px with the exact parameters used to build the geometry. */
-export function projectVenezuela(lat: number, lng: number): { x: number; y: number } {
-  const { minLng, maxLat, cosMid, scale } = VENEZUELA_PROJECTION;
+/** Lon/lat → viewBox px with the exact parameters used to build a map's geometry. */
+export function projectPoint(
+  projection: MapProjection,
+  lat: number,
+  lng: number,
+): { x: number; y: number } {
+  const { minLng, maxLat, cosMid, scale } = projection;
   return { x: round2((lng - minLng) * cosMid * scale), y: round2((maxLat - lat) * scale) };
 }
 
-const ALIASES: Record<string, string> = {
+/** Lon/lat → px on the national map (`projectPoint(VENEZUELA_MAP.projection, …)`). */
+export function projectVenezuela(lat: number, lng: number): { x: number; y: number } {
+  return projectPoint(VENEZUELA_PROJECTION, lat, lng);
+}
+
+const VENEZUELA_ALIASES: Record<string, string> = {
   caracas: 'VE-A',
   'dtto capital': 'VE-A',
   'distrito federal': 'VE-A',
@@ -99,39 +123,62 @@ const ALIASES: Record<string, string> = {
   've zr': 'VE-GE',
 };
 
-const BY_NAME = new Map<string, string>();
-for (const region of VENEZUELA_STATES) {
-  BY_NAME.set(fold(region.name), region.id);
-  BY_NAME.set(fold(region.short), region.id);
+/** Per-geometry lookup: folded id, name, short name and code → region id. */
+const LOOKUPS = new WeakMap<RegionMapGeometry, Map<string, string>>();
+
+function lookup(geometry: RegionMapGeometry): Map<string, string> {
+  let map = LOOKUPS.get(geometry);
+  if (!map) {
+    map = new Map<string, string>();
+    for (const region of geometry.regions) {
+      map.set(fold(region.id), region.id);
+      map.set(fold(region.name), region.id);
+      map.set(fold(region.short), region.id);
+      if (region.code) map.set(fold(region.code), region.id);
+    }
+    if (geometry === VENEZUELA_MAP) {
+      for (const [alias, id] of Object.entries(VENEZUELA_ALIASES)) map.set(alias, id);
+    }
+    LOOKUPS.set(geometry, map);
+  }
+  return map;
 }
-for (const [alias, id] of Object.entries(ALIASES)) BY_NAME.set(alias, id);
 
 /**
- * Resolves `VE-V`, `ve-v`, `Zulia`, `zulia`, `Dtto. Capital`, `Vargas`… to the region id
- * (ISO 3166-2 code, or `VE-GE` for Guayana Esequiba). Returns `undefined` for unknown input.
+ * Resolves an id, a name (accent- and case-insensitive), a short name or an official code to
+ * the region id of a map: `VE-V` / `Zulia` / `zulia` on the national map, `maracaibo` /
+ * `Maracaibo` / `2308` (INE code) on the Zulia map. Returns `undefined` for unknown input.
  */
-export function normalizeRegionId(input: string): string | undefined {
-  const trimmed = input.trim();
-  const iso = trimmed.toUpperCase();
-  if (/^VE-[A-Z]{1,2}$/.test(iso) && VENEZUELA_STATES.some((s) => s.id === iso)) return iso;
-  return BY_NAME.get(fold(trimmed));
+export function resolveRegionId(geometry: RegionMapGeometry, input: string): string | undefined {
+  return lookup(geometry).get(fold(input));
 }
 
-/** Joins geometry and data: value per region, opacity scale, markers and legend. */
+/**
+ * Resolves `VE-V`, `ve-v`, `Zulia`, `zulia`, `Dtto. Capital`, `Vargas`… to the region id of
+ * the national map (ISO 3166-2 code, or `VE-GE` for Guayana Esequiba).
+ */
+export function normalizeRegionId(input: string): string | undefined {
+  return resolveRegionId(VENEZUELA_MAP, input);
+}
+
+/** Joins geometry and data: value per region, opacity scale, markers, capitals and legend. */
 export function buildMapModel(
   data: readonly MapDatum[],
   markers: readonly MapMarker[],
   format: ValueFormatter,
   options: MapModelOptions = {},
 ): MapModel {
+  const geometry = options.geometry ?? VENEZUELA_MAP;
   const emptyText = options.emptyText ?? '—';
   const minOpacity = options.minOpacity ?? 0.18;
-  const highlight = new Set((options.highlight ?? []).map((h) => normalizeRegionId(h) ?? h));
+  const resolve = (input: string) => resolveRegionId(geometry, input);
+  const highlight = new Set((options.highlight ?? []).map((h) => resolve(h) ?? h));
+  const project = (lat: number, lng: number) => projectPoint(geometry.projection, lat, lng);
 
   const values = new Map<string, { value: number | null; label?: string }>();
   const unmatched: string[] = [];
   for (const datum of data) {
-    const id = normalizeRegionId(datum.id);
+    const id = resolve(datum.id);
     if (!id) {
       unmatched.push(datum.id);
       continue;
@@ -144,11 +191,11 @@ export function buildMapModel(
   const max = present.length ? Math.max(...present) : 0;
   const span = max - min;
 
-  const regions: MapRegionView[] = VENEZUELA_STATES.map((geometry) => {
-    const entry = values.get(geometry.id);
+  const regions: MapRegionView[] = geometry.regions.map((region) => {
+    const entry = values.get(region.id);
     const value = entry?.value ?? null;
     const hasData = value !== null;
-    const name = entry?.label ?? geometry.name;
+    const name = entry?.label ?? region.name;
     const valueText = hasData ? format(value) : emptyText;
     const opacity = !hasData
       ? 0
@@ -156,25 +203,22 @@ export function buildMapModel(
         ? 1
         : round2(minOpacity + ((value - min) / span) * (1 - minOpacity));
     return {
-      ...geometry,
+      ...region,
       name,
       value,
       valueText,
       hasData,
       opacity: clamp(opacity, 0, 1),
       ariaLabel: `${name}: ${valueText}`,
-      highlighted: highlight.has(geometry.id),
-      capitalPoint: geometry.capital
-        ? {
-            name: geometry.capital.name,
-            ...projectVenezuela(geometry.capital.lat, geometry.capital.lng),
-          }
+      highlighted: highlight.has(region.id),
+      capitalPoint: region.capital
+        ? { name: region.capital.name, ...project(region.capital.lat, region.capital.lng) }
         : null,
     };
   });
 
   const markerViews: MapMarkerView[] = markers.map((marker) => {
-    const { x, y } = projectVenezuela(marker.lat, marker.lng);
+    const { x, y } = project(marker.lat, marker.lng);
     const label = marker.label ?? marker.id;
     const valueText = marker.value == null ? '' : format(marker.value);
     return {
@@ -201,15 +245,22 @@ export function buildMapModel(
     unmatched,
     filled: regions.filter((r) => r.hasData).length,
     total: regions.length,
+    capital: geometry.capital
+      ? { name: geometry.capital.name, ...project(geometry.capital.lat, geometry.capital.lng) }
+      : null,
   };
 }
 
-/** Tooltip anchor for a region: its label point in px for a rendered width. */
+/**
+ * Tooltip anchor for a region: its label point in px for a rendered width (`viewBoxWidth` is
+ * the width the geometry was built in; the national map's by default).
+ */
 export function regionAnchor(
   region: MapRegionGeometry,
   renderedWidth: number,
+  viewBoxWidth: number = VENEZUELA_VIEWBOX.width,
 ): { x: number; y: number } {
-  const k = renderedWidth / VENEZUELA_VIEWBOX.width;
+  const k = renderedWidth / viewBoxWidth;
   return { x: round2(region.labelX * k), y: round2(region.labelY * k) };
 }
 

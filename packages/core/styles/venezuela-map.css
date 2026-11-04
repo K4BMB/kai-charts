@@ -93,7 +93,8 @@
   stroke-opacity: 1;
 }
 
-/* State capitals: small decorative dots, same size in every state. */
+/* Capitals: small decorative dots, same size in every region (state capitals on the national
+   map, municipal seats on a state map). */
 .kc-map__capital {
   fill: var(--kc-map-capital, currentColor);
   fill-opacity: 0.75;
@@ -101,6 +102,12 @@
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
+}
+
+/* The state capital on a state map: one bigger, solid dot with a wider ring. */
+.kc-map__capital--state {
+  fill-opacity: 1;
+  stroke-width: 2;
 }
 
 /* Legend: min · gradient · max · empty swatch · filled/total. */
