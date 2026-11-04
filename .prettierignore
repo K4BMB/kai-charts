@@ -1,2 +1,8 @@
+dist
+node_modules
+.angular
+coverage
+pnpm-lock.yaml
+*.tgz
 packages/core/src/data/venezuela.ts
 packages/core/src/data/states/
