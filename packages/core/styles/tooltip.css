@@ -1,8 +1,14 @@
 /* kai-charts · tooltip (absolutely positioned inside `.kc-plot`). Semi-transparent so the chart
-   underneath stays visible; `--kc-tooltip-opacity: 1` makes it solid again. */
+   underneath stays visible; `--kc-tooltip-opacity: 1` makes it solid again.
+   Rows read `Name = value`: a 3-column grid (swatch · name · "= value") so names and values line up
+   across rows; rows without a swatch leave the first column empty (it collapses to 0 width). */
 .kc-tooltip {
   position: absolute;
   z-index: 10;
+  display: grid;
+  grid-template-columns: max-content max-content auto;
+  align-items: center;
+  row-gap: 1px;
   min-width: 120px;
   padding: 6px 10px;
   border-radius: var(--kc-radius, 6px);
@@ -31,14 +37,14 @@
 }
 
 .kc-tooltip__title {
+  grid-column: 1 / -1;
   margin-bottom: 2px;
   font-weight: 600;
 }
 
+/* Each row contributes its cells straight to the tooltip grid. */
 .kc-tooltip__row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  display: contents;
 }
 
 .kc-tooltip__row--active {
@@ -46,15 +52,26 @@
 }
 
 .kc-tooltip__swatch {
-  flex: none;
+  grid-column: 1;
   width: 8px;
   height: 8px;
+  margin-right: 6px;
   border-radius: 2px;
 }
 
 .kc-tooltip__name {
-  flex: 1;
+  grid-column: 2;
   opacity: 0.85;
+}
+
+.kc-tooltip__value {
+  grid-column: 3;
+  margin-left: 6px;
+}
+
+.kc-tooltip__value::before {
+  content: '= ';
+  opacity: 0.6;
 }
 
 @media print {

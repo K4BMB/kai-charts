@@ -3,6 +3,8 @@ import { STATE_MAPS, hasStateMap, loadStateMap } from './state-map.js';
 import {
   VENEZUELA_STATES,
   buildMapModel,
+  mapTooltipRows,
+  municipalityCount,
   projectPoint,
   regionAnchor,
   resolveRegionId,
@@ -10,6 +12,62 @@ import {
 } from './venezuela-map.js';
 
 const es = createValueFormatter('es-VE');
+
+describe('municipalityCount and mapTooltipRows', () => {
+  it('counts the municipalities of a state by id, name or alias; none without a municipal division', () => {
+    expect(municipalityCount('Zulia')).toBe(21);
+    expect(municipalityCount('VE-A')).toBe(1);
+    expect(municipalityCount('Esequibo')).toBeUndefined();
+    expect(municipalityCount('Dependencias Federales')).toBeUndefined();
+    expect(municipalityCount('Narnia')).toBeUndefined();
+  });
+
+  it('builds the national tooltip: value, capital and municipalities, each row optional', () => {
+    const model = buildMapModel([{ id: 'Zulia', value: 5260 }], [], es);
+    const zulia = model.regions.find((r) => r.id === 'VE-V')!;
+    expect(
+      mapTooltipRows(zulia, {
+        valueHeader: 'Ciudadanos',
+        color: '#06c',
+        municipalitiesHeader: 'Municipios',
+      }),
+    ).toEqual([
+      { name: 'Ciudadanos', value: '5.260', color: '#06c' },
+      { name: 'Capital', value: 'Maracaibo' },
+      { name: 'Municipios', value: '21' },
+    ]);
+    // No municipalities row unless asked for; capitalHeader '' hides the capital row.
+    expect(mapTooltipRows(zulia, { valueHeader: 'V', color: 'c', capitalHeader: '' })).toEqual([
+      { name: 'V', value: '5.260', color: 'c' },
+    ]);
+    // Guayana Esequiba: no capital, no municipal division → value row only, even when asked.
+    const esequiba = model.regions.find((r) => r.id === 'VE-GE')!;
+    expect(
+      mapTooltipRows(esequiba, {
+        valueHeader: 'V',
+        color: 'c',
+        municipalitiesHeader: 'Municipios',
+      }),
+    ).toEqual([{ name: 'V', value: '—', color: 'c' }]);
+  });
+
+  it('builds a municipality tooltip on a state map: value and seat, never a municipalities row', async () => {
+    const zulia = await loadStateMap('Zulia');
+    const model = buildMapModel([{ id: 'Maracaibo', value: 1200 }], [], es, { geometry: zulia });
+    const maracaibo = model.regions.find((r) => r.id === 'maracaibo')!;
+    expect(
+      mapTooltipRows(maracaibo, {
+        valueHeader: 'Ciudadanos',
+        color: '#06c',
+        municipalitiesHeader: 'Municipios',
+        geometry: zulia,
+      }),
+    ).toEqual([
+      { name: 'Ciudadanos', value: '1.200', color: '#06c' },
+      { name: 'Capital', value: 'Maracaibo' },
+    ]);
+  });
+});
 
 /** Ray casting over every subpath (`M…Z`) of an absolute path. */
 function pathContains(d: string, x: number, y: number): boolean {

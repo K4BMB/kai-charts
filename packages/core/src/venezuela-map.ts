@@ -2,6 +2,8 @@ import { seriesColor } from './palette.js';
 import { round2 } from './text.js';
 import { clamp } from './tone.js';
 import { ValueFormatter } from './types.js';
+import { TooltipRow } from './bar-chart.js';
+import { STATE_MAPS } from './data/states/index.js';
 import type { MapProjection, MapRegionGeometry, RegionMapGeometry } from './data/map-types.js';
 import { VENEZUELA_PROJECTION, VENEZUELA_STATES, VENEZUELA_VIEWBOX } from './data/venezuela.js';
 
@@ -272,6 +274,60 @@ export function mapTooltipPlacement(x: number, renderedWidth: number): 'top' | '
   if (x < renderedWidth * 0.2) return 'right';
   if (x > renderedWidth * 0.8) return 'left';
   return 'top';
+}
+
+/** States drawn as a single region because they have no official municipal division. */
+const NO_MUNICIPAL_DIVISION = new Set(['VE-GE', 'VE-W']);
+
+/**
+ * Number of municipalities of a state (`Zulia` → 21, `VE-A` → 1); `undefined` for unknown
+ * input and for Guayana Esequiba and Dependencias Federales, which have no municipal division.
+ */
+export function municipalityCount(state: string): number | undefined {
+  const id = normalizeRegionId(state);
+  if (!id || NO_MUNICIPAL_DIVISION.has(id)) return undefined;
+  return STATE_MAPS.find((s) => s.id === id)?.regions;
+}
+
+export interface MapTooltipRowsOptions {
+  /** Name of the value row (`Ciudadanos`). */
+  valueHeader: string;
+  /** Swatch color of the value row (the map fill). */
+  color: string;
+  /** Name of the capital row; empty string hides it. Default `Capital`. */
+  capitalHeader?: string;
+  /**
+   * Name of the `Municipios = N` row, added on the national map only (states with a municipal
+   * division). Omit to leave it out.
+   */
+  municipalitiesHeader?: string;
+  /** Map the region belongs to (default: the national map). */
+  geometry?: RegionMapGeometry;
+}
+
+/**
+ * Tooltip rows of a region, the same in every renderer: `Ciudadanos = 5.260`, then
+ * `Capital = Maracaibo` when the region has a capital (state capital on the national map,
+ * municipal seat on a state map) and `Municipios = 21` on the national map when asked for.
+ */
+export function mapTooltipRows(
+  region: MapRegionView,
+  options: MapTooltipRowsOptions,
+): TooltipRow[] {
+  const geometry = options.geometry ?? VENEZUELA_MAP;
+  const capitalHeader = options.capitalHeader ?? 'Capital';
+  const rows: TooltipRow[] = [
+    { name: options.valueHeader, value: region.valueText, color: options.color },
+  ];
+  if (capitalHeader && region.capitalPoint) {
+    rows.push({ name: capitalHeader, value: region.capitalPoint.name });
+  }
+  if (options.municipalitiesHeader && geometry.id === VENEZUELA_MAP.id) {
+    const count = municipalityCount(region.id);
+    if (count !== undefined)
+      rows.push({ name: options.municipalitiesHeader, value: String(count) });
+  }
+  return rows;
 }
 
 function isFinite(value: number | null | undefined): value is number {

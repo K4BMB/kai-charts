@@ -60,6 +60,8 @@ export {
   VENEZUELA_VIEWBOX,
   buildMapModel,
   mapTooltipPlacement,
+  mapTooltipRows,
+  municipalityCount,
   normalizeRegionId,
   projectPoint,
   projectVenezuela,
