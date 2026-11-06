@@ -33,6 +33,9 @@
     "kai-charts-core": "^0.6.0",
     "tslib": "^2.3.0"
   },
+  "exports": {
+    "./styles/*": "./styles/*"
+  },
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
