@@ -19,6 +19,7 @@ export { KcIcon, KcKpiCard } from './kpi-card/kpi-card';
 export { KcProgressList } from './progress-list/progress-list';
 export { KcRankingList } from './ranking-list/ranking-list';
 export { KcVenezuelaMap, type MapRegionClickEvent } from './venezuela-map/venezuela-map';
+export { KcStateMap } from './state-map/state-map';
 export { KcLineChart } from './line-chart/line-chart';
 export { KcRingChart } from './ring-chart/ring-chart';
 export { KcMonthCalendar, type MonthChangeEvent } from './month-calendar/month-calendar';

@@ -27,6 +27,12 @@ describe('KcVenezuelaMap', () => {
   const regions = () => Array.from(element.querySelectorAll<SVGPathElement>('path.kc-map__region'));
   const region = (id: string) => element.querySelector<SVGPathElement>(`path[data-id="${id}"]`)!;
   const text = (selector: string) => element.querySelector(selector)?.textContent?.trim();
+  /** `[name, value]` of every tooltip row. */
+  const tooltipRows = () =>
+    Array.from(element.querySelectorAll('.kc-tooltip__row')).map((row) => [
+      row.querySelector('.kc-tooltip__name')?.textContent?.trim(),
+      row.querySelector('.kc-tooltip__value')?.textContent?.trim(),
+    ]);
 
   it('renders the 26 regions, Guayana Esequiba as a regular state, with uniform borders', () => {
     fixture.detectChanges();
@@ -74,7 +80,7 @@ describe('KcVenezuelaMap', () => {
     expect(element.querySelectorAll('.kc-map__region--highlighted')).toHaveLength(1);
   });
 
-  it('opens the tooltip on focus with the name and formatted value and closes it on blur', () => {
+  it('opens the tooltip on focus with value, capital and municipalities rows and closes it on blur', () => {
     fixture.componentRef.setInput('valueHeader', 'Ciudadanos');
     fixture.detectChanges();
     const zulia = region('VE-V');
@@ -83,35 +89,49 @@ describe('KcVenezuelaMap', () => {
     const tooltip = element.querySelector('.kc-tooltip');
     expect(tooltip?.getAttribute('aria-hidden')).toBe('true');
     expect(text('.kc-tooltip__title')).toBe('Zulia');
-    expect(text('.kc-tooltip__name')).toBe('Ciudadanos');
-    expect(text('.kc-tooltip__value')).toBe('5.260');
+    // `Name = value` rows (the `=` is drawn by CSS, so textContent has none).
+    expect(tooltipRows()).toEqual([
+      ['Ciudadanos', '5.260'],
+      ['Capital', 'Maracaibo'],
+      ['Municipios', '21'],
+    ]);
+    // Only the value row carries a swatch.
+    expect(element.querySelectorAll('.kc-tooltip__swatch')).toHaveLength(1);
     // Zulia sits on the west edge: the bubble opens to the right so it stays inside the map.
     expect(tooltip?.classList.contains('kc-tooltip--right')).toBe(true);
     zulia.dispatchEvent(new FocusEvent('blur'));
     fixture.detectChanges();
     expect(element.querySelector('.kc-tooltip')).toBeNull();
+
+    // Guayana Esequiba: no capital and no municipal division → the value row only.
+    region('VE-GE').dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+    expect(tooltipRows()).toEqual([['Ciudadanos', 'Sin datos']]);
   });
 
-  it('draws a capital dot in every state and names it in the tooltip; showCapitals=false removes both', () => {
+  it('draws a capital dot in every state; showCapitals=false removes the dots but keeps the row', () => {
     fixture.detectChanges();
     expect(element.querySelectorAll('circle.kc-map__capital')).toHaveLength(24);
-    region('VE-V').dispatchEvent(new FocusEvent('focus'));
-    fixture.detectChanges();
-    const names = Array.from(element.querySelectorAll('.kc-tooltip__name')).map((n) =>
-      n.textContent?.trim(),
-    );
-    const values = Array.from(element.querySelectorAll('.kc-tooltip__value')).map((n) =>
-      n.textContent?.trim(),
-    );
-    expect(names).toEqual(['Valor', 'Capital']);
-    expect(values).toEqual(['5.260', 'Maracaibo']);
+    // The national map never draws the map-level capital dot.
+    expect(element.querySelector('.kc-map__capital--state')).toBeNull();
 
     fixture.componentRef.setInput('showCapitals', false);
     fixture.detectChanges();
     expect(element.querySelectorAll('circle.kc-map__capital')).toHaveLength(0);
     region('VE-V').dispatchEvent(new FocusEvent('focus'));
     fixture.detectChanges();
-    expect(element.querySelectorAll('.kc-tooltip__name')).toHaveLength(1);
+    expect(tooltipRows().map((r) => r[0])).toEqual(['Valor', 'Capital', 'Municipios']);
+
+    // capitalHeader / municipalitiesHeader rename or hide their rows.
+    fixture.componentRef.setInput('capitalHeader', 'Cap.');
+    fixture.componentRef.setInput('municipalitiesHeader', '');
+    fixture.detectChanges();
+    region('VE-V').dispatchEvent(new FocusEvent('focus'));
+    fixture.detectChanges();
+    expect(tooltipRows()).toEqual([
+      ['Valor', '5.260'],
+      ['Cap.', 'Maracaibo'],
+    ]);
   });
 
   it('emits regionClick on click and keyboard', () => {
