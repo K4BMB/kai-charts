@@ -14,6 +14,7 @@ export { KpiCard, type KpiCardProps } from './kpi-card';
 export { ProgressList, type ProgressListProps } from './progress-list';
 export { RankingList, type RankingListProps } from './ranking-list';
 export { VenezuelaMap, type MapRegionClickEvent, type VenezuelaMapProps } from './venezuela-map';
+export { StateMap, useStateMap, type StateMapProps, type StateMapStatus } from './state-map';
 export { LineChart, type LineChartProps } from './line-chart';
 export { RingChart, type RingChartProps } from './ring-chart';
 export { MonthCalendar, type MonthCalendarProps, type MonthChangeEvent } from './month-calendar';

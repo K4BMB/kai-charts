@@ -77,17 +77,27 @@ describe('VenezuelaMap', () => {
     expect(element.querySelectorAll('.kc-map__region--highlighted')).toHaveLength(1);
   });
 
-  it('opens the tooltip on focus with the name and the value, closes it on blur', () => {
+  /** `[name, value]` of every tooltip row (the `=` is drawn by CSS, so textContent has none). */
+  const tooltipRows = () =>
+    Array.from(element.querySelectorAll('.kc-tooltip__row')).map((row) => [
+      row.querySelector('.kc-tooltip__name')?.textContent,
+      row.querySelector('.kc-tooltip__value')?.textContent,
+    ]);
+
+  it('opens the tooltip on focus with value, capital and municipalities rows, closes it on blur', () => {
     mount({ valueHeader: 'Ciudadanos' });
     const zulia = region('VE-V') as SVGPathElement;
     fireEvent.focus(zulia);
     const tooltip = element.querySelector('.kc-tooltip');
     expect(tooltip?.getAttribute('aria-hidden')).toBe('true');
     expect(tooltip?.querySelector('.kc-tooltip__title')?.textContent).toBe('Zulia');
-    // Value row + capital row (capitals are on by default).
-    expect(tooltip?.querySelectorAll('.kc-tooltip__row')).toHaveLength(2);
-    expect(tooltip?.querySelector('.kc-tooltip__name')?.textContent).toBe('Ciudadanos');
-    expect(tooltip?.querySelector('.kc-tooltip__value')?.textContent).toBe('5.260');
+    expect(tooltipRows()).toEqual([
+      ['Ciudadanos', '5.260'],
+      ['Capital', 'Maracaibo'],
+      ['Municipios', '21'],
+    ]);
+    // Only the value row carries a swatch.
+    expect(element.querySelectorAll('.kc-tooltip__swatch')).toHaveLength(1);
     // Zulia sits on the west edge: the bubble opens to the right so it stays inside the map.
     expect(tooltip?.classList.contains('kc-tooltip--right')).toBe(true);
     fireEvent.blur(zulia);
@@ -95,27 +105,29 @@ describe('VenezuelaMap', () => {
 
     fireEvent.focus(region('VE-I') as SVGPathElement);
     expect(element.querySelector('.kc-tooltip__value')?.textContent).toBe('Sin datos');
+    // Guayana Esequiba: no capital and no municipal division → the value row only.
+    fireEvent.focus(region('VE-GE') as SVGPathElement);
+    expect(tooltipRows()).toEqual([['Ciudadanos', 'Sin datos']]);
   });
 
-  it('draws a capital dot in every state and names it in the tooltip; showCapitals=false removes both', () => {
+  it('draws a capital dot in every state; showCapitals=false removes the dots but keeps the row', () => {
     mount();
     expect(element.querySelectorAll('circle.kc-map__capital')).toHaveLength(24);
-    fireEvent.focus(region('VE-V') as SVGPathElement);
-    const names = Array.from(element.querySelectorAll('.kc-tooltip__name')).map(
-      (n) => n.textContent,
-    );
-    const values = Array.from(element.querySelectorAll('.kc-tooltip__value')).map(
-      (n) => n.textContent,
-    );
-    expect(names).toEqual(['Valor', 'Capital']);
-    expect(values).toEqual(['5.260', 'Maracaibo']);
-    // The capital row carries no swatch.
-    expect(element.querySelectorAll('.kc-tooltip__swatch')).toHaveLength(1);
+    // The national map never draws the map-level capital dot.
+    expect(element.querySelector('.kc-map__capital--state')).toBeNull();
 
     mount({ showCapitals: false });
     expect(element.querySelectorAll('circle.kc-map__capital')).toHaveLength(0);
     fireEvent.focus(region('VE-V') as SVGPathElement);
-    expect(element.querySelectorAll('.kc-tooltip__row')).toHaveLength(1);
+    expect(tooltipRows().map((r) => r[0])).toEqual(['Valor', 'Capital', 'Municipios']);
+
+    // capitalHeader / municipalitiesHeader rename or hide their rows.
+    mount({ capitalHeader: 'Cap.', municipalitiesHeader: '' });
+    fireEvent.focus(region('VE-V') as SVGPathElement);
+    expect(tooltipRows()).toEqual([
+      ['Valor', '5.260'],
+      ['Cap.', 'Maracaibo'],
+    ]);
   });
 
   it('emits onRegionClick on click and Enter, and marks regions clickable only then', () => {
