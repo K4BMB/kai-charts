@@ -8,7 +8,10 @@ import {
   RankingList,
   RankingTable,
   RingChart,
+  STATE_MAPS,
+  StateMap,
   VenezuelaMap,
+  loadStateMap,
   type CalendarDayView,
   type ChartPointEvent,
   type MapDatum,
@@ -16,6 +19,7 @@ import {
   type MonthChangeEvent,
   type ProgressItem,
   type RankingItem,
+  type RegionMapGeometry,
   type RingItem,
   type SortChangeEvent,
   type TableRow,
@@ -71,6 +75,69 @@ function nextArrival(current: MapDatum[]): MapDatum[] {
   return next ? [...current, next] : current;
 }
 
+/** Deterministic value of the i-th municipality of the state map (below the national Top 5). */
+const municipalityValue = (i: number) => 300 + ((i * 157) % 2500);
+
+/**
+ * State map card: the chosen state's geometry (one lazy chunk, cached by the core) and a
+ * municipality arrival that starts by itself once the geometry is there. Changing the state
+ * empties the map and restarts the arrival; stale chunk responses are ignored.
+ */
+function useStateArrival(stateId: string) {
+  const [geometry, setGeometry] = useState<RegionMapGeometry | null>(null);
+  const [data, setData] = useState<MapDatum[]>([]);
+  const [simulating, setSimulating] = useState(false);
+
+  useEffect(() => {
+    let stale = false;
+    setGeometry(null);
+    setData([]);
+    setSimulating(false);
+    loadStateMap(stateId).then((result) => {
+      if (stale) return;
+      setGeometry(result);
+    });
+    return () => {
+      stale = true;
+    };
+  }, [stateId]);
+  // Auto-start shortly after the geometry arrives.
+  useEffect(() => {
+    if (!geometry) return undefined;
+    const timer = setTimeout(() => setSimulating(true), ARRIVAL_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [geometry]);
+  useEffect(() => {
+    if (!simulating || !geometry) return undefined;
+    const regions = geometry.regions;
+    const timer = setInterval(
+      () =>
+        setData((current) => {
+          const region = regions[current.length];
+          return region
+            ? [...current, { id: region.id, value: municipalityValue(current.length) }]
+            : current;
+        }),
+      ARRIVAL_INTERVAL_MS,
+    );
+    return () => clearInterval(timer);
+  }, [simulating, geometry]);
+  const complete = geometry !== null && data.length >= geometry.regions.length;
+  useEffect(() => {
+    if (complete) setSimulating(false);
+  }, [complete]);
+
+  const start = () => {
+    setData([]);
+    setSimulating(true);
+  };
+  const reset = () => {
+    setSimulating(false);
+    setData([]);
+  };
+  return { geometry, data, simulating, start, reset };
+}
+
 /** The reference blocks of the Angular demo (indicadores, mapa, barras y líneas, listas y anillos). */
 export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
   const [lastEvent, setLastEvent] = useState<LastEvent | null>(null);
@@ -80,6 +147,9 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
   // Controlled calendar month and table sort: the components only ask, the host decides.
   const [calendarMonth, setCalendarMonth] = useState<MonthChangeEvent>(CALENDAR_START);
   const [tableSort, setTableSort] = useState<SortChangeEvent>(TABLE_SORT);
+  // State map card: the picked state (also set by clicking the national map: drill-down).
+  const [stateId, setStateId] = useState('VE-V');
+  const stateMap = useStateArrival(stateId);
 
   // The simulation starts by itself shortly after the page shows up: that behaviour is what the
   // map exists for, so the visitor sees it without clicking anything.
@@ -115,8 +185,16 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
     setLastEvent({ label: item.label, source: 'Densidad', value: item.value });
   const onCitizensClick = (item: RankingItem) =>
     setLastEvent({ label: item.label, source: 'Ciudadanos', value: item.value });
-  const onRegionClick = (e: MapRegionClickEvent) =>
+  const onRegionClick = (e: MapRegionClickEvent) => {
     setLastEvent({ label: e.name, source: 'Mapa', value: e.value ?? '—' });
+    setStateId(e.id);
+  };
+  const onMunicipalityClick = (e: MapRegionClickEvent) =>
+    setLastEvent({
+      label: e.code ? `${e.name} (${e.code})` : e.name,
+      source: 'Municipio',
+      value: e.value ?? '—',
+    });
   const onRingClick = (item: RingItem) =>
     setLastEvent({ label: item.name, source: 'Anillos', value: item.value });
   const onUnitClick = (row: TableRow) =>
@@ -185,6 +263,54 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
                 loading={loading}
                 label="Top 5 de estados por ciudadanos atendidos"
                 onItemClick={onCitizensClick}
+              />
+            </div>
+          </section>
+          <section className="card">
+            <h2>Municipios por estado</h2>
+            <p className="hint">
+              Mismo mapa un nivel más abajo: cada estado se llena por municipios. Punto = capital
+              del estado; la capital de cada municipio y la cantidad de municipios van en el
+              tooltip. Guayana Esequiba y Dependencias Federales no tienen división municipal
+              oficial, así que se dibujan como una sola región.
+            </p>
+            <div className="map-actions">
+              <label className="state-picker">
+                Estado
+                <select
+                  value={stateId}
+                  onChange={(event) => setStateId(event.target.value)}
+                  aria-label="Estado"
+                >
+                  {STATE_MAPS.map((state) => (
+                    <option key={state.id} value={state.id}>
+                      {state.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={stateMap.start}
+                disabled={stateMap.simulating || !stateMap.geometry || empty || loading}
+              >
+                Simular llegada de datos
+              </button>
+              <button type="button" className="secondary" onClick={stateMap.reset}>
+                Reiniciar
+              </button>
+            </div>
+            <div className="map-layout map-layout--single">
+              <StateMap
+                className="state-map"
+                state={stateId}
+                geometry={stateMap.geometry ?? undefined}
+                data={empty ? [] : stateMap.data}
+                loading={loading}
+                showTable={showTable}
+                valueHeader="Ciudadanos"
+                label="Ciudadanos atendidos por municipio"
+                onRegionClick={onMunicipalityClick}
               />
             </div>
           </section>

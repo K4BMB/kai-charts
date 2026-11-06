@@ -5,6 +5,7 @@ import { CalendarSandbox } from './playground/sandboxes/calendar';
 import { KpiSandbox } from './playground/sandboxes/kpi';
 import { LineSandbox } from './playground/sandboxes/line';
 import { MapSandbox } from './playground/sandboxes/map';
+import { StateSandbox } from './playground/sandboxes/state';
 import { ProgressSandbox } from './playground/sandboxes/progress';
 import { RankingSandbox } from './playground/sandboxes/ranking';
 import { RingSandbox } from './playground/sandboxes/ring';
@@ -21,6 +22,7 @@ const SANDBOXES: Record<ChartId, ComponentType> = {
   table: TableSandbox,
   calendar: CalendarSandbox,
   map: MapSandbox,
+  state: StateSandbox,
 };
 
 export interface PlaygroundProps {

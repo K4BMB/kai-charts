@@ -9,6 +9,7 @@ export const CHARTS = [
   { id: 'table', label: 'Tabla' },
   { id: 'calendar', label: 'Calendario' },
   { id: 'map', label: 'Mapa' },
+  { id: 'state', label: 'Estado' },
 ] as const;
 
 export type ChartId = (typeof CHARTS)[number]['id'];
