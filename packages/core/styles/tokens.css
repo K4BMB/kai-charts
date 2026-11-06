@@ -5,7 +5,8 @@
  * is missing. Define the tokens in `:root` (or on any ancestor) to make the charts inherit
  * your app theme — dark mode, brand palette, fonts.
  *
- *   @import 'kai-charts/styles/kai-charts.css';   // or copy the block below into your styles
+ *   @import 'kai-charts/styles/tokens.css';   // Angular (React: already inside styles.css)
+ *   // or copy the block below into your own stylesheet and edit the values
  */
 :root {
   /* Series palette, used in order and cycled when there are more than 8 series. */
