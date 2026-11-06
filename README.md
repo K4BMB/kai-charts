@@ -36,6 +36,7 @@ editable data panel (categories, series, every number) and generates the code to
 | Ring chart     | `kc-ring-chart`     | `RingChart`     | ✅ v0.3 |
 | Month calendar | `kc-month-calendar` | `MonthCalendar` | ✅ v0.4 |
 | Ranking table  | `kc-ranking-table`  | `RankingTable`  | ✅ v0.4 |
+| State map      | `kc-state-map`      | `StateMap`      | ✅ v0.6 |
 
 Every component exists in both renderers with the same inputs, the same DOM and the same `.kc-*`
 CSS. The DOM/props/tests contract each pair follows lives in [`docs/contract.md`](docs/contract.md).
@@ -51,6 +52,23 @@ counter.
 Geometry comes from Natural Earth (public domain), simplified with shared borders so neighbouring
 states never overlap or leave gaps, and ships inside `kai-charts-core` (≈35 KB) — no external
 data files.
+
+**State map.** The same choropleth one level down: one state filled in **municipality by
+municipality** — all 26 regions of the national map, 335 municipalities in total. The only dot is
+the **state capital**; the professional reading of capitals and municipalities lives in the
+tooltip, `Name = value` style: on the national map a state reads `Ciudadanos = 5.260` ·
+`Capital = Maracaibo` · `Municipios = 21`, on a state map a municipality reads `Ciudadanos = 1.200`
+· `Capital = <its seat>` (`showSeats` draws the seats as small dots if you want them). Ids accept
+the municipality name (`Maracaibo`, accents optional), its slug (`san-francisco`) or its INE code
+(`2313` = Maracaibo). Guayana Esequiba and Dependencias Federales have no municipal division, so
+their maps are a single region; Distrito Capital and La Guaira have one municipality each. Each
+state is a lazy chunk (2–46 KB) loaded on demand with `loadStateMap('Zulia')`, so an app that only
+shows the national map ships none of them. Municipality polygons come from the OCHA Common
+Operational Dataset for Venezuela (INE boundaries, via geoBoundaries, CC BY 3.0 IGO); names, INE
+codes and seats from GeoNames (CC BY 4.0).
+
+Every tooltip in the library reads `Name = value` (names and values aligned in columns) on a
+translucent background; both are pure CSS (`--kc-tooltip-opacity`).
 
 Out of scope for v1: zoom, complex animations, export.
 

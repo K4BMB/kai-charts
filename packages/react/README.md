@@ -10,7 +10,8 @@ accessible by default, `Intl` formatting with `es-VE` by default, loading and em
 | `<BarChart />`      | Vertical/horizontal, grouped/stacked bars, legend, mirror table    |
 | `<LineChart />`     | Lines over categories, monotone-smooth or linear, area, end values |
 | `<RingChart />`     | Concentric progress rings with center value/trend and legend       |
-| `<VenezuelaMap />`  | Choropleth of the 25 regions that fills in as data arrives         |
+| `<VenezuelaMap />`  | Choropleth of the 26 regions that fills in as data arrives         |
+| `<StateMap />`      | One state filled in by municipalities (capital + seats in tooltip) |
 | `<KpiCard />`       | Headline indicator with icon, trend chip and subtext               |
 | `<ProgressList />`  | Rows with a bar and a traffic-light tone (coverage, compliance)    |
 | `<RankingList />`   | Top N with rank badge, value and bar relative to the first row     |
@@ -160,25 +161,64 @@ value, so the map visibly fills in as data arrives. An empty `data` array still 
 (there is no empty state). Every region shares the same thin border: nothing is hatched, dashed or
 thickened on hover.
 
-| Prop            | Type                               | Default   | Description                                       |
-| --------------- | ---------------------------------- | --------- | ------------------------------------------------- |
-| `data`          | `readonly MapDatum[]`              | `[]`      | `{ id: 'VE-V' \| 'Zulia', value, label? }`        |
-| `markers`       | `readonly MapMarker[]`             | `[]`      | `{ id, lat, lng, label?, value?, color? }`        |
-| `color`         | `string`                           | palette 1 | Fill of the regions with data                     |
-| `highlight`     | `string \| readonly string[]`      | `[]`      | Ids or names drawn with a strong outline          |
-| `showLegend`    | `boolean`                          | `true`    | Gradient min → max, empty swatch, `filled/total`  |
-| `showLabels`    | `boolean`                          | `false`   | Short state names                                 |
-| `showTable`     | `boolean`                          | `false`   | Mirror table, all 26 regions                      |
-| `valueHeader`   | `string`                           | `'Valor'` | Tooltip row name and table column header          |
-| `emptyText`     | `string`                           | config    | Tooltip/table text for regions without data       |
-| `minOpacity`    | `number`                           | `0.18`    | Opacity of the lowest value (the highest is 1)    |
-| `onRegionClick` | `(e: MapRegionClickEvent) => void` | —         | `{ id, name, value }` (`value` null without data) |
-| `onMarkerClick` | `(marker: MapMarker) => void`      | —         | The original marker                               |
+| Prop                   | Type                               | Default        | Description                                       |
+| ---------------------- | ---------------------------------- | -------------- | ------------------------------------------------- |
+| `data`                 | `readonly MapDatum[]`              | `[]`           | `{ id: 'VE-V' \| 'Zulia', value, label? }`        |
+| `markers`              | `readonly MapMarker[]`             | `[]`           | `{ id, lat, lng, label?, value?, color? }`        |
+| `color`                | `string`                           | palette 1      | Fill of the regions with data                     |
+| `highlight`            | `string \| readonly string[]`      | `[]`           | Ids or names drawn with a strong outline          |
+| `showLegend`           | `boolean`                          | `true`         | Gradient min → max, empty swatch, `filled/total`  |
+| `showLabels`           | `boolean`                          | `false`        | Short state names                                 |
+| `showTable`            | `boolean`                          | `false`        | Mirror table, all 26 regions                      |
+| `showCapitals`         | `boolean`                          | `true`         | Small dot on every state capital (dots only)      |
+| `capitalHeader`        | `string`                           | `'Capital'`    | `Capital = Maracaibo` tooltip row; `''` hides it  |
+| `municipalitiesHeader` | `string`                           | `'Municipios'` | `Municipios = 21` tooltip row; `''` hides it      |
+| `valueHeader`          | `string`                           | `'Valor'`      | Tooltip row name and table column header          |
+| `emptyText`            | `string`                           | config         | Tooltip/table text for regions without data       |
+| `minOpacity`           | `number`                           | `0.18`         | Opacity of the lowest value (the highest is 1)    |
+| `onRegionClick`        | `(e: MapRegionClickEvent) => void` | —              | `{ id, name, value }` (`value` null without data) |
+| `onMarkerClick`        | `(marker: MapMarker) => void`      | —              | The original marker                               |
 
 `label`, `locale`, `valueFormat`, `loading`, `className` and `style` work as usual. Regions and
 markers are always focusable (`role="img"`, `aria-label`); the `--clickable` class is added only
 when the matching handler is provided. The width follows the container and the svg keeps the
 800 × 614 aspect ratio.
+
+## `<StateMap />`
+
+```tsx
+<StateMap
+  state="Zulia"
+  data={[
+    { id: 'Maracaibo', value: 5260 },
+    { id: '2313', value: 1200 }, // INE code (Maracaibo)
+  ]}
+  valueHeader="Ciudadanos"
+  label="Ciudadanos atendidos por municipio"
+  onRegionClick={({ id, name, value, code }) => select(code)}
+/>
+```
+
+The Venezuela map one level down: **one state, filled in municipality by municipality**. The only
+dot is the state capital; each municipality's tooltip reads `Ciudadanos = 1.200` ·
+`Capital = <its seat>` (`showSeats` draws the seats as small dots too). All 26 regions of the
+national map have a map (335 municipalities; Guayana Esequiba and Dependencias Federales have no
+municipal division, so they are a single region). The geometry of each state is a lazy chunk
+(2–46 KB) loaded with `loadStateMap(state)` the first time it is shown; the skeleton is rendered
+meanwhile. Same props and DOM as `<VenezuelaMap />`, plus:
+
+| Prop               | Type                | Default                  | Description                                                        |
+| ------------------ | ------------------- | ------------------------ | ------------------------------------------------------------------ |
+| `state`            | `string`            | `''`                     | State id (`VE-V`), name (`Zulia`) or alias (`Esequibo`)            |
+| `geometry`         | `RegionMapGeometry` | —                        | Preloaded geometry (`await loadStateMap(...)`); `state` ignored    |
+| `showSeats`        | `boolean`           | `false`                  | Small dot on every municipal seat (`showCapitals` = state capital) |
+| `regionHeader`     | `string`            | `'Municipio'`            | First column of the mirror table                                   |
+| `unknownStateText` | `string`            | `'Estado no disponible'` | Empty state for an unknown `state`                                 |
+| `onRegionClick`    | `(e) => void`       | —                        | `{ id, name, value, code }` — `code` is the INE municipality code  |
+
+Municipality ids are slugs of the official name (`jesus-enrique-lossada`); `data[].id` may be the
+name (accents optional), the slug or the INE code. `STATE_MAPS` (`{ id, name, regions }[]`) is
+exported for pickers.
 
 ## `<KpiCard />`
 

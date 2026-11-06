@@ -7,6 +7,35 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-04
+
+### Added
+
+- **State map** (`kc-state-map` / `StateMap`): the Venezuela map one level down — one state
+  filled in **municipality by municipality**. 26 maps (24 states incl. Guayana Esequiba, Distrito
+  Capital, Dependencias Federales), 335 municipalities with official names, INE codes and seats;
+  Guayana Esequiba and Dependencias Federales are single-region maps (no municipal division).
+  Each state is a lazy chunk (2–46 KB) loaded with `loadStateMap(state)` the first time it is
+  shown (skeleton meanwhile; `geometry` prop for a preloaded, synchronous render); unknown states
+  render an empty state (`unknownStateText`). Props on top of the Venezuela map's: `state`,
+  `geometry`, `showSeats`, `regionHeader`, `unknownStateText`; `regionClick` carries the INE
+  `code`. Core: `loadStateMap`, `hasStateMap`, `STATE_MAPS`, `VENEZUELA_MAP`, `RegionMapGeometry`,
+  `resolveRegionId(geometry, input)`, `projectPoint`, `municipalityCount`, `mapTooltipRows`;
+  `buildMapModel` takes `options.geometry` and returns `model.capital`.
+- **Tooltip rows read `Name = value`** in every chart: a 3-column grid (swatch · name · `= value`)
+  with names and values aligned across rows — pure CSS, same DOM.
+- Venezuela map tooltip rows: `Ciudadanos = 5.260` · `Capital = Maracaibo` · `Municipios = 21`
+  (`municipalitiesHeader`, `''` hides it); the `Capital` row no longer depends on `showCapitals`
+  (which now only governs the dots).
+- Showcase: card "Municipios por estado" with a state picker, drill-down from the national map
+  and the same self-filling arrival; Playground sandbox `state` (`#/playground/state`).
+
+### Changed
+
+- Geometry generators share `scripts/geo-lib.mjs`; the national map's geometry is byte-identical.
+- Municipality polygons: OCHA Common Operational Dataset for Venezuela (INE boundaries, via
+  geoBoundaries gbHumanitarian, CC BY 3.0 IGO); names, INE codes and seats: GeoNames (CC BY 4.0).
+
 ## [0.5.0] - 2026-10-30
 
 ### Changed
