@@ -9,6 +9,7 @@ export const CHART_IDS = [
   'table',
   'calendar',
   'map',
+  'state',
 ] as const;
 
 export type ChartId = (typeof CHART_IDS)[number];
@@ -29,6 +30,7 @@ export const CHARTS: readonly ChartEntry[] = [
   { id: 'table', label: 'Tabla' },
   { id: 'calendar', label: 'Calendario' },
   { id: 'map', label: 'Mapa' },
+  { id: 'state', label: 'Estado' },
 ];
 
 /** Unknown or missing ids fall back to the bar sandbox. */

@@ -12,15 +12,19 @@ import {
   KcRankingList,
   KcRankingTable,
   KcRingChart,
+  KcStateMap,
   KcVenezuelaMap,
   MapDatum,
   MapRegionClickEvent,
   MonthChangeEvent,
   ProgressItem,
   RankingItem,
+  RegionMapGeometry,
   RingItem,
+  STATE_MAPS,
   SortChangeEvent,
   TableRow,
+  loadStateMap,
 } from 'kai-charts';
 import {
   AGE_RANGE,
@@ -67,6 +71,7 @@ const ARRIVAL_DELAY = 800;
     KcRankingList,
     KcRankingTable,
     KcRingChart,
+    KcStateMap,
     KcVenezuelaMap,
     KpiIcon,
   ],
@@ -107,6 +112,17 @@ export class Showcase {
   private arrivalTimer: ReturnType<typeof setInterval> | null = null;
   private autoStartTimer: ReturnType<typeof setTimeout> | null = null;
 
+  /** State map card: the 26 states for the picker, the chosen one, its geometry and its data. */
+  protected readonly stateOptions = STATE_MAPS;
+  protected readonly stateId = signal('VE-V');
+  protected readonly stateGeometry = signal<RegionMapGeometry | null>(null);
+  protected readonly stateData = signal<MapDatum[]>([]);
+  protected readonly stateSimulating = signal(false);
+  private stateTimer: ReturnType<typeof setInterval> | null = null;
+  private stateStartTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Request token: a quick change of state makes the previous chunk's response stale. */
+  private stateRequest = 0;
+
   /** Controlled sort of the ranking table (updated on `sortChange`). */
   protected readonly sortBy = signal('procedures');
   protected readonly sortDirection = signal<'desc' | 'asc'>('desc');
@@ -118,10 +134,67 @@ export class Showcase {
     // The map starts grey and fills in by itself shortly after the page shows up: that is the
     // behaviour this component exists for, so the visitor sees it without clicking anything.
     this.autoStartTimer = setTimeout(() => this.simulateArrival(), ARRIVAL_DELAY);
+    this.selectState(this.stateId());
     inject(DestroyRef).onDestroy(() => {
       this.stopSimulation();
+      this.stopStateSimulation();
       if (this.autoStartTimer !== null) clearTimeout(this.autoStartTimer);
+      if (this.stateStartTimer !== null) clearTimeout(this.stateStartTimer);
     });
+  }
+
+  /**
+   * Loads the chosen state's geometry (one lazy chunk, cached by the core) and restarts the
+   * municipality arrival once it is there: the host passes `[geometry]` so the component renders
+   * synchronously instead of showing its own skeleton twice.
+   */
+  protected selectState(id: string): void {
+    this.stateId.set(id);
+    this.stopStateSimulation();
+    this.stateData.set([]);
+    this.stateGeometry.set(null);
+    const request = ++this.stateRequest;
+    loadStateMap(id).then((geometry) => {
+      if (request !== this.stateRequest) return;
+      this.stateGeometry.set(geometry);
+      this.stateStartTimer = setTimeout(() => this.simulateStateArrival(), ARRIVAL_DELAY);
+    });
+  }
+
+  /** Fills the municipalities one every 400 ms, in geometry order, with deterministic values. */
+  protected simulateStateArrival(): void {
+    this.stopStateSimulation();
+    const geometry = this.stateGeometry();
+    if (!geometry) return;
+    this.stateData.set([]);
+    const pending = geometry.regions.map((region, i) => ({
+      id: region.id,
+      value: 300 + ((i * 157) % 2500),
+    }));
+    this.stateSimulating.set(true);
+    this.stateTimer = setInterval(() => {
+      const next = pending.shift();
+      if (next) this.stateData.update((data) => [...data, next]);
+      if (pending.length === 0) this.stopStateSimulation();
+    }, ARRIVAL_INTERVAL);
+  }
+
+  /** Stops the municipality arrival and leaves the state map grey again. */
+  protected resetStateMap(): void {
+    this.stopStateSimulation();
+    this.stateData.set([]);
+  }
+
+  private stopStateSimulation(): void {
+    if (this.stateTimer !== null) {
+      clearInterval(this.stateTimer);
+      this.stateTimer = null;
+    }
+    if (this.stateStartTimer !== null) {
+      clearTimeout(this.stateStartTimer);
+      this.stateStartTimer = null;
+    }
+    this.stateSimulating.set(false);
   }
 
   /** Replays the arrival: empties the map and adds one state every 400 ms until all 25 have a value. */
@@ -163,8 +236,18 @@ export class Showcase {
     this.lastClick.set({ category: item.label, series: 'Ciudadanos', value: item.value });
   }
 
+  /** A click on a state of the national map drills down into it on the state map below. */
   protected onRegionClick(event: MapRegionClickEvent): void {
     this.lastClick.set({ category: event.name, series: 'Ciudadanos', value: event.value ?? 0 });
+    if (event.id !== this.stateId()) this.selectState(event.id);
+  }
+
+  protected onMunicipalityClick(event: MapRegionClickEvent): void {
+    this.lastClick.set({
+      category: event.code ? `${event.name} (${event.code})` : event.name,
+      series: 'Ciudadanos',
+      value: event.value ?? 0,
+    });
   }
 
   protected onRingClick({ item }: ItemClickEvent<RingItem>): void {

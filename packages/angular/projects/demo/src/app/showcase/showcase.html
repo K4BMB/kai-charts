@@ -68,6 +68,49 @@
         />
       </div>
     </section>
+    <section class="card">
+      <h2>Municipios por estado</h2>
+      <p class="hint">
+        Mismo mapa un nivel más abajo: cada estado se llena por municipios. Punto = capital del
+        estado; la capital de cada municipio y la cantidad de municipios van en el tooltip. Guayana
+        Esequiba y Dependencias Federales no tienen división municipal oficial, así que se dibujan
+        como una sola región.
+      </p>
+      <div class="map-actions">
+        <label class="state-picker">
+          Estado
+          <select
+            [value]="stateId()"
+            (change)="selectState($any($event.target).value)"
+            aria-label="Estado"
+          >
+            @for (state of stateOptions; track state.id) {
+              <option [value]="state.id">{{ state.name }}</option>
+            }
+          </select>
+        </label>
+        <button
+          type="button"
+          (click)="simulateStateArrival()"
+          [disabled]="stateSimulating() || !stateGeometry()"
+        >
+          Simular llegada de datos
+        </button>
+        <button type="button" (click)="resetStateMap()">Reiniciar</button>
+      </div>
+      <div class="map-body map-body--single">
+        <kc-state-map
+          [state]="stateId()"
+          [geometry]="stateGeometry() ?? undefined"
+          [data]="empty() ? [] : stateData()"
+          [loading]="loading()"
+          [showTable]="showTable()"
+          valueHeader="Ciudadanos"
+          label="Ciudadanos atendidos por municipio"
+          (regionClick)="onMunicipalityClick($event)"
+        />
+      </div>
+    </section>
   </section>
 
   <section class="block">

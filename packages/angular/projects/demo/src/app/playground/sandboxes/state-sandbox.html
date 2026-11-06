@@ -1,0 +1,145 @@
+<div class="play">
+  <aside class="panel">
+    <section>
+      <h2>Datos</h2>
+      <label class="field">
+        Estado (state)
+        <select [value]="state()" (change)="selectState(text($event))" aria-label="Estado">
+          @for (option of stateOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+      <h3>Municipios</h3>
+      <p class="hint">
+        Un valor por municipio; los ids aceptan el nombre, su slug o el código INE. Al cambiar de
+        estado la lista se reconstruye con sus municipios.
+      </p>
+      <app-rows-editor
+        [columns]="columns()"
+        [(rows)]="rows"
+        [json]="data()"
+        [newRow]="newRow"
+        addLabel="+ Municipio"
+      />
+    </section>
+
+    <section>
+      <h2>Opciones</h2>
+      <div class="options">
+        <label class="field">
+          Color (color)
+          <span class="color-row">
+            <input
+              type="color"
+              [value]="color() || defaultSwatch"
+              (input)="color.set(text($event))"
+              aria-label="Color de los municipios"
+            />
+            <button type="button" class="secondary" (click)="color.set('')" [disabled]="!color()">
+              Por defecto
+            </button>
+          </span>
+        </label>
+        <label class="field">
+          Resaltar (highlight, ids o nombres)
+          <input
+            type="text"
+            placeholder="Maracaibo, cabimas"
+            [value]="highlight()"
+            (input)="highlight.set(text($event))"
+          />
+        </label>
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showLegend()"
+            (change)="showLegend.set(!showLegend())"
+          />
+          Leyenda</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showLabels()"
+            (change)="showLabels.set(!showLabels())"
+          />
+          Nombres</label
+        >
+        <label class="check"
+          ><input
+            type="checkbox"
+            [checked]="showCapitals()"
+            (change)="showCapitals.set(!showCapitals())"
+          />
+          Capital del estado</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="showSeats()" (change)="showSeats.set(!showSeats())" />
+          Capitales de municipio</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="showTable()" (change)="showTable.set(!showTable())" />
+          Tabla espejo</label
+        >
+        <label class="check"
+          ><input type="checkbox" [checked]="loading()" (change)="loading.set(!loading())" />
+          Cargando</label
+        >
+        <label class="field">
+          Opacidad mínima: {{ minOpacity() }}
+          <input
+            type="range"
+            min="0"
+            max="0.6"
+            step="0.02"
+            [value]="minOpacity()"
+            (input)="minOpacity.set(+text($event))"
+          />
+        </label>
+        <label class="field">
+          Cabecera del valor (valueHeader)
+          <input type="text" [value]="valueHeader()" (input)="valueHeader.set(text($event))" />
+        </label>
+        <label class="field wide">
+          Etiqueta accesible (label)
+          <input type="text" [value]="label()" (input)="label.set(text($event))" />
+        </label>
+        <app-format-fields [(locale)]="locale" [(format)]="format" />
+      </div>
+    </section>
+
+    <section>
+      <h2>Código</h2>
+      <app-code-box [code]="code()" />
+    </section>
+  </aside>
+
+  <div class="stage">
+    <div class="card">
+      <kc-state-map
+        [state]="state()"
+        [geometry]="geometry() ?? undefined"
+        [data]="data()"
+        [color]="color() || defaultColor"
+        [highlight]="highlightIds()"
+        [showLegend]="showLegend()"
+        [showLabels]="showLabels()"
+        [showCapitals]="showCapitals()"
+        [showSeats]="showSeats()"
+        [minOpacity]="minOpacity()"
+        [valueHeader]="valueHeader()"
+        [showTable]="showTable()"
+        [loading]="loading()"
+        [label]="label()"
+        [locale]="locale()"
+        [valueFormat]="valueFormat()"
+        (regionClick)="onRegionClick($event)"
+      />
+    </div>
+    <p class="status" aria-live="polite" appStatus [event]="lastEvent()">
+      Elige un estado y edita sus municipios; el mapa se actualiza al instante. Clic en un municipio
+      para ver <code>regionClick</code> con su código INE.
+    </p>
+  </div>
+</div>

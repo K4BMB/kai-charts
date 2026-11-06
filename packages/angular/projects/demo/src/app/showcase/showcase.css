@@ -95,8 +95,31 @@
   align-items: start;
 }
 
+/* State map card: the map alone, capped so a tall state (Zulia) does not fill the screen. */
+.map-body--single {
+  grid-template-columns: minmax(0, 560px);
+}
+
+.state-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.state-picker select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+}
+
 @media (max-width: 760px) {
-  .map-body {
+  .map-body,
+  .map-body--single {
     grid-template-columns: 1fr;
   }
 }

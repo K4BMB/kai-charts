@@ -14,6 +14,7 @@ import { MapSandbox } from './sandboxes/map-sandbox';
 import { ProgressSandbox } from './sandboxes/progress-sandbox';
 import { RankingSandbox } from './sandboxes/ranking-sandbox';
 import { RingSandbox } from './sandboxes/ring-sandbox';
+import { StateSandbox } from './sandboxes/state-sandbox';
 import { TableSandbox } from './sandboxes/table-sandbox';
 
 /**
@@ -37,6 +38,7 @@ import { TableSandbox } from './sandboxes/table-sandbox';
     TableSandbox,
     CalendarSandbox,
     MapSandbox,
+    StateSandbox,
   ],
   templateUrl: './playground.html',
   styleUrl: './playground.css',

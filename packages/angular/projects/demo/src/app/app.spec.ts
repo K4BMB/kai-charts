@@ -36,6 +36,7 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-kpi-card .kc-kpi__icon svg')).toHaveLength(6);
     expect(compiled.querySelectorAll('kc-kpi-card .kc-trend')).toHaveLength(2);
     expect(compiled.querySelectorAll('kc-venezuela-map')).toHaveLength(1);
+    expect(compiled.querySelectorAll('kc-state-map')).toHaveLength(1);
     expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__region')).toHaveLength(26);
     // Showcase map: capitals in every state, no mobile-unit markers and no highlighted outline.
     expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__capital')).toHaveLength(24);
@@ -143,6 +144,7 @@ describe('Playground', () => {
     table: 'kc-ranking-table',
     calendar: 'kc-month-calendar',
     map: 'kc-venezuela-map',
+    state: 'kc-state-map',
   };
 
   async function create(chart: string) {
@@ -167,10 +169,10 @@ describe('Playground', () => {
     expect(compiled.querySelector('code')?.textContent).toContain('<kc-bar-chart');
   });
 
-  it('shows the nine chips and marks the active one', async () => {
+  it('shows the ten chips and marks the active one', async () => {
     const { compiled } = await create('ring');
     const chips = Array.from(compiled.querySelectorAll<HTMLAnchorElement>('.chart-picker .chip'));
-    expect(chips).toHaveLength(9);
+    expect(chips).toHaveLength(10);
     expect(chips.map((c) => c.textContent?.trim())).toEqual([
       'Barras',
       'Líneas',
@@ -181,8 +183,10 @@ describe('Playground', () => {
       'Tabla',
       'Calendario',
       'Mapa',
+      'Estado',
     ]);
     expect(chips.map((c) => c.getAttribute('href'))).toContain('#/playground/map');
+    expect(chips.map((c) => c.getAttribute('href'))).toContain('#/playground/state');
     const active = compiled.querySelectorAll('.chip--active');
     expect(active).toHaveLength(1);
     expect(active[0].textContent?.trim()).toBe('Anillos');
