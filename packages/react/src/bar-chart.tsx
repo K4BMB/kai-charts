@@ -46,6 +46,7 @@ export interface BarChartProps {
   showGrid?: boolean;
   /** Render the data as an accessible, printable table below the chart. */
   showTable?: boolean;
+  /** Radius of the far-end corners of each bar (away from the baseline); base and stack seams stay square. Stacked: only the outermost segment is rounded. */
   barRadius?: number;
   /** Share of each category band occupied by bars, 0.1–1 (default 0.7). Thin bars: 0.25. */
   barWidth?: number;
@@ -53,8 +54,6 @@ export interface BarChartProps {
   showValueAxis?: boolean;
   /** `false` hides the category labels and shrinks their margin. */
   showCategoryAxis?: boolean;
-  /** Stacked only: round the outer corners of each stack with `barRadius`. */
-  roundStackTop?: boolean;
   /** Replace the chart by a skeleton with `aria-busy`. */
   loading?: boolean;
   /** Accessible name of the chart; also used as the table caption. */
@@ -97,7 +96,6 @@ export function BarChart({
   barWidth = 0.7,
   showValueAxis = true,
   showCategoryAxis = true,
-  roundStackTop = false,
   loading = false,
   label = '',
   categoryHeader,
@@ -135,7 +133,6 @@ export function BarChart({
         barWidth,
         showValueAxis,
         showCategoryAxis,
-        roundStackTop,
         categories,
         series: visibleSeries,
         format: formatter,
@@ -150,7 +147,6 @@ export function BarChart({
       barWidth,
       showValueAxis,
       showCategoryAxis,
-      roundStackTop,
       categories,
       visibleSeries,
       formatter,
@@ -164,7 +160,7 @@ export function BarChart({
     const name = series[index]?.name;
     if (name !== undefined) setHiddenSeries((hidden) => toggleHidden(hidden, name));
   };
-  const activate = (bar: BarShape, event?: KeyboardEvent<SVGRectElement>) => {
+  const activate = (bar: BarShape, event?: KeyboardEvent<SVGPathElement>) => {
     event?.preventDefault();
     onBarClick?.({
       seriesIndex: bar.seriesIndex,
@@ -174,7 +170,7 @@ export function BarChart({
       value: bar.value,
     });
   };
-  const onBarKeyDown = (bar: BarShape, event: KeyboardEvent<SVGRectElement>) => {
+  const onBarKeyDown = (bar: BarShape, event: KeyboardEvent<SVGPathElement>) => {
     if (event.key === 'Enter' || event.key === ' ') activate(bar, event);
   };
 
@@ -220,14 +216,10 @@ export function BarChart({
               y2={layout.axisLine.y2}
             />
             {layout.bars.map((bar) => (
-              <rect
+              <path
                 key={bar.key}
                 className="kc-bar"
-                x={bar.x}
-                y={bar.y}
-                width={bar.w}
-                height={bar.h}
-                rx={bar.rx}
+                d={bar.d}
                 style={{ fill: bar.color }}
                 data-series={bar.seriesIndex}
                 data-category={bar.categoryIndex}

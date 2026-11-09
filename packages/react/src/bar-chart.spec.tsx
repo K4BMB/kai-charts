@@ -18,8 +18,22 @@ describe('BarChart', () => {
     return result;
   }
 
-  const bars = () => Array.from(element.querySelectorAll<SVGRectElement>('rect.kc-bar'));
-  const num = (el: Element, attr: string) => Number(el.getAttribute(attr));
+  const bars = () => Array.from(element.querySelectorAll<SVGPathElement>('path.kc-bar'));
+  /** Bounding box of a bar path (the M/H/V/A commands `barPath` emits): x, y, width, height. */
+  const box = (el: Element) => {
+    const xs: number[] = [];
+    const ys: number[] = [];
+    for (const m of (el.getAttribute('d') ?? '').matchAll(/([MHVA])([^MHVAZ]*)/g)) {
+      const n = m[2].split(/[ ,]+/).filter(Boolean).map(Number);
+      if (m[1] === 'H') xs.push(n[0]);
+      else if (m[1] === 'V') ys.push(n[0]);
+      else (xs.push(n[n.length - 2]), ys.push(n[n.length - 1]));
+    }
+    const x = Math.min(...xs);
+    const y = Math.min(...ys);
+    return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+  };
+  const num = (el: Element, attr: 'x' | 'y' | 'width' | 'height') => box(el)[attr];
 
   it('renders one bar per category and series', () => {
     mount();
@@ -38,7 +52,7 @@ describe('BarChart', () => {
   it('uses widths when horizontal', () => {
     mount({ orientation: 'horizontal' });
     const [small, , big] = bars().filter((b) => b.dataset['series'] === '0');
-    expect(num(small, 'height')).toBe(num(big, 'height'));
+    expect(num(small, 'height')).toBeCloseTo(num(big, 'height'), 6);
     expect(num(big, 'width') / num(small, 'width')).toBeCloseTo(3, 2);
   });
 
