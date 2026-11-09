@@ -77,10 +77,9 @@ export class KcBarChart {
   readonly showCategoryAxis = input(true, { transform: booleanAttribute });
   /** Share of each category band occupied by bars, 0.1–1. Thin bars: `0.25`. */
   readonly barWidth = input(0.7, { transform: numberAttribute });
-  /** Stacked only: round the outer corners of each stack with `barRadius`. */
-  readonly roundStackTop = input(false, { transform: booleanAttribute });
   /** Render the data as an accessible, printable table below the chart. */
   readonly showTable = input(false, { transform: booleanAttribute });
+  /** Radius of the far-end corners of each bar (away from the baseline); base and stack seams stay square. Stacked: only the outermost segment is rounded. */
   readonly barRadius = input(2, { transform: numberAttribute });
   readonly loading = input(false, { transform: booleanAttribute });
   /** Accessible name of the chart; also used as the table caption. */
@@ -131,7 +130,6 @@ export class KcBarChart {
       barWidth: this.barWidth(),
       showValueAxis: this.showValueAxis(),
       showCategoryAxis: this.showCategoryAxis(),
-      roundStackTop: this.roundStackTop(),
       categories: this.categories(),
       series: this.visibleSeries(),
       format: this.formatter(),

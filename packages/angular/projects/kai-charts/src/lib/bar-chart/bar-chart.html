@@ -44,13 +44,9 @@
         [attr.y2]="l.axisLine.y2"
       />
       @for (bar of l.bars; track bar.key) {
-        <rect
+        <path
           class="kc-bar"
-          [attr.x]="bar.x"
-          [attr.y]="bar.y"
-          [attr.width]="bar.w"
-          [attr.height]="bar.h"
-          [attr.rx]="bar.rx"
+          [attr.d]="bar.d"
           [style.fill]="bar.color"
           [attr.data-series]="bar.seriesIndex"
           [attr.data-category]="bar.categoryIndex"
