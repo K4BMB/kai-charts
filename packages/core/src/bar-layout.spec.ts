@@ -1,6 +1,8 @@
 import { BarLayoutOptions, computeBarLayout } from './bar-layout.js';
 
 const format = (value: number) => String(value);
+/** Same 2-decimal rounding the layout applies to path numbers. */
+const r2 = (n: number) => Math.round(n * 100) / 100;
 
 function options(overrides: Partial<BarLayoutOptions> = {}): BarLayoutOptions {
   return {
@@ -116,20 +118,117 @@ describe('computeBarLayout', () => {
     expect(thin.bars[0].w).toBeCloseTo(wide.bars[0].w * 0.25, 0);
   });
 
-  it('rounds only the outer segment of a stack and hides the seam behind it', () => {
-    const plain = computeBarLayout(options({ stacked: true, barRadius: 4 }));
-    expect(plain.bars.every((b) => b.rx === 0)).toBe(true);
+  it('rounds only the far end of grouped bars: top for positives, bottom for negatives', () => {
+    const layout = computeBarLayout(options({ barRadius: 4 }));
+    const bar = layout.bars[0];
+    expect(bar.radius).toBe(4);
+    // Starts at the bottom-left, two arcs along the top edge, straight base (no arc).
+    expect(bar.d).toBe(
+      `M${bar.x},${r2(bar.y + bar.h)}V${r2(bar.y + 4)}A4,4 0 0 1 ${r2(bar.x + 4)},${bar.y}H${r2(bar.x + bar.w - 4)}A4,4 0 0 1 ${r2(bar.x + bar.w)},${r2(bar.y + 4)}V${r2(bar.y + bar.h)}Z`,
+    );
 
-    const rounded = computeBarLayout(options({ stacked: true, barRadius: 4, roundStackTop: true }));
-    const [bottom, top] = rounded.bars.filter((b) => b.categoryIndex === 0);
-    expect(top.rx).toBe(4);
-    expect(bottom.rx).toBe(0);
-    const plainBottom = plain.bars.find((b) => b.key === bottom.key)!;
-    expect(bottom.h).toBeCloseTo(plainBottom.h + 4, 1);
-    expect(bottom.y).toBeCloseTo(plainBottom.y - 4, 1);
-    // Category B has a single segment (S2 is null): it is rounded without a neighbour to grow.
-    const single = rounded.bars.filter((b) => b.categoryIndex === 1);
+    const negative = computeBarLayout(
+      options({
+        barRadius: 4,
+        series: [{ index: 0, name: 'S1', color: 'red', data: [-10, 20, 30] }],
+      }),
+    ).bars[0];
+    expect(negative.value).toBe(-10);
+    // Arcs sit on the bottom edge; the top edge (on the baseline) is a straight H.
+    expect(negative.d).toMatch(/^M[\d.]+,[\d.]+H[\d.]+V[\d.]+A4,4 0 0 1 .*A4,4 0 0 1 .*Z$/);
+    expect(negative.d.indexOf('A')).toBeGreaterThan(negative.d.indexOf('H'));
+  });
+
+  it('rounds the right end of horizontal bars and the left end of negatives', () => {
+    const layout = computeBarLayout(
+      options({
+        horizontal: true,
+        barRadius: 3,
+        series: [{ index: 0, name: 'S1', color: 'red', data: [10, -20, 30] }],
+      }),
+    );
+    const [positive, negative] = layout.bars;
+    expect(positive.d).toBe(
+      `M${positive.x},${positive.y}H${r2(positive.x + positive.w - 3)}A3,3 0 0 1 ${r2(positive.x + positive.w)},${r2(positive.y + 3)}V${r2(positive.y + positive.h - 3)}A3,3 0 0 1 ${r2(positive.x + positive.w - 3)},${r2(positive.y + positive.h)}H${positive.x}Z`,
+    );
+    expect(
+      negative.d.startsWith(`M${r2(negative.x + 3)},${negative.y}H${r2(negative.x + negative.w)}V`),
+    ).toBe(true);
+  });
+
+  it('stacked: only the outermost segment is rounded, seams and base stay square', () => {
+    const layout = computeBarLayout(options({ stacked: true, barRadius: 4 }));
+    const [bottom, top] = layout.bars.filter((b) => b.categoryIndex === 0);
+    expect(bottom.radius).toBe(0);
+    expect(bottom.d).toBe(
+      `M${bottom.x},${bottom.y}H${r2(bottom.x + bottom.w)}V${r2(bottom.y + bottom.h)}H${bottom.x}Z`,
+    );
+    expect(top.radius).toBe(4);
+    expect(top.d).toContain('A4,4 0 0 1');
+    // The seam is shared exactly: the top segment starts where the bottom one ends, no overlap.
+    expect(top.y + top.h).toBeCloseTo(bottom.y, 2);
+    // Category B has a single segment (S2 is null): it is the outermost one and is rounded.
+    const single = layout.bars.filter((b) => b.categoryIndex === 1);
     expect(single).toHaveLength(1);
-    expect(single[0].rx).toBe(4);
+    expect(single[0].radius).toBe(4);
+  });
+
+  it('stacked with negatives: the lowest negative segment is rounded at the bottom', () => {
+    const layout = computeBarLayout(
+      options({
+        stacked: true,
+        barRadius: 4,
+        series: [
+          { index: 0, name: 'S1', color: 'red', data: [10, 20, 30] },
+          { index: 1, name: 'S2', color: 'blue', data: [-5, -8, 25] },
+        ],
+      }),
+    );
+    const [positive, negative] = layout.bars.filter((b) => b.categoryIndex === 0);
+    expect(positive.radius).toBe(4);
+    expect(positive.d).toContain('A4,4 0 0 1');
+    expect(negative.radius).toBe(4);
+    // Negative: straight top (baseline), arcs at the bottom.
+    expect(negative.d.indexOf('A')).toBeGreaterThan(negative.d.indexOf('H'));
+  });
+
+  it('clamps the radius to the bar: half the thickness and the full length of a tiny tip', () => {
+    const tiny = computeBarLayout(
+      options({
+        stacked: true,
+        barRadius: 6,
+        series: [
+          { index: 0, name: 'S1', color: 'red', data: [100, 100, 100] },
+          { index: 1, name: 'S2', color: 'blue', data: [0.5, 0.5, 0.5] },
+        ],
+      }),
+    );
+    const tip = tiny.bars.find((b) => b.seriesIndex === 1)!;
+    expect(tip.h).toBeLessThan(6);
+    expect(tip.radius).toBe(tip.h);
+
+    const thin = computeBarLayout(options({ barRadius: 50, barWidth: 0.1 })).bars[0];
+    expect(thin.radius).toBe(Math.round((thin.w / 2) * 100) / 100);
+
+    const square = computeBarLayout(options({ barRadius: 0 })).bars[0];
+    expect(square.radius).toBe(0);
+    expect(square.d).not.toContain('A');
+  });
+
+  it('skips zero-length segments when choosing the rounded one', () => {
+    const layout = computeBarLayout(
+      options({
+        stacked: true,
+        barRadius: 4,
+        series: [
+          { index: 0, name: 'S1', color: 'red', data: [10, 20, 30] },
+          { index: 1, name: 'S2', color: 'blue', data: [0, 0, 0] },
+        ],
+      }),
+    );
+    const [first, zero] = layout.bars.filter((b) => b.categoryIndex === 0);
+    expect(zero.value).toBe(0);
+    expect(zero.radius).toBe(0);
+    expect(first.radius).toBe(4);
   });
 });

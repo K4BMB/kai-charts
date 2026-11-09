@@ -16,6 +16,11 @@ export interface BarLayoutOptions {
   horizontal: boolean;
   stacked: boolean;
   showValues: boolean;
+  /**
+   * Radius of the two corners at the far end of each bar (the end away from the baseline);
+   * the base and, in stacks, every seam between segments stay square so a stack reads as one
+   * bar. Stacked: only the outermost segment on each side is rounded. Clamped to the bar.
+   */
   barRadius: number;
   categories: readonly string[];
   series: readonly ResolvedSeries[];
@@ -27,11 +32,6 @@ export interface BarLayoutOptions {
   showValueAxis?: boolean;
   /** Hide category labels and shrink their margin. */
   showCategoryAxis?: boolean;
-  /**
-   * Stacked only: round the outer corners of each stack with `barRadius`. The segment under the
-   * top one is extended behind it so no background shows through the rounded corners.
-   */
-  roundStackTop?: boolean;
 }
 
 export interface Rect {
@@ -72,7 +72,10 @@ export interface BarShape extends Rect {
   valueLabel: string;
   ariaLabel: string;
   color: string;
-  rx: number;
+  /** Effective radius of the far-end corners (0 = square; inner stack segments are always 0). */
+  radius: number;
+  /** SVG path of the bar: `x/y/w/h` with the far-end corners rounded by `radius`. */
+  d: string;
 }
 
 export interface ValueLabel {
@@ -113,7 +116,6 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
   const showValueAxis = o.showValueAxis ?? true;
   const showCategoryAxis = o.showCategoryAxis ?? true;
   const bandFill = clamp(o.barWidth ?? BAND_FILL, 0.1, 1);
-  const roundStack = stacked && (o.roundStackTop ?? false) && o.barRadius > 0;
 
   // 1. Value domain (grouped: raw values; stacked: per-category positive and negative sums).
   let min = 0;
@@ -240,7 +242,8 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
         ariaLabel:
           seriesCount > 1 ? `${category}, ${s.name}: ${valueLabel}` : `${category}: ${valueLabel}`,
         color: s.color,
-        rx: stacked ? 0 : o.barRadius,
+        radius: 0,
+        d: '',
         ...rect,
       });
       if (o.showValues && !stacked) {
@@ -279,7 +282,7 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
             },
       );
     }
-    if (roundStack && drawn > 0) roundStackEnds(bars.slice(firstBar), o.barRadius, horizontal);
+    shapeBars(bars.slice(firstBar), o.barRadius, horizontal, stacked);
   }
 
   // 5. Axes: value ticks with grid lines, category ticks and the zero baseline.
@@ -341,30 +344,64 @@ export function computeBarLayout(o: BarLayoutOptions): BarLayout {
   };
 }
 
+/** Which end of a bar is away from the baseline. */
+export type BarEnd = 'top' | 'bottom' | 'left' | 'right';
+
 /**
- * Rounds the outer end of a stack: the last positive (and first negative) segment gets `rx`,
- * and the neighbouring segment grows `rx` behind it so the rounded corners show its color
- * instead of the background. Bars are mutated in place; they are drawn in array order.
+ * Gives every bar of one category its path. Grouped: each bar is rounded at its far end.
+ * Stacked: only the outermost positive and the outermost negative segment are rounded, at
+ * their outer end; the seams between segments and the base on the baseline stay square, so the
+ * stack reads as a single bar instead of a pile of pills.
  */
-function roundStackEnds(stack: BarShape[], rx: number, horizontal: boolean): void {
-  const positives = stack.filter((b) => b.value >= 0);
-  const negatives = stack.filter((b) => b.value < 0);
-  const cap = (outer: BarShape | undefined, inner: BarShape | undefined, towardsEnd: boolean) => {
-    if (!outer) return;
-    outer.rx = rx;
-    if (!inner) return;
-    const grow = Math.min(rx, horizontal ? inner.w : inner.h);
-    if (horizontal) {
-      inner.w = round2(inner.w + grow);
-      if (!towardsEnd) inner.x = round2(inner.x - grow);
-    } else {
-      inner.h = round2(inner.h + grow);
-      if (towardsEnd) inner.y = round2(inner.y - grow);
-    }
-  };
-  // Vertical positives grow upwards (y decreases); horizontal positives grow to the right.
-  cap(positives.at(-1), positives.at(-2), true);
-  cap(negatives.at(-1), negatives.at(-2), false);
+function shapeBars(group: BarShape[], radius: number, horizontal: boolean, stacked: boolean): void {
+  const farEnd = (positive: boolean): BarEnd =>
+    horizontal ? (positive ? 'right' : 'left') : positive ? 'top' : 'bottom';
+  const rounded = new Set<BarShape>();
+  if (stacked) {
+    const positives = group.filter((b) => b.value > 0);
+    const negatives = group.filter((b) => b.value < 0);
+    if (positives.length) rounded.add(positives[positives.length - 1]);
+    if (negatives.length) rounded.add(negatives[negatives.length - 1]);
+  } else {
+    for (const bar of group) rounded.add(bar);
+  }
+  for (const bar of group) {
+    const end = farEnd(bar.value >= 0);
+    bar.radius = rounded.has(bar) ? clampRadius(bar, radius, end) : 0;
+    bar.d = barPath(bar, bar.radius, end);
+  }
+}
+
+/** The radius cannot exceed half the bar thickness nor the bar length. */
+function clampRadius(rect: Rect, radius: number, end: BarEnd): number {
+  const vertical = end === 'top' || end === 'bottom';
+  const thickness = vertical ? rect.w : rect.h;
+  const length = vertical ? rect.h : rect.w;
+  return round2(Math.max(0, Math.min(radius, thickness / 2, length)));
+}
+
+/**
+ * Path of a rectangle whose two corners at `end` are rounded by `radius` (0 → plain rectangle).
+ * Drawn clockwise; shared by both renderers so a bar is the same shape everywhere.
+ */
+export function barPath(rect: Rect, radius: number, end: BarEnd): string {
+  const x0 = round2(rect.x);
+  const y0 = round2(rect.y);
+  const x1 = round2(rect.x + rect.w);
+  const y1 = round2(rect.y + rect.h);
+  const r = round2(radius);
+  if (r <= 0) return `M${x0},${y0}H${x1}V${y1}H${x0}Z`;
+  const arc = `A${r},${r} 0 0 1 `;
+  switch (end) {
+    case 'top':
+      return `M${x0},${y1}V${round2(y0 + r)}${arc}${round2(x0 + r)},${y0}H${round2(x1 - r)}${arc}${x1},${round2(y0 + r)}V${y1}Z`;
+    case 'bottom':
+      return `M${x0},${y0}H${x1}V${round2(y1 - r)}${arc}${round2(x1 - r)},${y1}H${round2(x0 + r)}${arc}${x0},${round2(y1 - r)}Z`;
+    case 'right':
+      return `M${x0},${y0}H${round2(x1 - r)}${arc}${x1},${round2(y0 + r)}V${round2(y1 - r)}${arc}${round2(x1 - r)},${y1}H${x0}Z`;
+    case 'left':
+      return `M${round2(x0 + r)},${y0}H${x1}V${y1}H${round2(x0 + r)}${arc}${x0},${round2(y1 - r)}V${round2(y0 + r)}${arc}${round2(x0 + r)},${y0}Z`;
+  }
 }
 
 function isFiniteValue(value: ChartValue): value is number {

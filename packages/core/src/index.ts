@@ -5,8 +5,10 @@ export { createValueFormatter } from './format.js';
 export { niceDomain, scaleLinear, tickStep, type NiceDomain } from './scale.js';
 export { estimateTextWidth, round2, truncateLabel } from './text.js';
 export {
+  barPath,
   computeBarLayout,
   type AxisTick,
+  type BarEnd,
   type BarLayout,
   type BarLayoutOptions,
   type BarShape,
