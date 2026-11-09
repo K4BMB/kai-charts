@@ -145,7 +145,7 @@ pure UI adapter.
 | `showValues`     | `boolean`                                   | `false`    | Value at the end of each bar (total when stacked)     |
 | `showGrid`       | `boolean`                                   | `true`     |                                                       |
 | `showTable`      | `boolean`                                   | `false`    | Mirror table below the chart (a11y, print)            |
-| `barRadius`      | `number`                                    | `2`        |                                                       |
+| `barRadius`      | `number`                                    | `2`        | Far-end corners only; stack seams stay square         |
 | `loading`        | `boolean`                                   | `false`    | Skeleton with `aria-busy`                             |
 | `label`          | `string`                                    | `''`       | Accessible name; also the table caption               |
 | `categoryHeader` | `string`                                    | config     | First column header of the table                      |

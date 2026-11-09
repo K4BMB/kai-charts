@@ -7,6 +7,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-09
+
+### Changed
+
+- **Bar corners.** Each bar is now a `<path class="kc-bar">` built by the core (`barPath`) and
+  `barRadius` rounds **only the far end** of the bar — the end away from the baseline. The base
+  on the baseline and, in stacked charts, every seam between segments are straight lines, so a
+  stack reads as one bar instead of a pile of rounded blocks (the previous "grow the segment
+  behind the rounded one" trick left visible notches at the seams). Only the outermost segment
+  on each side of a stack is rounded; the radius is clamped to half the thickness and to the
+  segment length. Both renderers, same path.
+- `BarShape.rx` → `BarShape.radius` (effective radius) + `BarShape.d` (the path).
+
+### Removed
+
+- `roundStackTop` input/prop/option: a stack's far end is always rounded when `barRadius > 0`.
+
 ## [0.6.0] - 2026-11-04
 
 ### Added

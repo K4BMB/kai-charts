@@ -353,17 +353,16 @@ export function Showcase({ loading, empty, showTable }: ShowcaseProps) {
             <section className="card">
               <h2>Estado de sincronización</h2>
               <p className="hint">
-                Apilado horizontal con colores propios por serie, total al final y extremo
-                redondeado (<code>roundStackTop</code> + <code>barRadius</code>). También
-                configurables: <code>barWidth</code>, <code>showValueAxis</code> y{' '}
-                <code>showCategoryAxis</code>.
+                Apilado horizontal con colores propios por serie y total al final. Solo el extremo
+                lejano al eje se redondea (<code>barRadius</code>): las uniones entre segmentos y la
+                base quedan rectas, así cada pila se lee como una sola barra. También configurables:{' '}
+                <code>barWidth</code>, <code>showValueAxis</code> y <code>showCategoryAxis</code>.
               </p>
               <BarChart
                 {...common}
                 orientation="horizontal"
                 stacked
                 showValues
-                roundStackTop
                 barRadius={6}
                 categories={SYNC_STATE.categories}
                 series={empty ? NO_DATA : SYNC_STATE.series}

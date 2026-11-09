@@ -154,8 +154,9 @@
       <section class="card">
         <h2>Estado de sincronización</h2>
         <p class="hint">
-          Apilado horizontal con colores propios por serie, total al final y extremos redondeados
-          (<code>roundStackTop</code> + <code>barRadius</code>). También existen
+          Apilado horizontal con colores propios por serie y total al final. Solo el extremo lejano
+          al eje se redondea (<code>barRadius</code>): las uniones entre segmentos y la base quedan
+          rectas, así cada pila se lee como una sola barra. También existen
           <code>barWidth</code>, <code>showValueAxis</code> y <code>showCategoryAxis</code> para
           barras finas sin ejes, al estilo del mockup.
         </p>
@@ -163,7 +164,6 @@
           orientation="horizontal"
           stacked
           showValues
-          roundStackTop
           barRadius="6"
           [categories]="syncState.categories"
           [series]="empty() ? noData : syncState.series"

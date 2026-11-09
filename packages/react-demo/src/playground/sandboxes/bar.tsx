@@ -42,7 +42,6 @@ export function BarSandbox() {
   const [barWidth, setBarWidth] = useState(0.7);
   const [showValueAxis, setShowValueAxis] = useState(true);
   const [showCategoryAxis, setShowCategoryAxis] = useState(true);
-  const [roundStackTop, setRoundStackTop] = useState(false);
   const [label, setLabel] = useState('Trámites por día de jornada');
   const [locale, setLocale] = useState('es-VE');
   const [format, setFormat] = useState<FormatKey>('number');
@@ -63,7 +62,6 @@ export function BarSandbox() {
     if (barWidth !== 0.7) props.push(`barWidth={${barWidth}}`);
     if (!showValueAxis) props.push('showValueAxis={false}');
     if (!showCategoryAxis) props.push('showCategoryAxis={false}');
-    if (roundStackTop) props.push('roundStackTop');
     if (label) props.push(`label="${label}"`);
     props.push(...formatProps(locale, format));
     if (loading) props.push('loading');
@@ -86,7 +84,6 @@ export function BarSandbox() {
     barWidth,
     showValueAxis,
     showCategoryAxis,
-    roundStackTop,
     label,
     locale,
     format,
@@ -124,7 +121,6 @@ export function BarSandbox() {
             checked={showCategoryAxis}
             onChange={setShowCategoryAxis}
           />
-          <Check label="Extremo redondeado" checked={roundStackTop} onChange={setRoundStackTop} />
           <Check label="Tabla espejo" checked={showTable} onChange={setShowTable} />
           <Check label="Cargando" checked={loading} onChange={setLoading} />
           <Check label="Sin datos" checked={empty} onChange={setEmpty} />
@@ -178,7 +174,6 @@ export function BarSandbox() {
           barWidth={barWidth}
           showValueAxis={showValueAxis}
           showCategoryAxis={showCategoryAxis}
-          roundStackTop={roundStackTop}
           loading={loading}
           label={label}
           locale={locale}

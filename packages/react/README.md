@@ -65,11 +65,10 @@ Charts are presentation-only: they receive data already shaped by your view mode
 | `showValues`       | `boolean`                                   | `false`    | Value at the end of each bar (total when stacked)     |
 | `showGrid`         | `boolean`                                   | `true`     |                                                       |
 | `showTable`        | `boolean`                                   | `false`    | Mirror table below the chart (a11y, print)            |
-| `barRadius`        | `number`                                    | `2`        |                                                       |
+| `barRadius`        | `number`                                    | `2`        | Far-end corners only; stack seams stay square         |
 | `barWidth`         | `number`                                    | `0.7`      | Share of each band occupied by bars (thin: `0.25`)    |
 | `showValueAxis`    | `boolean`                                   | `true`     | `false` hides the value ticks and their margin        |
 | `showCategoryAxis` | `boolean`                                   | `true`     | `false` hides the category labels                     |
-| `roundStackTop`    | `boolean`                                   | `false`    | Stacked: round the outer end of each stack            |
 | `loading`          | `boolean`                                   | `false`    | Skeleton with `aria-busy`                             |
 | `label`            | `string`                                    | `''`       | Accessible name; also the table caption               |
 | `categoryHeader`   | `string`                                    | config     | First column header of the table                      |

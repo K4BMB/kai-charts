@@ -42,14 +42,6 @@
         <label class="check"
           ><input
             type="checkbox"
-            [checked]="roundStackTop()"
-            (change)="roundStackTop.set(!roundStackTop())"
-          />
-          Extremo redondeado</label
-        >
-        <label class="check"
-          ><input
-            type="checkbox"
             [checked]="showValueAxis()"
             (change)="showValueAxis.set(!showValueAxis())"
           />
@@ -133,7 +125,6 @@
         [showGrid]="showGrid()"
         [showValueAxis]="showValueAxis()"
         [showCategoryAxis]="showCategoryAxis()"
-        [roundStackTop]="roundStackTop()"
         [barWidth]="barWidth()"
         [showTable]="showTable()"
         [showLegend]="legendValue()"

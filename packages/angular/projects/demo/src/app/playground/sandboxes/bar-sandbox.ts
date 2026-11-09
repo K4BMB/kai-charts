@@ -42,7 +42,6 @@ export class BarSandbox {
   protected readonly showGrid = signal(true);
   protected readonly showValueAxis = signal(true);
   protected readonly showCategoryAxis = signal(true);
-  protected readonly roundStackTop = signal(false);
   protected readonly barWidth = signal(0.7);
   protected readonly showTable = signal(false);
   protected readonly loading = signal(false);
@@ -89,7 +88,6 @@ export class BarSandbox {
     if (!this.showGrid()) attrs.push(bind('showGrid', false));
     if (!this.showValueAxis()) attrs.push(bind('showValueAxis', false));
     if (!this.showCategoryAxis()) attrs.push(bind('showCategoryAxis', false));
-    if (this.roundStackTop()) attrs.push('roundStackTop');
     if (this.barWidth() !== 0.7) attrs.push(attr('barWidth', String(this.barWidth())));
     if (this.showTable()) attrs.push('showTable');
     if (this.legend() !== 'auto') attrs.push(bind('showLegend', this.legend()));

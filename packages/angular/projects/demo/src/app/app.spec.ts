@@ -43,7 +43,7 @@ describe('Showcase', () => {
     expect(compiled.querySelectorAll('kc-venezuela-map .kc-map__marker')).toHaveLength(0);
     expect(compiled.querySelector('.kc-map__region--highlighted')).toBeNull();
     expect(compiled.querySelectorAll('kc-bar-chart')).toHaveLength(6);
-    expect(compiled.querySelectorAll('rect.kc-bar').length).toBeGreaterThan(50);
+    expect(compiled.querySelectorAll('path.kc-bar').length).toBeGreaterThan(50);
     expect(compiled.querySelectorAll('kc-line-chart')).toHaveLength(1);
     expect(compiled.querySelectorAll('kc-line-chart path.kc-line')).toHaveLength(2);
     expect(compiled.querySelectorAll('kc-line-chart path.kc-area')).toHaveLength(2);
@@ -157,15 +157,15 @@ describe('Playground', () => {
 
   it('re-renders the chart when a value is edited', async () => {
     const { fixture, compiled } = await create('bar');
-    const firstBar = () => compiled.querySelector<SVGRectElement>('rect.kc-bar')!;
-    const before = firstBar().getAttribute('height');
+    const firstBar = () => compiled.querySelector<SVGPathElement>('path.kc-bar')!;
+    const before = firstBar().getAttribute('d');
 
     const cell = compiled.querySelector<HTMLInputElement>('input[type="number"]')!;
     cell.value = '0';
     cell.dispatchEvent(new Event('input', { bubbles: true }));
     await fixture.whenStable();
 
-    expect(firstBar().getAttribute('height')).not.toBe(before);
+    expect(firstBar().getAttribute('d')).not.toBe(before);
     expect(compiled.querySelector('code')?.textContent).toContain('<kc-bar-chart');
   });
 

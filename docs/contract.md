@@ -765,10 +765,22 @@ con valor central y leyenda con cifras (más legible que anillos sin etiqueta)".
 ## Bar chart additions (both renderers, same input names)
 
 New inputs mapped straight to `computeBarLayout` options: `barWidth` (number, default 0.7),
-`showValueAxis` (true), `showCategoryAxis` (true), `roundStackTop` (false). Nothing else changes;
-existing tests stay valid. Add one test: `showValueAxis=false` renders no value ticks and the bars
-start further left. Showcase: change the "Estado de sincronización" card hint to mention the new
-options and use `roundStackTop barRadius="6"`; add nothing else.
+`showValueAxis` (true), `showCategoryAxis` (true). Add one test: `showValueAxis=false` renders no
+value ticks and the bars start further left. Showcase: the "Estado de sincronización" card uses
+`barRadius="6"`.
+
+### Bar corners (v0.7)
+
+Each bar is a `<path class="kc-bar" d="…">` (no longer `<rect>`): `BarShape.d` comes from the
+core (`barPath(rect, radius, end)`), so both renderers draw the exact same shape. `barRadius`
+rounds **only the two corners at the far end** of the bar — the end away from the baseline: top
+for positive vertical bars, bottom for negative ones, right/left when horizontal. The base on the
+baseline is square. Stacked: only the outermost segment on each side (last positive, last
+negative, zero-length segments ignored) gets the radius; every seam between segments is a
+straight line, so a stack reads as one bar and never as a pile of pills. The radius is clamped
+to half the thickness and to the segment length (`BarShape.radius` is the effective value; inner
+segments report `0`). `roundStackTop` is gone — a stack's far end is always rounded when
+`barRadius > 0`. `x/y/w/h` stay on `BarShape` for tooltip anchors and tests.
 
 ---
 
@@ -968,7 +980,7 @@ and **Formato** `number/percent/currency/compact` as today; `ring` and `kpi` tre
 `percent`; every chart gets **Cargando**; charts with an empty state get **Sin datos**; charts
 with a table get **Tabla espejo**; `label` text where the component accepts it):
 
-- `bar`: today's options + `barWidth` (range 0.1–1 step 0.05) · `showValueAxis` · `showCategoryAxis` · `roundStackTop`.
+- `bar`: today's options + `barWidth` (range 0.1–1 step 0.05) · `showValueAxis` · `showCategoryAxis`.
 - `line`: `curve` (select smooth/linear) · `area` · `includeZero` · `showEndValues` · `showGrid` · `showValueAxis` · `showCategoryAxis` · legend mode · `height` (range) · `pointRadius` (range 0–8).
 - `ring`: `size` (range 120–320) · `thickness` (range 0 = auto … 24) · `gap` (range 0–12) · `centerLabel` · `centerValue` (number) · `centerTrend` (number) · `invertTrend` · `showLegend`.
 - `kpi`: `invertTrend` · `color` (color) · value format; the stage shows the card inside a 320 px wide box with the `calendar` demo icon projected.
